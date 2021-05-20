@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {background-color: gold;}
+    </style>
+    <title>My Website</title>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <div id="app">
+      <h1>Prajwal's Personal Website</h1>
+      <p>My name is Prajwal and I like to play Minecraft!</p>
+      <p>Hello there!</p>
+      <img src="Bearisents.jpg" width="300" height="400">
+      <!-- This is a comment in HTML, my code is very awesome -->
+      <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Bears eating apples video</a>
+      <script>
+        // + means addition, x means multiplication, - means substraction, / means division 
+       function calculator() {
+         var input = document.getElementById("inputVal").value;
+
+         // Step 1: iterate through the string, make the string into a list
+         var listOfLetters = input.split("")
+         console.log(listOfLetters)
+         
+
+
+         // PROBLEM: we do not know where exactly the operator is 
+         // Step 2: figure out what is the operator being inputted 
+         //var operator = listOfLetters[1]
+       
+         // Step 3: to "parse" the numbers into actual numbers 
+         // [ "3", "x", "3"]
+         //var firstNumber = parseInt(listOfLetters[0]) // parseInt turns text into number 
+         //var secondNumber = parseInt(listOfLetters[2])
+
+
+         // UPGRADE OUR CODE TO HANDLE DOUBLE DIGITS NUMBERS: Complete! 
+         // for-loop
+         let firstNumber = "" // empty string 
+         let secondNumber = ""
+         let i;
+         let operatorArray = ["x", "/", "+","-"];
+         let indexOfOperator;
+         for(i=0; i<listOfLetters.length ; i++) {
+           if( operatorArray.includes(listOfLetters[i])) {
+             // we found the operator! 
+             operator = listOfLetters[i]
+             indexOfOperator = i
+             break;
+           }
+         }
+         // [ "3", "0", "-", "2", "1"], indexOfOperator = 2, firstnumber= 0,1, secondNunber = 3,4
+         for(i=0; i<listOfLetters.length ; i++) {
+           // any index position less than/BEFORE indexOfOperator = firstNumber 
+           if (i < indexOfOperator) {
+             // create the first number 
+             firstNumber = firstNumber + listOfLetters[i] // concatenate/join the numbers together (REMINDER: the numbers are right now strings) 
+           }
+           else if (i == indexOfOperator) {
+             // stop creating the first number 
+             // start creating the second number 
+           } 
+           else if (i > indexOfOperator) {
+             // create the second number 
+             secondNumber = secondNumber + listOfLetters[i] // concatenate/join the numbers together (REMINDER: the numbers are right now strings)
+           }
+           // any index position more than/AFTER indexofOperator = secondNumber
+         }
+         firstNumber = parseInt(firstNumber) // parseInt turns text into number 
+         secondNumber = parseInt(secondNumber)
+         console.log(firstNumber)
+         console.log(secondNumber)
+
+         
+         // Step4: bunch of if stateements depending on what the operator is to set the correct result/calculation 
+         var result;
+         
+         if (operator == "x") {
+           result = firstNumber*secondNumber;
+         } else if (operator == "/") {
+           result = firstNumber/secondNumber;
+         } else if (operator == "+") {// addition
+           result = firstNumber + secondNumber;
+         } else if (operator == "-") {
+           result = firstNumber - secondNumber;
+         }
+         //return result;
+         // We are setting the <p> tag with id "answer" to be the result of our calculator 
+         document.getElementById("answer").innerHTML = result;
+       }
+     </script>
+     <h1>Use my amazing calculator!</h1>
+     <input type="text" id="inputVal" name="inputVal"><br>
+     <input type="submit" value="Submit" onclick="calculator()">
+     <p>The answer is</p>
+     <p id="answer"></p>
+    </div>
+  </body>
+</html>
