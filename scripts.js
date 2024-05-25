@@ -1,7 +1,7 @@
 // Scroll to next section on down arrow click
 document.getElementById("downArrow").addEventListener("click", function () {
     window.scroll({
-        top: document.getElementById("about").offsetTop,
+        top: document.getElementById("work-in-progress").offsetTop, // TODO: replace with "about" when done
         behavior: "smooth",
     });
 });
