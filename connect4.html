@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Connect Four</title>
+        <link rel="stylesheet" href="./connect4_styles.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div class="bubble">
+            <h1>Connect Four</h1>
+            <div class="center">
+                <label for="ai-level">AI level:</label>
+                <select id="ai-level">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+                <label for="who-first">First player:</label>
+                <select id="who-first" class="last">
+                    <option value="random">Random</option>
+                    <option value="player">Me</option>
+                    <option value="ai">AI</option>
+                </select>
+            </div>
+            <div class="center">
+                <button id="start" onclick="startAIGame()">Start</button>
+                <button id="reset" onclick="resetBoard()">Reset</button>
+            </div>
+        </div>
+        <div class="center">
+            <div id="notif-X" class="notification win_red"></div>
+            <div id="notif-O" class="notification win_yellow" hidden></div>
+            <div id="notif-D" class="notification draw" hidden></div>
+        </div>
+        <div id="turn" class="center"></div>
+        <table id="board">
+            <!-- Add the Connect Four game board here --></table>
+        <script src="./connect4_script.js"></script>
+    </body>
+</html>
