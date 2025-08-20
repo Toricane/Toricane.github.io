@@ -139,6 +139,78 @@ img {
     color: var(--text-dim);
 }
 
+/* --- Tagline Links & Footnotes ---------------------------------------------- */
+.tagline a {
+    color: var(--text);
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    border-bottom: 1px solid rgba(77, 181, 255, 0.25);
+}
+
+.tagline a:hover, .tagline a:focus-visible {
+    background-color: rgba(77, 181, 255, 0.1);
+    color: #a9d9ff;
+    border-bottom-color: rgba(77, 181, 255, 0.5);
+}
+
+.footnote {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.footnote-content {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 12px;
+    /* space for arrow */
+    background-color: var(--panel);
+    border: 1px solid var(--panel-edge);
+    border-radius: 12px;
+    padding: .8rem 1rem;
+    width: max-content;
+    max-width: 320px;
+    font-size: .8rem;
+    line-height: 1.5;
+    color: var(--text-dim);
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .2s, visibility .2s, transform .2s;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .5);
+    text-align: left;
+}
+
+.footnote:hover .footnote-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
+}
+
+/* Arrow for footnote */
+.footnote-content::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: var(--panel) transparent transparent transparent;
+}
+
+.footnote sup {
+    font-size: .7em;
+    vertical-align: super;
+    margin-left: -0.1em;
+    /* Pulls it back to counter formatter whitespace */
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
 /* Connections pill */
 .connections {
     background: linear-gradient(145deg, #101a21, #0c1216);
