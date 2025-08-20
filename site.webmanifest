@@ -1,1 +1,55 @@
-{"name":"","short_name":"","icons":[{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}
+{
+    "id": "/",
+    "name": "Prajwal Prashanth – Portfolio",
+    "short_name": "Prajwal",
+    "description": "Portfolio of Prajwal Prashanth – student developer building AI + systems projects and shipping fast, thoughtful products.",
+    "lang": "en",
+    "start_url": "/?pwa=true",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "any",
+    "theme_color": "#060809",
+    "background_color": "#060809",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "categories": ["education", "portfolio", "productivity"],
+    "shortcuts": [
+        {
+            "name": "Projects",
+            "short_name": "Projects",
+            "description": "View highlighted projects",
+            "url": "/#projects"
+        },
+        {
+            "name": "Hackathons",
+            "short_name": "Hackathons",
+            "description": "Browse hackathon entries",
+            "url": "/#hackathons"
+        },
+        {
+            "name": "Awards",
+            "short_name": "Awards",
+            "description": "See awards & recognitions",
+            "url": "/#awards"
+        }
+    ],
+    "prefer_related_applications": false
+}

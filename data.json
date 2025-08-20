@@ -1,0 +1,377 @@
+{
+    "projects": [
+        {
+            "title": "JARVIS for the Visually Impaired",
+            "live": false,
+            "from": "Independent / TKS Activate",
+            "date": "Jan 2024 – Dec 2024",
+            "description": "Portable wearable AI assistant (camera, mic, speaker) giving low‑latency scene descriptions & Q/A; core translated to microcontroller (C++ + Edge Impulse).",
+            "tags": ["AI", "Edge", "C++", "Embedded"],
+            "link": ""
+        },
+        {
+            "title": "Google Internal Announcements RAG MVP",
+            "live": false,
+            "from": "Google Canada Challenge (Top 3 Team)",
+            "date": "Dec 2023 – Aug 2024",
+            "description": "Personalized announcements + question answering by integrating Gemini with internal docs (RAG) for sales teams; selected top 3/100+ & ranked #1 in final judging.",
+            "tags": ["LLM", "RAG", "Product"],
+            "link": ""
+        },
+        {
+            "title": "Peter Pan: Longevity for Everyone",
+            "live": false,
+            "from": "Team Research (3 members)",
+            "date": "Apr 2024 – Oct 2024",
+            "description": "Researched mitochondrial theory of aging; built MVP system to help stabilize blood glucose for accessible lifespan improvement; pitched to 3 VCs.",
+            "tags": ["Health", "Research", "Bio"],
+            "link": ""
+        },
+        {
+            "title": "CalendAI",
+            "live": false,
+            "from": "buildspace / Community Meetup Demo",
+            "date": "Jun 2024 – Jul 2024",
+            "description": "Chrome extension integrating Gemini with Google Calendar to plan weeks & schedule events via natural language; demoed at Vancouver AI Community Meetup.",
+            "tags": ["Chrome Ext", "AI", "Productivity"],
+            "link": ""
+        },
+        {
+            "title": "Learning Machine Learning Journey",
+            "live": false,
+            "from": "Self‑Study",
+            "date": "Jan 2024 – Present",
+            "description": "Self‑driven study: CNN on MNIST, micrograd replication (backprop), neural networks & LLM fundamentals (3Blue1Brown, Karpathy) toward future GPT‑2 reproduction.",
+            "tags": ["ML", "Learning", "CNN", "Backprop"],
+            "link": ""
+        }
+    ],
+    "hackathons": [
+        {
+            "year": "2025",
+            "month": "Jan",
+            "name": "nwHacks 2025 – Genimo",
+            "from": "nwHacks 2025",
+            "description": "AI + animation tool converting user text into educational animations (Gemini + Manim).",
+            "badges": ["In-Person"],
+            "link": ""
+        },
+        {
+            "year": "2025",
+            "month": "Mar",
+            "name": "Scrapyard Vancouver – Itémon (2nd Place)",
+            "from": "Scrapyard Vancouver 2025",
+            "description": "Interactive AI game resembling Pokémon with real‑world items; placed 2nd among 100+ participants.",
+            "badges": ["Second Place", "In-Person"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Sep",
+            "name": "Hack the North 2024 – DaVinci Solve",
+            "from": "Hack the North 2024",
+            "description": "AI interview simulation app for CS majors (Gradio, Groq, OpenAI).",
+            "badges": ["In-Person"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Sep",
+            "name": "yvrHacks – yeetup (Honourable Mention)",
+            "from": "yvrHacks 2024",
+            "description": "AI‑first natural language interface to discover youth events & meetups (Groq).",
+            "badges": ["Honourable Mention", "In-Person"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Nov",
+            "name": "Hack For Youth – TimeCraft (1st Place)",
+            "from": "Hack For Youth 2024",
+            "description": "Calendar + AI chatbot for intelligent time management integrating Google Calendar.",
+            "badges": ["Winner", "In-Person"],
+            "link": ""
+        }
+    ],
+    "awards": [
+        {
+            "year": "2025",
+            "month": "Jun",
+            "name": "Class Valedictorian",
+            "from": "MacNeill Secondary",
+            "description": "Chosen to deliver farewell speech (GPA 96.43%).",
+            "tags": ["Academic", "Leadership"],
+            "link": ""
+        },
+        {
+            "year": "2025",
+            "month": "Jun",
+            "name": "Certificate of Distinction – CSMC",
+            "from": "CEMC, University of Waterloo",
+            "description": "Top 25% Canadian Senior Mathematics Contest.",
+            "tags": ["Math", "Contest"],
+            "link": ""
+        },
+        {
+            "year": "2025",
+            "month": "Jun",
+            "name": "Jean Myron Memorial Scholarship",
+            "from": "Richmond Retired Teachers' Association",
+            "description": "Scholarship for outstanding achievement 2024–25.",
+            "tags": ["Scholarship"],
+            "link": ""
+        },
+        {
+            "year": "2025",
+            "month": "Jun",
+            "name": "Level 2 Service Award (75+ hrs)",
+            "from": "MacNeill Secondary",
+            "description": "75+ service hours (2024–25).",
+            "tags": ["Service"],
+            "link": ""
+        },
+        {
+            "year": "2025",
+            "month": "Jun",
+            "name": "Top Raven Award (Gr.12)",
+            "from": "MacNeill Secondary",
+            "description": "Highest award: academics, citizenship, school spirit.",
+            "tags": ["Academic", "Citizenship"],
+            "link": ""
+        },
+        {
+            "year": "2025",
+            "month": "Jun",
+            "name": "Top Senior Science Student",
+            "from": "MacNeill Secondary",
+            "description": "Excellence & potential in senior sciences.",
+            "tags": ["Science", "Academic"],
+            "link": ""
+        },
+        {
+            "year": "2025",
+            "month": "Jun",
+            "name": "Top Mathematics 12 Award",
+            "from": "MacNeill Secondary",
+            "description": "Top marks AP Calc AB + self‑studied BC.",
+            "tags": ["Math", "Academic"],
+            "link": ""
+        },
+        {
+            "year": "2025",
+            "month": "Jun",
+            "name": "Top Science 12 Award",
+            "from": "MacNeill Secondary",
+            "description": "AP Chem 97%, Chem 12 97%, Physics 12 96%.",
+            "tags": ["Science", "Academic"],
+            "link": ""
+        },
+        {
+            "year": "2025",
+            "month": "May",
+            "name": "Distinction – Chem 13 News Exam",
+            "from": "CEMC, University of Waterloo",
+            "description": "Top 20% internationally.",
+            "tags": ["Chemistry", "Contest"],
+            "link": ""
+        },
+        {
+            "year": "2025",
+            "month": "May",
+            "name": "Distinction – Sir Isaac Newton Exam",
+            "from": "University of Waterloo Faculty of Science",
+            "description": "Physics contest distinction (2025).",
+            "tags": ["Physics", "Contest"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Nov",
+            "name": "Hack For Youth – 1st Place",
+            "from": "Hack For Youth",
+            "description": "TimeCraft (AI + calendar).",
+            "tags": ["Hackathon", "AI"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Sep",
+            "name": "yvrHacks Honourable Mention",
+            "from": "yvrHacks",
+            "description": "yeetup AI events interface.",
+            "tags": ["Hackathon", "AI"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Sep",
+            "name": "Hack the North Builder",
+            "from": "Hack the North",
+            "description": "DaVinci Solve interview AI app.",
+            "tags": ["Hackathon", "AI"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Jun",
+            "name": "Certificate of Distinction – Fermat",
+            "from": "CEMC, University of Waterloo",
+            "description": "Top 25% Fermat contest.",
+            "tags": ["Math", "Contest"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Jun",
+            "name": "CCC Junior Honour Roll",
+            "from": "CEMC, University of Waterloo",
+            "description": "Score 66/75 (Group 3).",
+            "tags": ["Programming", "Contest"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Jun",
+            "name": "Level 2 Service Award (60+ hrs)",
+            "from": "MacNeill Secondary",
+            "description": "60+ service hours (2023–24).",
+            "tags": ["Service"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Jun",
+            "name": "Top Academic Award (Gr.11)",
+            "from": "MacNeill Secondary",
+            "description": "96.75% average over 8 courses.",
+            "tags": ["Academic"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Jun",
+            "name": "Top French 11 Award",
+            "from": "MacNeill Secondary",
+            "description": "Highest French 11 marks.",
+            "tags": ["Language", "Academic"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Jun",
+            "name": "Top Mathematics 12 (Gr.11)",
+            "from": "MacNeill Secondary",
+            "description": "Highest Pre‑Calculus 12 while in Gr.11.",
+            "tags": ["Math", "Academic"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Jun",
+            "name": "Top Science 11 Award",
+            "from": "MacNeill Secondary",
+            "description": "Chem 100%, Phys 99% (Gr.11).",
+            "tags": ["Science", "Academic"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "May",
+            "name": "Distinction – Sir Isaac Newton Exam",
+            "from": "University of Waterloo Faculty of Science",
+            "description": "282/3077 worldwide; 3rd school (Gr.11).",
+            "tags": ["Physics", "Contest"],
+            "link": ""
+        },
+        {
+            "year": "2024",
+            "month": "Apr",
+            "name": "Ingenious+ Regional Grant ($1K)",
+            "from": "Ingenious+",
+            "description": "Funding for JARVIS project.",
+            "tags": ["Grant", "AI"],
+            "link": ""
+        },
+        {
+            "year": "2023",
+            "month": "Jun",
+            "name": "Exceptional Service Award (80+ hrs)",
+            "from": "MacNeill Secondary",
+            "description": "80+ service hours (2022–23).",
+            "tags": ["Service"],
+            "link": ""
+        },
+        {
+            "year": "2023",
+            "month": "Jun",
+            "name": "Top Academic Award (Gr.10)",
+            "from": "MacNeill Secondary",
+            "description": "95.5% average over 8 courses.",
+            "tags": ["Academic"],
+            "link": ""
+        },
+        {
+            "year": "2023",
+            "month": "Jun",
+            "name": "Top French 10 Award",
+            "from": "MacNeill Secondary",
+            "description": "Highest French 10 marks.",
+            "tags": ["Language", "Academic"],
+            "link": ""
+        },
+        {
+            "year": "2023",
+            "month": "Jun",
+            "name": "Top Math 11 (Gr.10)",
+            "from": "MacNeill Secondary",
+            "description": "Highest Grade 11 math while in Gr.10.",
+            "tags": ["Math", "Academic"],
+            "link": ""
+        },
+        {
+            "year": "2023",
+            "month": "Jun",
+            "name": "Top Raven Award (Gr.10)",
+            "from": "MacNeill Secondary",
+            "description": "Highest award: academics & contribution.",
+            "tags": ["Academic", "Citizenship"],
+            "link": ""
+        },
+        {
+            "year": "2023",
+            "month": "Jun",
+            "name": "Top Science 10 Award",
+            "from": "MacNeill Secondary",
+            "description": "Highest Grade 10 science marks.",
+            "tags": ["Science", "Academic"],
+            "link": ""
+        },
+        {
+            "year": "2023",
+            "month": "Jun",
+            "name": "Distinction – Cayley Contest",
+            "from": "CEMC, University of Waterloo",
+            "description": "Top 25% Cayley math contest.",
+            "tags": ["Math", "Contest"],
+            "link": ""
+        },
+        {
+            "year": "2022",
+            "month": "Jun",
+            "name": "Distinction – Pascal Contest (Champion)",
+            "from": "CEMC, University of Waterloo",
+            "description": "Top 25% & school champion Pascal.",
+            "tags": ["Math", "Contest"],
+            "link": ""
+        },
+        {
+            "year": "2022",
+            "month": "Jun",
+            "name": "Top Social Studies 9 Award",
+            "from": "MacNeill Secondary",
+            "description": "Highest Social Studies 9 marks.",
+            "tags": ["Academic", "Social Studies"],
+            "link": ""
+        }
+    ]
+}
