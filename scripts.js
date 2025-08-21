@@ -290,12 +290,15 @@ document.addEventListener("DOMContentLoaded", () => {
         root.appendChild(ol);
     }
 
-    // 3D tilt microanimations for large imagery (portrait + highlight)
-    const portrait = document.querySelector(".portrait");
+    // 3D tilt microanimations for large imagery (coverflow + highlight)
+    const coverflowImages = document.querySelectorAll(".coverflow-cards img");
     const highlightFigure = document.querySelector(".tab-highlight-figure");
 
     function setupTilt(target, opts = {}) {
         if (!target) return;
+        // Skip tilt setup for Cover Flow images to prevent interference
+        if (target.closest(".coverflow-cards")) return;
+
         const cfg = Object.assign(
             { max: 14, glare: false, scale: 1.015 },
             opts
@@ -376,16 +379,166 @@ document.addEventListener("DOMContentLoaded", () => {
         wrapperEl.addEventListener("touchend", leave);
     }
 
+    // Setup Cover Flow interaction
+    function setupCoverFlow() {
+        const coverflowContainer = document.querySelector(".coverflow-cards");
+        const coverflowWrapper = document.querySelector(".coverflow-container");
+        if (!coverflowContainer || !coverflowWrapper) return;
+
+        // Add wheel event to convert vertical scrolling to horizontal Cover Flow scrolling
+        coverflowWrapper.addEventListener(
+            "wheel",
+            (e) => {
+                // Always prevent default and convert vertical scroll to horizontal
+                e.preventDefault();
+
+                // Use deltaY (vertical scroll) to scroll horizontally
+                const scrollAmount = e.deltaY;
+
+                coverflowContainer.scrollBy({
+                    left: scrollAmount * 1.5, // Adjust multiplier for sensitivity
+                    behavior: "auto", // Use auto for wheel events for responsiveness
+                });
+            },
+            { passive: false }
+        );
+
+        // Add keyboard navigation with smooth scrolling
+        coverflowContainer.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                e.preventDefault();
+                const scrollAmount = 290; // Width of one card + margin (240 + 50)
+                const direction = e.key === "ArrowLeft" ? -1 : 1;
+                coverflowContainer.scrollBy({
+                    left: direction * scrollAmount,
+                    behavior: "smooth",
+                });
+            }
+        });
+
+        // Make container focusable for keyboard navigation
+        coverflowContainer.setAttribute("tabindex", "0");
+
+        // Add touch/drag scrolling enhancement with smooth momentum
+        let isScrolling = false;
+        let startX = 0;
+        let scrollLeft = 0;
+        let velocity = 0;
+        let lastX = 0;
+        let lastTime = 0;
+
+        coverflowContainer.addEventListener("mousedown", (e) => {
+            isScrolling = true;
+            startX = e.pageX - coverflowContainer.offsetLeft;
+            scrollLeft = coverflowContainer.scrollLeft;
+            lastX = e.pageX;
+            lastTime = Date.now();
+            velocity = 0;
+            coverflowContainer.style.cursor = "grabbing";
+            coverflowContainer.style.scrollBehavior = "auto"; // Disable smooth scroll during drag
+        });
+
+        coverflowContainer.addEventListener("mouseleave", () => {
+            if (isScrolling) {
+                finishDragScroll();
+            }
+        });
+
+        coverflowContainer.addEventListener("mouseup", () => {
+            if (isScrolling) {
+                finishDragScroll();
+            }
+        });
+
+        function finishDragScroll() {
+            isScrolling = false;
+            coverflowContainer.style.cursor = "grab";
+            coverflowContainer.style.scrollBehavior = "smooth"; // Re-enable smooth scrolling
+
+            // Add momentum scrolling
+            if (Math.abs(velocity) > 0.5) {
+                const momentumScroll = velocity * 150; // Adjust momentum factor
+                coverflowContainer.scrollBy({
+                    left: momentumScroll,
+                    behavior: "smooth",
+                });
+            }
+        }
+
+        coverflowContainer.addEventListener("mousemove", (e) => {
+            if (!isScrolling) return;
+            e.preventDefault();
+
+            const currentTime = Date.now();
+            const currentX = e.pageX;
+            const timeDiff = currentTime - lastTime;
+
+            if (timeDiff > 0) {
+                velocity = (currentX - lastX) / timeDiff;
+            }
+
+            const x = e.pageX - coverflowContainer.offsetLeft;
+            const walk = (x - startX) * 1.5; // Slightly reduce sensitivity
+            coverflowContainer.scrollLeft = scrollLeft - walk;
+
+            lastX = currentX;
+            lastTime = currentTime;
+        });
+
+        // Add touch support for mobile devices
+        let touchStartX = 0;
+        let touchScrollLeft = 0;
+
+        coverflowContainer.addEventListener(
+            "touchstart",
+            (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchScrollLeft = coverflowContainer.scrollLeft;
+                coverflowContainer.style.scrollBehavior = "auto";
+            },
+            { passive: true }
+        );
+
+        coverflowContainer.addEventListener(
+            "touchmove",
+            (e) => {
+                if (!touchStartX) return;
+
+                const touchX = e.touches[0].clientX;
+                const walk = (touchStartX - touchX) * 2;
+                coverflowContainer.scrollLeft = touchScrollLeft + walk;
+            },
+            { passive: true }
+        );
+
+        coverflowContainer.addEventListener(
+            "touchend",
+            () => {
+                touchStartX = 0;
+                coverflowContainer.style.scrollBehavior = "smooth";
+            },
+            { passive: true }
+        );
+    }
+
     // Respect reduced motion preferences
     const reduceMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
     ).matches;
+
     if (!reduceMotion) {
-        setupTilt(portrait, { max: 16, scale: 1.03 });
+        // Skip tilt setup for Cover Flow images - they have their own CSS animations
+        // coverflowImages.forEach(img => {
+        //     setupTilt(img, { max: 8, scale: 1.02 });
+        // });
+
         // Use the inner IMG inside highlight figure
         const highlightImgEl = document.getElementById("tabHighlightImage");
         setupTilt(highlightImgEl, { max: 12, scale: 1.02 });
     }
+
+    // Initialize Cover Flow functionality
+    setupCoverFlow();
 });
 
 // Helper functions hoisted outside to ensure availability
