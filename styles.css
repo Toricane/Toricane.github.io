@@ -190,7 +190,7 @@ img {
     text-align: left;
 }
 
-.footnote:hover .footnote-content {
+.footnote.active .footnote-content {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(-5px);
@@ -206,6 +206,19 @@ img {
     border-width: 6px;
     border-style: solid;
     border-color: var(--panel) transparent transparent transparent;
+}
+
+.footnote.flipped .footnote-content {
+    bottom: auto;
+    top: 100%;
+    margin-bottom: 0;
+    margin-top: 12px;
+}
+
+.footnote.flipped .footnote-content::after {
+    top: auto;
+    bottom: 100%;
+    border-color: transparent transparent var(--panel) transparent;
 }
 
 .footnote sup {
