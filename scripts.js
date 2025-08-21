@@ -5,11 +5,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Scroll button
     const scrollBtn = document.getElementById("scrollMore");
-    if (scrollBtn)
+    if (scrollBtn) {
         scrollBtn.addEventListener("click", () => {
             const content = document.getElementById("content");
             if (content) content.scrollIntoView({ behavior: "smooth" });
         });
+
+        // Hide scroll button when user starts scrolling
+        let scrollTimeout;
+        const hideScrollButton = () => {
+            scrollBtn.classList.add("hidden");
+        };
+
+        const handleScroll = () => {
+            if (window.scrollY > 50) {
+                // Hide after scrolling 50px
+                hideScrollButton();
+                // Remove event listener after hiding to improve performance
+                window.removeEventListener("scroll", handleScroll);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+    }
 
     // Tabs logic
     const tabs = Array.from(document.querySelectorAll(".tab"));
