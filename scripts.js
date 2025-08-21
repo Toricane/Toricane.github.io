@@ -135,51 +135,81 @@ document.addEventListener("DOMContentLoaded", () => {
                         150
                     );
 
-                // Continuous sparkle loop for all links
-                const sparkleInterval = setInterval(() => {
-                    window.anime({
-                        targets:
-                            links[Math.floor(Math.random() * links.length)],
-                        translateY: [0, -2, 0],
-                        duration: 600,
-                    });
-                }, 1800);
+                // Reduce animation frequency for mobile performance
+                const isMobile = window.innerWidth <= 768;
+                const sparkleDelay = isMobile ? 3000 : 1800;
+                const pillGlowDelay = isMobile ? 5000 : 3000;
+                const linkedinDelay = isMobile ? 3000 : 1500;
 
-                // Continuous pill glow pulse animation
-                const pillGlowInterval = setInterval(() => {
-                    window.anime({
-                        targets: conn,
-                        boxShadow: [
-                            "0 0 0 1px #2b4b5f, 0 0 0 3px #2b4b5f55, 0 0 24px -4px #4db5ff44",
-                            "0 0 0 1px #4db5ff, 0 0 0 6px #4db5ff33, 0 0 32px -2px #4db5ff66",
-                            "0 0 0 1px #2b4b5f, 0 0 0 3px #2b4b5f55, 0 0 24px -4px #4db5ff44",
-                        ],
-                        duration: 2000,
-                        easing: "easeInOutQuad",
-                    });
-                }, 3000);
-
-                // Special LinkedIn button animation every 1.5 seconds
-                const linkedinInterval = setInterval(() => {
-                    if (linkedinLink) {
-                        linkedinLink.classList.add("linkedin-highlight");
-                        window.anime({
-                            targets: linkedinLink,
-                            scale: [1, 1.05, 1],
-                            boxShadow: [
-                                "0 0 0 0 rgba(77,181,255,.6)",
-                                "0 0 0 8px rgba(77,181,255,0)",
-                            ],
-                            duration: 1000,
-                            easing: "easeOutQuad",
-                            complete: () => {
-                                linkedinLink.classList.remove(
-                                    "linkedin-highlight"
-                                );
-                            },
-                        });
+                // Use requestIdleCallback for better performance if available
+                const scheduleAnimation = (callback) => {
+                    if (window.requestIdleCallback) {
+                        requestIdleCallback(callback);
+                    } else {
+                        setTimeout(callback, 16);
                     }
-                }, 1500);
+                };
+
+                // Reduced frequency sparkle loop for all links
+                const sparkleInterval = setInterval(() => {
+                    scheduleAnimation(() => {
+                        if (document.visibilityState === "visible") {
+                            window.anime({
+                                targets:
+                                    links[
+                                        Math.floor(Math.random() * links.length)
+                                    ],
+                                translateY: [0, -2, 0],
+                                duration: 600,
+                            });
+                        }
+                    });
+                }, sparkleDelay);
+
+                // Reduced frequency pill glow pulse animation
+                const pillGlowInterval = setInterval(() => {
+                    scheduleAnimation(() => {
+                        if (document.visibilityState === "visible") {
+                            window.anime({
+                                targets: conn,
+                                boxShadow: [
+                                    "0 0 0 1px #2b4b5f, 0 0 0 3px #2b4b5f55, 0 0 24px -4px #4db5ff44",
+                                    "0 0 0 1px #4db5ff, 0 0 0 6px #4db5ff33, 0 0 32px -2px #4db5ff66",
+                                    "0 0 0 1px #2b4b5f, 0 0 0 3px #2b4b5f55, 0 0 24px -4px #4db5ff44",
+                                ],
+                                duration: 2000,
+                                easing: "easeInOutQuad",
+                            });
+                        }
+                    });
+                }, pillGlowDelay);
+
+                // Special LinkedIn button animation with reduced frequency
+                const linkedinInterval = setInterval(() => {
+                    scheduleAnimation(() => {
+                        if (
+                            linkedinLink &&
+                            document.visibilityState === "visible"
+                        ) {
+                            linkedinLink.classList.add("linkedin-highlight");
+                            window.anime({
+                                targets: linkedinLink,
+                                scale: [1, 1.05, 1],
+                                boxShadow: [
+                                    "0 0 0 0 rgba(77,181,255,.6)",
+                                    "0 0 0 8px rgba(77,181,255,0)",
+                                ],
+                                duration: 1000,
+                                easing: "easeOutQuad",
+                                complete: () => {
+                                    linkedinLink.classList.remove(
+                                        "linkedin-highlight"
+                                    );
+                                },
+                            });
+                        }
+                    });
+                }, linkedinDelay);
 
                 // Stop all animations after 15 seconds
                 setTimeout(() => {
@@ -299,6 +329,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Skip tilt setup for Cover Flow images to prevent interference
         if (target.closest(".coverflow-cards")) return;
 
+        // Disable tilt on mobile for better performance
+        const isMobile = window.innerWidth <= 768 || "ontouchstart" in window;
+        if (isMobile) return;
+
         const cfg = Object.assign(
             { max: 14, glare: false, scale: 1.015 },
             opts
@@ -321,13 +355,23 @@ document.addEventListener("DOMContentLoaded", () => {
             const { rx, ry, tz, scale } = state;
             target.style.transform = `translateZ(${tz}px) rotateX(${rx}deg) rotateY(${ry}deg) scale(${scale})`;
         };
-        function loop() {
-            // Smooth towards target
-            state.rx = lerp(state.rx, targetState.rx, 0.16);
-            state.ry = lerp(state.ry, targetState.ry, 0.16);
-            state.tz = lerp(state.tz, targetState.tz, 0.18);
-            state.scale = lerp(state.scale, targetState.scale, 0.18);
-            apply();
+
+        // Throttle the animation loop for better performance
+        let lastFrameTime = 0;
+        const targetFPS = 30; // Lower FPS for better mobile performance
+        const frameInterval = 1000 / targetFPS;
+
+        function loop(currentTime) {
+            if (currentTime - lastFrameTime >= frameInterval) {
+                // Smooth towards target
+                state.rx = lerp(state.rx, targetState.rx, 0.16);
+                state.ry = lerp(state.ry, targetState.ry, 0.16);
+                state.tz = lerp(state.tz, targetState.tz, 0.18);
+                state.scale = lerp(state.scale, targetState.scale, 0.18);
+                apply();
+                lastFrameTime = currentTime;
+            }
+
             // Continue while moving or not at rest
             if (
                 hovering ||
@@ -344,7 +388,16 @@ document.addEventListener("DOMContentLoaded", () => {
         function ensureLoop() {
             if (rafId == null) rafId = requestAnimationFrame(loop);
         }
+
+        // Throttle mouse move events for better performance
+        let lastMoveTime = 0;
+        const moveThrottle = 16; // ~60fps
+
         function handleMove(e) {
+            const currentTime = Date.now();
+            if (currentTime - lastMoveTime < moveThrottle) return;
+            lastMoveTime = currentTime;
+
             if (!hovering) return;
             const rect = wrapperEl.getBoundingClientRect();
             const x = (e.clientX - rect.left) / rect.width; // 0..1
@@ -386,9 +439,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!coverflowContainer || !coverflowWrapper) return;
 
         // Add wheel event to convert vertical scrolling to horizontal Cover Flow scrolling
+        let lastWheelTime = 0;
+        const wheelThrottle = 16; // ~60fps throttling
+
         coverflowWrapper.addEventListener(
             "wheel",
             (e) => {
+                const currentTime = Date.now();
+                if (currentTime - lastWheelTime < wheelThrottle) return;
+                lastWheelTime = currentTime;
+
                 // Always prevent default and convert vertical scroll to horizontal
                 e.preventDefault();
 
@@ -468,6 +528,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize Cover Flow functionality
     setupCoverFlow();
+
+    // Pause intensive operations when page is not visible (mobile performance)
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+            // Pause any running animations when page is hidden
+            document.querySelectorAll("*").forEach((el) => {
+                if (el.style.animationPlayState !== "paused") {
+                    el.style.animationPlayState = "paused";
+                }
+            });
+        } else {
+            // Resume animations when page becomes visible
+            document.querySelectorAll("*").forEach((el) => {
+                if (el.style.animationPlayState === "paused") {
+                    el.style.animationPlayState = "running";
+                }
+            });
+        }
+    });
 });
 
 // Helper functions hoisted outside to ensure availability
