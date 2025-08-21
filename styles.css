@@ -306,7 +306,8 @@ img {
     border: 1px solid var(--panel-edge);
     padding: 1rem;
     border-radius: var(--radius);
-    min-height: 100px;
+    height: 160px;
+    /* Fixed height */
     display: flex;
     flex-direction: column;
     gap: .5rem;
@@ -315,10 +316,38 @@ img {
     overflow: hidden;
 }
 
+/* Gradient fade at bottom of widget */
+.widget::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2em;
+    background: linear-gradient(rgba(18, 29, 37, 0) 0%, var(--panel) 70%);
+    pointer-events: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+}
+
 .widget:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    border-color: var(--accent);
+}
+
+.widget-ring-active {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 2px rgba(77, 181, 255, 0.3), 0 8px 25px rgba(77, 181, 255, 0.15) !important;
+    animation: widget-ring-pulse 2s ease-in-out infinite;
+}
+
+@keyframes widget-ring-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 2px rgba(77, 181, 255, 0.3), 0 8px 25px rgba(77, 181, 255, 0.15);
+    }
+
+    50% {
+        box-shadow: 0 0 0 4px rgba(77, 181, 255, 0.2), 0 8px 25px rgba(77, 181, 255, 0.25);
+    }
 }
 
 .widget.expanded {
@@ -358,6 +387,7 @@ img {
 .widget-content {
     flex: 1;
     min-width: 0;
+    overflow: hidden;
 }
 
 .widget-image {
@@ -394,12 +424,12 @@ img {
     line-height: 1.4;
     color: var(--text-dim);
     overflow: hidden;
-    white-space: pre-wrap;
     word-wrap: break-word;
 }
 
 .widget-excerpt-container {
     overflow: hidden;
+    flex: 1;
 }
 
 .widget-excerpt span {

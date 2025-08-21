@@ -424,14 +424,7 @@ function fetchSubstack(feedUrl, widget) {
                     .trim();
             }
 
-            // Create both short and long excerpts
-            const shortSnippet =
-                first.description
-                    .replace(/<[^>]+>/g, " ")
-                    .slice(0, 100)
-                    .trim() + "…";
-
-            // Use content if available and longer, otherwise use a longer description
+            // Use content if available and longer, otherwise use description
             const sourceText =
                 bodyText &&
                 bodyText.length >
@@ -439,7 +432,29 @@ function fetchSubstack(feedUrl, widget) {
                     ? bodyText
                     : first.description.replace(/<[^>]+>/g, " ").trim();
 
-            const longSnippet = sourceText.slice(0, 200).trim() + "…";
+            // Show content up to first punctuation after 250 chars, max 400 chars
+            let fullContent = sourceText;
+            if (sourceText.length > 250) {
+                // Find first punctuation mark after 250 characters
+                const afterMin = sourceText.slice(250, 400);
+                const punctMatch = afterMin.match(/[.!?;:]/);
+
+                if (punctMatch) {
+                    // Cut at first punctuation + 1 character after 250
+                    const cutPoint = 250 + punctMatch.index + 1;
+                    fullContent = sourceText.slice(0, cutPoint).trim();
+                    // Add ellipsis if there's more content after the cut
+                    if (sourceText.length > cutPoint) {
+                        fullContent += " ...";
+                    }
+                } else {
+                    // No punctuation found, cut at 400 chars max
+                    fullContent = sourceText.slice(0, 400).trim();
+                    if (sourceText.length > 400) {
+                        fullContent += " ...";
+                    }
+                }
+            }
             const html = `
                 <div class="widget-link" data-url="${first.link}">
                     <div class="widget-layout">
@@ -448,11 +463,9 @@ function fetchSubstack(feedUrl, widget) {
                                 first.title
                             )}</h3>
                             <div class="widget-excerpt-container">
-                                <p class="widget-excerpt" data-short="${escapeHtml(
-                                    shortSnippet
-                                )}" data-long="${escapeHtml(
-                longSnippet
-            )}">${escapeHtml(shortSnippet)}</p>
+                                <p class="widget-excerpt">${escapeHtml(
+                                    fullContent
+                                )}</p>
                             </div>
                         </div>
                         ${imageHtml}
@@ -466,7 +479,7 @@ function fetchSubstack(feedUrl, widget) {
                     ".widget-link[data-url]"
                 );
                 if (widgetEl) {
-                    setupWidgetAnimation(widgetEl);
+                    setupWidgetInteraction(widgetEl);
                 }
             }, 10);
 
@@ -493,122 +506,53 @@ function escapeHtml(s) {
     );
 }
 
-function setupWidgetAnimation(widgetEl) {
-    const excerptEl = widgetEl.querySelector(".widget-excerpt");
-    const shortText = excerptEl.getAttribute("data-short");
-    const longText = excerptEl.getAttribute("data-long");
+function setupWidgetInteraction(widgetEl) {
     const url = widgetEl.getAttribute("data-url");
+    const widget = widgetEl.closest(".widget");
 
-    let isExpanded = false;
-    let animationInProgress = false;
-    let tapCount = 0;
-    let tapTimer = null;
+    let hasRingActive = false;
+    let tapTimeout = null;
 
     // Check if device is mobile
     const isMobile =
         window.matchMedia("(max-width: 768px)").matches ||
         "ontouchstart" in window;
 
-    function animateText(targetText, callback) {
-        if (animationInProgress) return;
-        animationInProgress = true;
+    function showBlueRing() {
+        if (hasRingActive) return;
+        hasRingActive = true;
+        widget.classList.add("widget-ring-active");
+    }
 
-        // Create a temporary element to measure height
-        const tempEl = excerptEl.cloneNode(true);
-        tempEl.style.visibility = "hidden";
-        tempEl.style.position = "absolute";
-        tempEl.style.height = "auto";
-        tempEl.textContent = targetText;
-        excerptEl.parentNode.appendChild(tempEl);
-        const targetHeight = tempEl.offsetHeight;
-        excerptEl.parentNode.removeChild(tempEl);
+    function hideBlueRing() {
+        if (!hasRingActive) return;
+        hasRingActive = false;
+        widget.classList.remove("widget-ring-active");
+    }
 
-        // Animate height change first
-        anime({
-            targets: excerptEl,
-            height: targetHeight + "px",
-            duration: 60,
-            easing: "easeOutQuad",
-            complete: () => {
-                // Then animate text change with typing effect
-                excerptEl.textContent = "";
-                excerptEl.style.height = "auto";
+    function openLink() {
+        window.open(url, "_blank", "noopener");
+    }
 
-                let i = 0;
-                function typeNextChar() {
-                    if (i < targetText.length) {
-                        excerptEl.textContent += targetText[i];
-                        i++;
-                        setTimeout(typeNextChar, 4);
-                    } else {
-                        animationInProgress = false;
-                        if (callback) callback();
-                    }
-                }
-                typeNextChar();
-            },
+    if (isMobile) {
+        // Mobile behavior: tap opens link directly
+        widgetEl.addEventListener("click", (e) => {
+            e.preventDefault();
+            openLink();
         });
-    }
-
-    function handleExpansion() {
-        if (animationInProgress) return;
-
-        if (!isExpanded) {
-            widgetEl.classList.add("expanded");
-            animateText(longText, () => {
-                isExpanded = true;
-            });
-        } else {
-            widgetEl.classList.remove("expanded");
-            animateText(shortText, () => {
-                isExpanded = false;
-            });
-        }
-    }
-
-    function handleClick(e) {
-        e.preventDefault();
-
-        if (isMobile) {
-            tapCount++;
-
-            if (tapCount === 1) {
-                // First tap - expand
-                if (!isExpanded) {
-                    handleExpansion();
-                }
-
-                // Set timer for double tap detection
-                tapTimer = setTimeout(() => {
-                    tapCount = 0;
-                }, 300);
-            } else if (tapCount === 2) {
-                // Second tap - open URL
-                clearTimeout(tapTimer);
-                tapCount = 0;
-                window.open(url, "_blank", "noopener");
-            }
-        } else {
-            // Desktop - direct click opens URL
-            window.open(url, "_blank", "noopener");
-        }
-    }
-
-    // Add event listeners
-    widgetEl.addEventListener("click", handleClick);
-
-    if (!isMobile) {
-        // Desktop hover behavior
+    } else {
+        // Desktop behavior: hover shows ring, click opens link
         widgetEl.addEventListener("mouseenter", () => {
-            if (!isExpanded) {
-                handleExpansion();
-            }
+            showBlueRing();
         });
 
         widgetEl.addEventListener("mouseleave", () => {
-            if (isExpanded) {
-                handleExpansion();
-            }
+            hideBlueRing();
+        });
+
+        widgetEl.addEventListener("click", (e) => {
+            e.preventDefault();
+            openLink();
         });
     }
 }
