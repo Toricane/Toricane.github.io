@@ -419,106 +419,35 @@ document.addEventListener("DOMContentLoaded", () => {
         // Make container focusable for keyboard navigation
         coverflowContainer.setAttribute("tabindex", "0");
 
-        // Add touch/drag scrolling enhancement with smooth momentum
-        let isScrolling = false;
-        let startX = 0;
-        let scrollLeft = 0;
-        let velocity = 0;
-        let lastX = 0;
-        let lastTime = 0;
+        // Add click/tap navigation for cards
+        const cards = coverflowContainer.querySelectorAll("li");
 
-        coverflowContainer.addEventListener("mousedown", (e) => {
-            isScrolling = true;
-            startX = e.pageX - coverflowContainer.offsetLeft;
-            scrollLeft = coverflowContainer.scrollLeft;
-            lastX = e.pageX;
-            lastTime = Date.now();
-            velocity = 0;
-            coverflowContainer.style.cursor = "grabbing";
-            coverflowContainer.style.scrollBehavior = "auto"; // Disable smooth scroll during drag
-        });
+        cards.forEach((card, index) => {
+            card.addEventListener("click", (e) => {
+                e.preventDefault();
 
-        coverflowContainer.addEventListener("mouseleave", () => {
-            if (isScrolling) {
-                finishDragScroll();
-            }
-        });
+                // Calculate the position to scroll to center this card
+                const cardWidth = 240; // width of each card
+                const cardMargin = 25; // margin on each side
+                const totalCardWidth = cardWidth + cardMargin * 2;
 
-        coverflowContainer.addEventListener("mouseup", () => {
-            if (isScrolling) {
-                finishDragScroll();
-            }
-        });
+                // Calculate scroll position to center the clicked card
+                const containerWidth = coverflowContainer.offsetWidth;
+                const targetScrollLeft =
+                    index * totalCardWidth - containerWidth / 2 + cardWidth / 2;
 
-        function finishDragScroll() {
-            isScrolling = false;
-            coverflowContainer.style.cursor = "grab";
-            coverflowContainer.style.scrollBehavior = "smooth"; // Re-enable smooth scrolling
-
-            // Add momentum scrolling
-            if (Math.abs(velocity) > 0.5) {
-                const momentumScroll = velocity * 150; // Adjust momentum factor
-                coverflowContainer.scrollBy({
-                    left: momentumScroll,
+                // Smooth scroll to the target position
+                coverflowContainer.scrollTo({
+                    left: targetScrollLeft,
                     behavior: "smooth",
                 });
-            }
-        }
+            });
 
-        coverflowContainer.addEventListener("mousemove", (e) => {
-            if (!isScrolling) return;
-            e.preventDefault();
-
-            const currentTime = Date.now();
-            const currentX = e.pageX;
-            const timeDiff = currentTime - lastTime;
-
-            if (timeDiff > 0) {
-                velocity = (currentX - lastX) / timeDiff;
-            }
-
-            const x = e.pageX - coverflowContainer.offsetLeft;
-            const walk = (x - startX) * 1.5; // Slightly reduce sensitivity
-            coverflowContainer.scrollLeft = scrollLeft - walk;
-
-            lastX = currentX;
-            lastTime = currentTime;
+            // Add hover effect for better UX
+            card.addEventListener("mouseenter", () => {
+                card.style.cursor = "pointer";
+            });
         });
-
-        // Add touch support for mobile devices
-        let touchStartX = 0;
-        let touchScrollLeft = 0;
-
-        coverflowContainer.addEventListener(
-            "touchstart",
-            (e) => {
-                touchStartX = e.touches[0].clientX;
-                touchScrollLeft = coverflowContainer.scrollLeft;
-                coverflowContainer.style.scrollBehavior = "auto";
-            },
-            { passive: true }
-        );
-
-        coverflowContainer.addEventListener(
-            "touchmove",
-            (e) => {
-                if (!touchStartX) return;
-
-                const touchX = e.touches[0].clientX;
-                const walk = (touchStartX - touchX) * 2;
-                coverflowContainer.scrollLeft = touchScrollLeft + walk;
-            },
-            { passive: true }
-        );
-
-        coverflowContainer.addEventListener(
-            "touchend",
-            () => {
-                touchStartX = 0;
-                coverflowContainer.style.scrollBehavior = "smooth";
-            },
-            { passive: true }
-        );
     }
 
     // Respect reduced motion preferences

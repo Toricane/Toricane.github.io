@@ -308,9 +308,13 @@ img {
     /* Firefox */
     -ms-overflow-style: none;
     /* IE/Edge */
-    cursor: grab;
     /* Smooth scrolling with momentum on touch devices */
     -webkit-overflow-scrolling: touch;
+    /* Prevent text selection during interaction */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 
     /* Custom scrollbar for webkit browsers */
 }
@@ -330,6 +334,8 @@ img {
     margin: 0 25px;
     perspective: 1000px;
     pointer-events: auto;
+    cursor: pointer;
+    transition: transform 0.2s ease;
     /* Allow pointer events on the container */
 
     /* View timeline for scroll-driven animations */
@@ -339,6 +345,11 @@ img {
     /* Animation for z-index management */
     animation: linear adjust-z-index both;
     animation-timeline: --li-in-and-out-of-view;
+}
+
+/* Add subtle hover effect for cards */
+.coverflow-cards li:hover {
+    transform: translateY(-2px);
 }
 
 .coverflow-cards li img {
@@ -1303,6 +1314,11 @@ img {
         animation-duration: .01ms !important;
         animation-iteration-count: 1 !important;
         transition: none !important;
+    }
+
+    /* Disable hover effects for Cover Flow cards */
+    .coverflow-cards li:hover {
+        transform: none !important;
     }
 }
 
