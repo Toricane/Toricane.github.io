@@ -320,14 +320,11 @@ document.addEventListener("DOMContentLoaded", () => {
         root.appendChild(ol);
     }
 
-    // 3D tilt microanimations for large imagery (coverflow + highlight)
-    const coverflowImages = document.querySelectorAll(".coverflow-cards img");
+    // 3D tilt microanimations for highlight images
     const highlightFigure = document.querySelector(".tab-highlight-figure");
 
     function setupTilt(target, opts = {}) {
         if (!target) return;
-        // Skip tilt setup for Cover Flow images to prevent interference
-        if (target.closest(".coverflow-cards")) return;
 
         // Disable tilt on mobile for better performance
         const isMobile = window.innerWidth <= 768 || "ontouchstart" in window;
@@ -432,96 +429,83 @@ document.addEventListener("DOMContentLoaded", () => {
         wrapperEl.addEventListener("touchend", leave);
     }
 
-    // Setup Cover Flow interaction
+    // Setup Cover Flow interaction - Infinite carousel version
     function setupCoverFlow() {
         const coverflowContainer = document.querySelector(".coverflow-cards");
         const coverflowWrapper = document.querySelector(".coverflow-container");
-        if (!coverflowContainer || !coverflowWrapper) return;
+        const coverflowGroups = document.querySelectorAll(".coverflow-group");
+        if (!coverflowContainer || !coverflowWrapper || !coverflowGroups.length)
+            return;
 
-        // Add wheel event to convert vertical scrolling to horizontal Cover Flow scrolling
-        let lastWheelTime = 0;
-        const wheelThrottle = 16; // ~60fps throttling
+        // Add click/tap handler to pause/resume animation
+        let isPaused = false;
 
-        coverflowWrapper.addEventListener(
-            "wheel",
-            (e) => {
-                const currentTime = Date.now();
-                if (currentTime - lastWheelTime < wheelThrottle) return;
-                lastWheelTime = currentTime;
+        const toggleAnimation = () => {
+            isPaused = !isPaused;
+            const playState = isPaused ? "paused" : "running";
+            coverflowGroups.forEach((group) => {
+                group.style.animationPlayState = playState;
+            });
+        };
 
-                // Always prevent default and convert vertical scroll to horizontal
-                e.preventDefault();
-
-                // Use deltaY (vertical scroll) to scroll horizontally
-                const scrollAmount = e.deltaY;
-
-                coverflowContainer.scrollBy({
-                    left: scrollAmount * 1.5, // Adjust multiplier for sensitivity
-                    behavior: "auto", // Use auto for wheel events for responsiveness
-                });
-            },
-            { passive: false }
-        );
-
-        // Add keyboard navigation with smooth scrolling
-        coverflowContainer.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-                e.preventDefault();
-                const scrollAmount = 290; // Width of one card + margin (240 + 50)
-                const direction = e.key === "ArrowLeft" ? -1 : 1;
-                coverflowContainer.scrollBy({
-                    left: direction * scrollAmount,
-                    behavior: "smooth",
-                });
+        // Click on container to toggle animation
+        coverflowWrapper.addEventListener("click", (e) => {
+            // Only toggle if clicking on the container itself, not on cards
+            if (
+                e.target === coverflowWrapper ||
+                e.target === coverflowContainer ||
+                e.target.classList.contains("coverflow-group")
+            ) {
+                toggleAnimation();
             }
+        });
+
+        // Individual card interactions
+        const cards = coverflowContainer.querySelectorAll(".coverflow-card");
+
+        cards.forEach((card) => {
+            // Touch devices: tap to pause/resume
+            card.addEventListener(
+                "touchstart",
+                (e) => {
+                    e.preventDefault();
+                    toggleAnimation();
+                },
+                { passive: false }
+            );
+
+            // Keyboard accessibility
+            card.setAttribute("tabindex", "0");
+            card.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleAnimation();
+                }
+            });
         });
 
         // Make container focusable for keyboard navigation
         coverflowContainer.setAttribute("tabindex", "0");
+        coverflowContainer.setAttribute("role", "region");
+        coverflowContainer.setAttribute("aria-label", "Image carousel");
 
-        // Add click/tap navigation for cards
-        const cards = coverflowContainer.querySelectorAll("li");
-
-        cards.forEach((card, index) => {
-            card.addEventListener("click", (e) => {
-                e.preventDefault();
-
-                // Calculate the position to scroll to center this card
-                const cardWidth = 240; // width of each card
-                const cardMargin = 25; // margin on each side
-                const totalCardWidth = cardWidth + cardMargin * 2;
-
-                // Calculate scroll position to center the clicked card
-                const containerWidth = coverflowContainer.offsetWidth;
-                const targetScrollLeft =
-                    index * totalCardWidth - containerWidth / 2 + cardWidth / 2;
-
-                // Smooth scroll to the target position
-                coverflowContainer.scrollTo({
-                    left: targetScrollLeft,
-                    behavior: "smooth",
+        // Global keyboard controls
+        coverflowContainer.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                // Resume animation on escape
+                isPaused = false;
+                coverflowGroups.forEach((group) => {
+                    group.style.animationPlayState = "running";
                 });
-            });
-
-            // Add hover effect for better UX
-            card.addEventListener("mouseenter", () => {
-                card.style.cursor = "pointer";
-            });
+            }
         });
-    }
-
-    // Respect reduced motion preferences
+    } // Respect reduced motion preferences
     const reduceMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
     ).matches;
 
     if (!reduceMotion) {
-        // Skip tilt setup for Cover Flow images - they have their own CSS animations
-        // coverflowImages.forEach(img => {
-        //     setupTilt(img, { max: 8, scale: 1.02 });
-        // });
-
-        // Use the inner IMG inside highlight figure
+        // Setup 3D tilt for highlight image only
         const highlightImgEl = document.getElementById("tabHighlightImage");
         setupTilt(highlightImgEl, { max: 12, scale: 1.02 });
     }
