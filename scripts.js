@@ -719,6 +719,15 @@ function fetchSubstack(feedUrl, widget) {
         );
         if (cached && Date.now() - cached.time < 1000 * 60 * 60 * 6) {
             widget.set(cached.html);
+            // Set up interactivity for cached content
+            setTimeout(() => {
+                const widgetEl = document.querySelector(
+                    ".widget-link[data-url]"
+                );
+                if (widgetEl) {
+                    setupWidgetInteraction(widgetEl);
+                }
+            }, 10);
             return;
         }
     } catch (_) {}
