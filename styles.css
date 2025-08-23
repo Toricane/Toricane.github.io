@@ -1475,6 +1475,20 @@ img {
     margin: 0;
 }
 
+.site-footer a {
+    color: var(--text-dim);
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    border-bottom: 1px solid rgba(77, 181, 255, 0.25);
+}
+
+.site-footer a:hover, .site-footer a:focus-visible {
+    background-color: rgba(77, 181, 255, 0.1);
+    color: #a9d9ff;
+    border-bottom-color: rgba(77, 181, 255, 0.5);
+}
+
 /* Animations / utilities */
 .glow {
     box-shadow: 0 0 0 1px #2b4b5f, 0 0 0 3px #2b4b5f55, 0 0 24px -4px #4db5ff44;

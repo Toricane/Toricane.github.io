@@ -237,3 +237,5 @@ Filenames are hard‑coded – adjust in `scripts.js` (`highlightMap`) if you pr
 ## License
 
 All custom code MIT. Personal content © Prajwal Prashanth.
+
+Design inspired by [kevinjosethomas.com](https://www.kevinjosethomas.com/) ([GitHub](https://github.com/kevinjosethomas/kevinjosethomas)).
