@@ -948,6 +948,8 @@ img {
     gap: 2rem;
     position: relative;
     padding-left: 1rem;
+    max-width: 100%;
+    overflow: hidden;
     /* small breathing room on left */
     --time-w: 80px;
     --gap: 1.5rem;
@@ -1029,6 +1031,8 @@ img {
 
 .timeline .entry {
     padding-top: .1rem;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .timeline h4 {
@@ -1055,8 +1059,278 @@ img {
     letter-spacing: .08em;
     text-transform: uppercase;
     font-weight: 600;
-    color: #6f8696;
-    opacity: .9;
+    color: #768a98;
+    /* opacity: .9; */
+}
+
+/* Timeline group styles */
+.timeline-summary {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    font-size: .85rem;
+    line-height: 1.3;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.timeline-summary:hover {
+    color: var(--accent);
+}
+
+.timeline-summary span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.timeline-toggle {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0.25rem;
+    margin-right: 0.5rem;
+    transition: var(--transition);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.timeline-toggle:hover {
+    color: var(--accent);
+    background: rgba(77, 181, 255, 0.1);
+}
+
+.timeline-toggle i {
+    transition: transform 0.2s ease;
+    font-size: 0.7rem;
+}
+
+.timeline-items {
+    margin-top: 0.75rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--panel-edge);
+    animation: expandItems 0.3s ease-out;
+}
+
+@keyframes expandItems {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.timeline-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(47, 70, 86, 0.3);
+    transition: var(--transition);
+}
+
+.timeline-item:last-child {
+    border-bottom: none;
+}
+
+.timeline-item:hover {
+    background: rgba(77, 181, 255, 0.03);
+    margin: 0 -0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 8px;
+}
+
+.timeline-item h5 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.timeline-item:hover h5 {
+    color: var(--accent);
+}
+
+.timeline-item p {
+    margin: 0.25rem 0;
+    font-size: 0.74rem;
+    line-height: 1.4;
+    color: var(--text-dim);
+}
+
+.timeline-item .from-line {
+    margin: 0.15rem 0 0.25rem 0;
+    font-size: 0.6rem;
+}
+
+.timeline-item .tags {
+    margin-top: 0.5rem;
+}
+
+/* Gold highlighting for prestigious awards */
+.gold-highlight {
+    position: relative;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.08) 0%, rgba(255, 193, 7, 0.05) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0 -0.5rem;
+}
+
+.gold-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.6) 0%, rgba(255, 193, 7, 0.3) 100%);
+    border-radius: 8px 8px 0 0;
+}
+
+.timeline-item.gold-highlight {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 193, 7, 0.03) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.12);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0 -0.5rem;
+}
+
+.timeline-item.gold-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.5) 0%, rgba(255, 193, 7, 0.25) 100%);
+    border-radius: 8px 8px 0 0;
+}
+
+.gold-highlight h4,
+.timeline-item.gold-highlight h5 {
+    color: rgba(255, 215, 0, 0.9);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+}
+
+.gold-highlight h4 {
+    padding-top: 0.4rem;
+}
+
+.gold-highlight:hover,
+.timeline-item.gold-highlight:hover {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 193, 7, 0.08) 100%);
+    border-color: rgba(255, 215, 0, 0.25);
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.1);
+}
+
+/* Silver highlighting for notable awards */
+.silver-highlight {
+    position: relative;
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.08) 0%, rgba(169, 169, 169, 0.05) 100%);
+    border: 1px solid rgba(192, 192, 192, 0.15);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0 -0.5rem;
+}
+
+.silver-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.6) 0%, rgba(169, 169, 169, 0.3) 100%);
+    border-radius: 8px 8px 0 0;
+}
+
+.timeline-item.silver-highlight {
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.06) 0%, rgba(169, 169, 169, 0.03) 100%);
+    border: 1px solid rgba(192, 192, 192, 0.12);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0 -0.5rem;
+}
+
+.timeline-item.silver-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.5) 0%, rgba(169, 169, 169, 0.25) 100%);
+    border-radius: 8px 8px 0 0;
+}
+
+.silver-highlight h4,
+.timeline-item.silver-highlight h5 {
+    color: rgba(192, 192, 192, 0.9);
+    text-shadow: 0 0 8px rgba(192, 192, 192, 0.15);
+}
+
+.silver-highlight h4 {
+    padding-top: 0.4rem;
+}
+
+.silver-highlight:hover,
+.timeline-item.silver-highlight:hover {
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.12) 0%, rgba(169, 169, 169, 0.08) 100%);
+    border-color: rgba(192, 192, 192, 0.25);
+    box-shadow: 0 4px 20px rgba(192, 192, 192, 0.08);
+}
+
+/* Category-level highlighting */
+.timeline-group.category-gold .timeline-summary {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 193, 7, 0.03) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.12);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin: 0 -0.5rem;
+    position: relative;
+}
+
+.timeline-group.category-gold .timeline-summary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.4) 0%, rgba(255, 193, 7, 0.2) 100%);
+    border-radius: 8px 8px 0 0;
+}
+
+.timeline-group.category-silver .timeline-summary {
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.06) 0%, rgba(169, 169, 169, 0.03) 100%);
+    border: 1px solid rgba(192, 192, 192, 0.12);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin: 0 -0.5rem;
+    position: relative;
+}
+
+.timeline-group.category-silver .timeline-summary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.4) 0%, rgba(169, 169, 169, 0.2) 100%);
+    border-radius: 8px 8px 0 0;
 }
 
 .project-date {

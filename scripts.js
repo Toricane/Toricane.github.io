@@ -283,39 +283,201 @@ document.addEventListener("DOMContentLoaded", () => {
             root.innerHTML = "<p>—</p>";
             return;
         }
+
+        // Sort items by date (newest first)
+        const sortedItems = [...items].sort((a, b) => {
+            const [yearA, monthA] = a.when.split("/").map(Number);
+            const [yearB, monthB] = b.when.split("/").map(Number);
+            if (yearA !== yearB) return yearB - yearA;
+            return monthB - monthA;
+        });
+
         const ol = document.createElement("ol");
         ol.className = "timeline";
-        items.forEach((i) => {
-            const li = document.createElement("li");
-            if (i.link) {
-                li.style.cursor = "pointer";
-                li.addEventListener("click", () => {
-                    window.open(i.link, "_blank", "noopener");
+
+        sortedItems.forEach((group) => {
+            const [year, month] = group.when.split("/");
+            const monthNames = {
+                "01": "Jan",
+                "02": "Feb",
+                "03": "Mar",
+                "04": "Apr",
+                "05": "May",
+                "06": "Jun",
+                "07": "Jul",
+                "08": "Aug",
+                "09": "Sep",
+                10: "Oct",
+                11: "Nov",
+                12: "Dec",
+            };
+            const timeDisplay = `${monthNames[month]} ${year}`;
+
+            if (group.items.length === 1) {
+                // Single item - render directly
+                const item = group.items[0];
+                const li = document.createElement("li");
+                if (item.link) {
+                    li.style.cursor = "pointer";
+                    li.addEventListener("click", () => {
+                        window.open(item.link, "_blank", "noopener");
+                    });
+                }
+
+                const badgeItems = (
+                    showBadges && item.badges ? item.badges : []
+                ).map(
+                    (b) =>
+                        `<span class="badge ${b
+                            .toLowerCase()
+                            .replace(/[^a-z]/g, "")}">${b}</span>`
+                );
+                const fromLine = item.from
+                    ? `<div class="from-line">${item.from}</div>`
+                    : "";
+                const tagItems = (item.tags || []).map(
+                    (t) =>
+                        `<span class="badge tag-${t
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]/g, "")}">${t}</span>`
+                );
+                const allBadges = [...badgeItems, ...tagItems];
+                const badgesBlock = allBadges.length
+                    ? `<div class="tags award-tags">${allBadges.join("")}</div>`
+                    : "";
+                const highlightClass = item.gold
+                    ? " gold-highlight"
+                    : item.silver
+                    ? " silver-highlight"
+                    : "";
+                li.innerHTML = `<div class="time">${timeDisplay}</div><div class="entry${highlightClass}"><h4>${item.name}</h4>${fromLine}<p>${item.description}</p>${badgesBlock}</div>`;
+                ol.appendChild(li);
+            } else {
+                // Multiple items - render with toggle
+                const li = document.createElement("li");
+                li.className = "timeline-group";
+
+                const summaryText =
+                    group.summary || `${group.items.length} items`;
+                const expandId = `expand-${id}-${group.when.replace("/", "-")}`;
+                const itemCount = group.items.length;
+
+                // Use appropriate terminology based on the section
+                let countText;
+                if (id === "awards") {
+                    countText =
+                        itemCount === 1 ? "1 award" : `${itemCount} awards`;
+                } else if (id === "hackathons") {
+                    countText =
+                        itemCount === 1
+                            ? "1 hackathon"
+                            : `${itemCount} hackathons`;
+                } else {
+                    countText =
+                        itemCount === 1 ? "1 item" : `${itemCount} items`;
+                }
+
+                // Determine category-level highlighting based on highest award type
+                const hasGold = group.items.some((item) => item.gold);
+                const hasSilver = group.items.some((item) => item.silver);
+                const categoryClass = hasGold
+                    ? " category-gold"
+                    : hasSilver
+                    ? " category-silver"
+                    : "";
+                li.className = `timeline-group${categoryClass}`;
+
+                li.innerHTML = `
+                    <div class="time">${timeDisplay}</div>
+                    <div class="entry">
+                        <h4 class="timeline-summary" data-target="${expandId}" aria-expanded="false">
+                            <button class="timeline-toggle">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <span>${summaryText}</span>
+                        </h4>
+                        <div class="from-line">${countText}</div>
+                        <div class="timeline-items" id="${expandId}" style="display: none;">
+                            ${group.items
+                                .map((item) => {
+                                    const badgeItems = (
+                                        showBadges && item.badges
+                                            ? item.badges
+                                            : []
+                                    ).map(
+                                        (b) =>
+                                            `<span class="badge ${b
+                                                .toLowerCase()
+                                                .replace(
+                                                    /[^a-z]/g,
+                                                    ""
+                                                )}">${b}</span>`
+                                    );
+                                    const fromLine = item.from
+                                        ? `<div class="from-line">${item.from}</div>`
+                                        : "";
+                                    const tagItems = (item.tags || []).map(
+                                        (t) =>
+                                            `<span class="badge tag-${t
+                                                .toLowerCase()
+                                                .replace(
+                                                    /[^a-z0-9]/g,
+                                                    ""
+                                                )}">${t}</span>`
+                                    );
+                                    const allBadges = [
+                                        ...badgeItems,
+                                        ...tagItems,
+                                    ];
+                                    const badgesBlock = allBadges.length
+                                        ? `<div class="tags award-tags">${allBadges.join(
+                                              ""
+                                          )}</div>`
+                                        : "";
+
+                                    const itemHighlight = item.gold
+                                        ? " gold-highlight"
+                                        : item.silver
+                                        ? " silver-highlight"
+                                        : "";
+                                    return `
+                                    <div class="timeline-item${itemHighlight}" ${
+                                        item.link
+                                            ? `style="cursor: pointer;" onclick="window.open('${item.link}', '_blank', 'noopener')"`
+                                            : ""
+                                    }>
+                                        <h5>${item.name}</h5>
+                                        ${fromLine}
+                                        <p>${item.description}</p>
+                                        ${badgesBlock}
+                                    </div>
+                                `;
+                                })
+                                .join("")}
+                        </div>
+                    </div>
+                `;
+
+                // Add toggle functionality to the summary (entire h4)
+                const summaryEl = li.querySelector(".timeline-summary");
+                summaryEl.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const target = document.getElementById(expandId);
+                    const toggleBtn =
+                        summaryEl.querySelector(".timeline-toggle i");
+                    const isExpanded = target.style.display !== "none";
+
+                    target.style.display = isExpanded ? "none" : "block";
+                    summaryEl.setAttribute("aria-expanded", !isExpanded);
+                    toggleBtn.style.transform = isExpanded
+                        ? "rotate(0deg)"
+                        : "rotate(180deg)";
                 });
+
+                ol.appendChild(li);
             }
-            const badgeItems = (showBadges && i.badges ? i.badges : []).map(
-                (b) =>
-                    `<span class="badge ${b
-                        .toLowerCase()
-                        .replace(/[^a-z]/g, "")}">${b}</span>`
-            );
-            const fromLine = i.from
-                ? `<div class="from-line">${i.from}</div>`
-                : "";
-            const tagItems = (i.tags || []).map(
-                (t) =>
-                    `<span class="badge tag-${t
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]/g, "")}">${t}</span>`
-            );
-            const timeDisplay = i.month ? `${i.month} ${i.year}` : i.year;
-            const allBadges = [...badgeItems, ...tagItems];
-            const badgesBlock = allBadges.length
-                ? `<div class="tags award-tags">${allBadges.join("")}</div>`
-                : "";
-            li.innerHTML = `<div class="time">${timeDisplay}</div><div class="entry"><h4>${i.name}</h4>${fromLine}<p>${i.description}</p>${badgesBlock}</div>`;
-            ol.appendChild(li);
         });
+
         root.innerHTML = "";
         root.appendChild(ol);
     }
