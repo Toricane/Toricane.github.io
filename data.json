@@ -4,7 +4,8 @@
             "title": "JARVIS for the Visually Impaired",
             "live": false,
             "from": "Independent / TKS",
-            "date": "Jan 2024 – Dec 2024",
+            "start-date": "2024/01/01",
+            "end-date": "2024/12/19",
             "description": "Portable wearable AI assistant (camera, mic, speaker) giving low‑latency scene descriptions & Q/A; core translated to microcontroller (C++ + Edge Impulse).",
             "tags": ["AI", "Edge", "C++", "Embedded"],
             "link": [
@@ -59,7 +60,8 @@
             "title": "Google Internal Announcements RAG MVP",
             "live": false,
             "from": "Google Canada Challenge Winner",
-            "date": "Dec 2023 – Aug 2024",
+            "start-date": "2023/12/01",
+            "end-date": "2024/08/06",
             "description": "Personalized announcements + question answering by integrating Gemini with internal docs (RAG) for sales teams; selected top 3/100+ & ranked #1 in final judging by the Global Head of Partnerships with Google Canada.",
             "tags": ["LLM", "RAG", "Product"],
             "link": [
@@ -84,7 +86,8 @@
             "title": "Peter Pan: Longevity for Everyone",
             "live": false,
             "from": "Team Research",
-            "date": "Apr 2024 – Oct 2024",
+            "start-date": "2024/04/01",
+            "end-date": "2024/10/01",
             "description": "Researched mitochondrial theory of aging; built MVP system to help stabilize blood glucose for accessible lifespan improvement; pitched to 3 VCs.",
             "tags": ["Health", "Research", "Bio"],
             "link": [
@@ -99,7 +102,8 @@
             "title": "CalendAI",
             "live": false,
             "from": "buildspace / Community Meetup Demo",
-            "date": "Jun 2024 – Jul 2024",
+            "start-date": "2024/06/01",
+            "end-date": "2024/07/01",
             "description": "Chrome extension integrating Gemini with Google Calendar to plan weeks & schedule events via natural language; demoed at Vancouver AI Community Meetup.",
             "tags": ["Chrome Ext", "AI", "Productivity"],
             "link": [

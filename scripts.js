@@ -249,9 +249,20 @@ document.addEventListener("DOMContentLoaded", () => {
             root.innerHTML = "<p>No projects yet.</p>";
             return;
         }
+        // Sort projects by end-date (newest first). Support "end-date" in several formats and "Present"/ongoing.
+        const sorted = [...list].sort((a, b) => {
+            const ta = projectEndTimestamp(a);
+            const tb = projectEndTimestamp(b);
+            // Put ongoing (Infinity) first
+            if (ta === tb) return 0;
+            if (ta === Infinity) return -1;
+            if (tb === Infinity) return 1;
+            return tb - ta;
+        });
+
         const ul = document.createElement("ul");
         ul.className = "cards";
-        list.forEach((p) => {
+        sorted.forEach((p) => {
             const li = document.createElement("li");
             li.className = "card";
             // Normalize links: allow p.link to be a string, object, or an array; produce {label,url}
@@ -277,9 +288,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
             const fromLine = p.from ? `<p class="from-line">${p.from}</p>` : "";
-            const dateLine = p.date
-                ? `<p class="from-line project-date">${p.date}</p>`
-                : "";
+            const dateLine = (function () {
+                // Prefer start-date / end-date if available
+                const s =
+                    p["start-date"] || p["start_date"] || p.startDate || null;
+                const e = p["end-date"] || p["end_date"] || p.endDate || null;
+                if (s || e) {
+                    return `<p class="from-line project-date">${formatProjectDate(
+                        s,
+                        e
+                    )}</p>`;
+                }
+                return p.date
+                    ? `<p class="from-line project-date">${p.date}</p>`
+                    : "";
+            })();
             li.innerHTML = `<h3>${p.title}${
                 p.live ? ' <span class="dot live"></span>' : ""
             }</h3>${fromLine}${dateLine}<p>${
@@ -1223,4 +1246,88 @@ function formatLinkDate(s) {
         } ago)`;
     const diffYears = Math.floor(diffMonths / 12);
     return `${formatted} (${diffYears} year${diffYears === 1 ? "" : "s"} ago)`;
+}
+
+// Helpers for project start/end date handling
+function parseYMD(s) {
+    if (!s) return null;
+    // Accept yyyy/mm/dd or yyyy-mm-dd or yyyy/mm or yyyy-mm or yyyy
+    const parts = s.split(/[-\/]/).map((p) => parseInt(p, 10));
+    if (!parts || parts.some((x) => Number.isNaN(x))) return null;
+    const [y, m, d] = parts;
+    if (parts.length === 1) return new Date(y, 0, 1);
+    if (parts.length === 2) return new Date(y, (m || 1) - 1, 1);
+    return new Date(y, (m || 1) - 1, d || 1);
+}
+
+function projectEndTimestamp(p) {
+    // Look for end-date (preferred), fall back to parsing p.date for range like "Jun 2024 – Dec 2024"
+    const eRaw = p["end-date"] || p["end_date"] || p.endDate || null;
+    if (eRaw) {
+        const parsed = parseYMD(eRaw);
+        if (parsed) return parsed.getTime();
+        if (/present|ongoing/i.test(String(eRaw))) return Infinity;
+    }
+    // Try to parse a simple p.date string like `Jan 2024 – Dec 2024` or `Dec 2023 – Aug 2024`
+    if (p.date && typeof p.date === "string") {
+        const parts = p.date.split("–").map((s) => s.trim());
+        if (parts.length === 2) {
+            const end = parts[1];
+            const parsed = parseYMD(
+                end.replace(/\s+/g, " ").replace(/ /g, "/")
+            );
+            if (parsed) return parsed.getTime();
+            if (/present|ongoing/i.test(end)) return Infinity;
+        }
+    }
+    // If no explicit end date is found, treat the project as ongoing
+    // (so it sorts first). This covers cases where end-date was omitted
+    // but the project should still appear at the top of the list.
+    return Infinity;
+}
+
+function formatProjectDate(sRaw, eRaw) {
+    const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    ];
+    const fmt = (d) => `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+    const s = sRaw ? parseYMD(sRaw) : null;
+    const e = eRaw
+        ? /(present|ongoing)/i.test(String(eRaw))
+            ? null
+            : parseYMD(eRaw)
+        : null;
+    if (s && e) {
+        // compute relative time from end date
+        const now = new Date();
+        const months =
+            (now.getFullYear() - e.getFullYear()) * 12 +
+            (now.getMonth() - e.getMonth());
+        let rel = null;
+        if (months < 1) {
+            const days = Math.floor((now - e) / (1000 * 60 * 60 * 24));
+            rel =
+                days <= 1 ? "today" : `${days} day${days === 1 ? "" : "s"} ago`;
+        } else if (months < 12) {
+            rel = `${months} month${months === 1 ? "" : "s"} ago`;
+        } else {
+            const years = Math.floor(months / 12);
+            rel = `${years} year${years === 1 ? "" : "s"} ago`;
+        }
+        return `${fmt(s)} – ${fmt(e)} (${rel})`;
+    }
+    if (s && !e) return `${fmt(s)} – Present`;
+    if (!s && e) return `– ${fmt(e)}`;
+    return "";
 }
