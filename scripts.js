@@ -254,10 +254,26 @@ document.addEventListener("DOMContentLoaded", () => {
         list.forEach((p) => {
             const li = document.createElement("li");
             li.className = "card";
-            if (p.link) {
+            // Normalize links: allow p.link to be a string, object, or an array; produce {label,url}
+            const links = normalizeLinks(p.link);
+
+            if (links.length) {
                 li.style.cursor = "pointer";
-                li.addEventListener("click", () => {
-                    window.open(p.link, "_blank", "noopener");
+                // Click opens single link directly, or shows chooser for multiple
+                li.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    if (links.length === 1) {
+                        window.open(links[0].url, "_blank", "noopener");
+                    } else {
+                        openLinksPopup(e, links, p.title || "");
+                    }
+                });
+                li.tabIndex = 0;
+                li.addEventListener("keydown", (ev) => {
+                    if (ev.key === "Enter" || ev.key === " ") {
+                        ev.preventDefault();
+                        li.click();
+                    }
                 });
             }
             const fromLine = p.from ? `<p class="from-line">${p.from}</p>` : "";
@@ -317,10 +333,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Single item - render directly
                 const item = group.items[0];
                 const li = document.createElement("li");
-                if (item.link) {
+                // Support item.link as string or array
+                const itemLinks = normalizeLinks(item.link);
+                if (itemLinks.length) {
                     li.style.cursor = "pointer";
-                    li.addEventListener("click", () => {
-                        window.open(item.link, "_blank", "noopener");
+                    li.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        if (itemLinks.length === 1) {
+                            window.open(itemLinks[0].url, "_blank", "noopener");
+                        } else {
+                            openLinksPopup(e, itemLinks, item.name || "");
+                        }
+                    });
+                    li.tabIndex = 0;
+                    li.addEventListener("keydown", (ev) => {
+                        if (ev.key === "Enter" || ev.key === " ") {
+                            ev.preventDefault();
+                            li.click();
+                        }
                     });
                 }
 
@@ -440,12 +470,15 @@ document.addEventListener("DOMContentLoaded", () => {
                                         : item.silver
                                         ? " silver-highlight"
                                         : "";
+                                    // Store links as data attribute (stringified) for safe attachment
+                                    const itemLinks = normalizeLinks(item.link);
+                                    const dataAttr = itemLinks.length
+                                        ? ` data-links='${JSON.stringify(
+                                              itemLinks
+                                          ).replace(/'/g, "&#39;")}'`
+                                        : "";
                                     return `
-                                    <div class="timeline-item${itemHighlight}" ${
-                                        item.link
-                                            ? `style="cursor: pointer;" onclick="window.open('${item.link}', '_blank', 'noopener')"`
-                                            : ""
-                                    }>
+                                    <div class="timeline-item${itemHighlight}" ${dataAttr}>
                                         <h5>${item.name}</h5>
                                         ${fromLine}
                                         <p>${item.description}</p>
@@ -457,6 +490,52 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </div>
                 `;
+
+                // After building innerHTML, attach click handlers for any timeline-item that has data-links
+                setTimeout(() => {
+                    const container = li.querySelector("#" + expandId);
+                    if (container) {
+                        const itemsEls = container.querySelectorAll(
+                            ".timeline-item[data-links]"
+                        );
+                        itemsEls.forEach((el) => {
+                            try {
+                                const links = JSON.parse(
+                                    el.getAttribute("data-links")
+                                );
+                                if (!Array.isArray(links) || !links.length)
+                                    return;
+                                el.style.cursor = "pointer";
+                                el.tabIndex = 0;
+                                el.addEventListener("click", (e) => {
+                                    e.stopPropagation();
+                                    if (links.length === 1) {
+                                        window.open(
+                                            links[0].url,
+                                            "_blank",
+                                            "noopener"
+                                        );
+                                    } else {
+                                        openLinksPopup(
+                                            e,
+                                            links,
+                                            el.querySelector("h5")
+                                                ?.textContent || ""
+                                        );
+                                    }
+                                });
+                                el.addEventListener("keydown", (ev) => {
+                                    if (ev.key === "Enter" || ev.key === " ") {
+                                        ev.preventDefault();
+                                        el.click();
+                                    }
+                                });
+                            } catch (e) {
+                                // ignore malformed data
+                            }
+                        });
+                    }
+                }, 0);
 
                 // Add toggle functionality to the summary (entire h4)
                 const summaryEl = li.querySelector(".timeline-summary");
@@ -959,4 +1038,189 @@ function setupFootnotes() {
     window.addEventListener("scroll", () => closeAllFootnotes(), {
         passive: true,
     });
+}
+
+// Links popup chooser: creates a floating menu near click target with multiple links
+function openLinksPopup(event, links, title) {
+    // Remove existing popup
+    const existing = document.querySelector(".links-popup");
+    if (existing) existing.remove();
+
+    const popup = document.createElement("div");
+    popup.className = "links-popup";
+    popup.setAttribute("role", "menu");
+    popup.setAttribute("aria-label", title || "Open link");
+
+    const list = document.createElement("ul");
+    list.className = "links-popup-list";
+
+    // links can be strings or objects { label, url }
+    links.forEach((l, i) => {
+        const href = typeof l === "string" ? l : l.url;
+        const label =
+            typeof l === "string"
+                ? l.replace(/^https?:\/\//, "")
+                : l.label || l.url.replace(/^https?:\/\//, "");
+        const dateVal = typeof l === "object" && l.date ? l.date : null;
+        const li = document.createElement("li");
+        li.className = "links-popup-item";
+        const a = document.createElement("a");
+        a.href = href;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.setAttribute("role", "menuitem");
+
+        const labelSpan = document.createElement("span");
+        labelSpan.className = "link-label";
+        labelSpan.textContent = label;
+
+        const urlSpan = document.createElement("small");
+        urlSpan.className = "link-url";
+        try {
+            const u = new URL(href);
+            urlSpan.textContent =
+                u.hostname +
+                (u.pathname && u.pathname !== "/" ? u.pathname : "");
+        } catch (_) {
+            urlSpan.textContent = href.replace(/^https?:\/\//, "");
+        }
+
+        a.appendChild(labelSpan);
+        if (dateVal) {
+            const dateSpan = document.createElement("div");
+            dateSpan.className = "link-date";
+            dateSpan.textContent = formatLinkDate(dateVal);
+            a.appendChild(dateSpan);
+        }
+        a.appendChild(urlSpan);
+
+        li.appendChild(a);
+        list.appendChild(li);
+    });
+
+    popup.appendChild(list);
+    document.body.appendChild(popup);
+
+    // Positioning near the event (click or keyboard)
+    const rect = (event.target &&
+        event.target.getBoundingClientRect &&
+        event.target.getBoundingClientRect()) || {
+        left: event.clientX,
+        top: event.clientY,
+        width: 0,
+        height: 0,
+    };
+    const left = rect.left + rect.width / 2;
+    const top = rect.top + rect.height + 8;
+
+    // Basic clamp to viewport
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+    const popupRect = popup.getBoundingClientRect();
+    const x = clamp(
+        left - popupRect.width / 2,
+        8,
+        window.innerWidth - popupRect.width - 8
+    );
+    const y = clamp(top, 8, window.innerHeight - popupRect.height - 8);
+
+    popup.style.left = x + "px";
+    popup.style.top = y + "px";
+
+    // Focus first link for keyboard accessibility
+    const firstLink = popup.querySelector("a");
+    if (firstLink) firstLink.focus();
+
+    // Close handlers
+    const close = () => popup.remove();
+    setTimeout(() => {
+        document.addEventListener("click", function onDocClick(e) {
+            if (!popup.contains(e.target)) {
+                document.removeEventListener("click", onDocClick);
+                close();
+            }
+        });
+    }, 0);
+
+    // Escape key closes
+    const onKey = (e) => {
+        if (e.key === "Escape") {
+            close();
+            document.removeEventListener("keydown", onKey);
+        }
+    };
+    document.addEventListener("keydown", onKey);
+}
+
+// Normalize link inputs into array of {label, url}
+function normalizeLinks(field) {
+    if (!field) return [];
+    const toObj = (x) => {
+        if (!x) return null;
+        if (typeof x === "string") {
+            return { label: x.replace(/^https?:\/\//, ""), url: x };
+        }
+        if (typeof x === "object") {
+            // Accept {label, url, date} or {href, label, date}
+            if (x.url || x.href) {
+                return {
+                    label: x.label || x.name || x.url || x.href,
+                    url: x.url || x.href,
+                    date: x.date || x.when || null,
+                };
+            }
+            // Fallback: try to stringify
+            return null;
+        }
+        return null;
+    };
+
+    if (Array.isArray(field)) {
+        return field.map(toObj).filter(Boolean);
+    }
+    const single = toObj(field);
+    return single ? [single] : [];
+}
+
+// Format a link date string "yyyy/mm/dd" into "Mon dd, yyyy (x months ago)"
+function formatLinkDate(s) {
+    if (!s) return "";
+    // Accept yyyy/mm/dd or yyyy-mm-dd
+    const parts = s.split(/[-\/]/).map((p) => parseInt(p, 10));
+    if (!parts || parts.length < 3 || parts.some(isNaN)) return s;
+    const [y, m, d] = parts;
+    const date = new Date(y, m - 1, d);
+    if (isNaN(date.getTime())) return s;
+
+    const monthNames = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    ];
+    const formatted = `${
+        monthNames[date.getMonth()]
+    } ${date.getDate()}, ${date.getFullYear()}`;
+
+    // Relative time
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays < 1) return `${formatted} (today)`;
+    if (diffDays < 30)
+        return `${formatted} (${diffDays} day${diffDays === 1 ? "" : "s"} ago)`;
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths < 12)
+        return `${formatted} (${diffMonths} month${
+            diffMonths === 1 ? "" : "s"
+        } ago)`;
+    const diffYears = Math.floor(diffMonths / 12);
+    return `${formatted} (${diffYears} year${diffYears === 1 ? "" : "s"} ago)`;
 }

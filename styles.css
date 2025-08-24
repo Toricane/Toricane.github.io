@@ -424,6 +424,80 @@ img {
     }
 }
 
+/* Links popup chooser (for items with multiple links) */
+.links-popup {
+    position: fixed;
+    z-index: 1200;
+    background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.7), 0 4px 18px rgba(0, 0, 0, 0.5);
+    min-width: 200px;
+    max-width: min(90vw, 420px);
+}
+
+.links-popup-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.links-popup-item {
+    border-radius: 8px;
+    margin: 2px 0;
+}
+
+.links-popup-item a {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 8px 10px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: .9rem;
+    border-radius: 8px;
+    width: 100%;
+}
+
+.links-popup-item a:hover, .links-popup-item a:focus {
+    background: rgba(77, 181, 255, 0.08);
+    color: #e9fbff;
+    outline: none;
+}
+
+.links-popup-item .link-label {
+    display: block;
+    font-weight: 600;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.links-popup-item .link-url {
+    display: block;
+    color: var(--text-dim);
+    font-size: .75rem;
+    margin-top: 2px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.links-popup-item .link-date {
+    display: block;
+    color: var(--text-dim);
+    font-size: .75rem;
+    margin-top: 6px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
     /* No hover/tap visual effects on touch to keep things smooth */

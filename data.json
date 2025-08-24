@@ -3,29 +3,97 @@
         {
             "title": "JARVIS for the Visually Impaired",
             "live": false,
-            "from": "Independent / TKS Activate",
+            "from": "Independent / TKS",
             "date": "Jan 2024 – Dec 2024",
             "description": "Portable wearable AI assistant (camera, mic, speaker) giving low‑latency scene descriptions & Q/A; core translated to microcontroller (C++ + Edge Impulse).",
             "tags": ["AI", "Edge", "C++", "Embedded"],
-            "link": ""
+            "link": [
+                {
+                    "label": "AI Voice Project",
+                    "date": "2024/03/03",
+                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_create-your-own-ai-voice-assistant-for-free-activity-7169593571602362368-Rn7y"
+                },
+                {
+                    "label": "Ingenious+ Regional Award CAD$1K",
+                    "date": "2024/04/16",
+                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_last-tuesday-i-had-the-incredible-opportunity-activity-7188737473236160513-mCiZ"
+                },
+                {
+                    "label": "1st Demo (500 reactions)",
+                    "date": "2024/04/28",
+                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_demo-video-of-my-jarvis-project-jarvis-activity-7190196909771268096-mV2p"
+                },
+                {
+                    "label": "AI Meetup Demo",
+                    "date": "2024/05/30",
+                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_second-demo-video-of-my-jarvis-project-with-activity-7204007352314851329-QSDR"
+                },
+                {
+                    "label": "TKS Showcase Demo",
+                    "date": "2024/06/09",
+                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_on-sunday-june-9th-i-demoed-my-jarvis-project-activity-7209208311588528129-9Qt-"
+                },
+                {
+                    "label": "BCYDC Spotlight Demo",
+                    "date": "2024/06/27",
+                    "url": "https://www.linkedin.com/posts/bcydc_ai-innovation-tech-activity-7216507096656199680-Gqqm"
+                },
+                {
+                    "label": "2nd AI Meetup Demo",
+                    "date": "2024/06/27",
+                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_last-night-at-the-june-future-proof-creatives-activity-7214142470563975170-4g_L"
+                },
+                {
+                    "label": "2nd Prototype Demo",
+                    "date": "2024/08/29",
+                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_vancouverai-futureproofcreatives-healthcarerevolution-activity-7236979912601964544-gUnx"
+                },
+                {
+                    "label": "TKS Focus Showcase",
+                    "date": "2024/12/19",
+                    "url": "https://tksworld.notion.site/JARVIS-AI-Voice-Assistant-with-Vision-for-the-Visually-Impaired-15cb825036e280a1b04bc4b23943b625"
+                }
+            ]
         },
         {
             "title": "Google Internal Announcements RAG MVP",
             "live": false,
-            "from": "Google Canada Challenge (Top 3 Team)",
+            "from": "Google Canada Challenge Winner",
             "date": "Dec 2023 – Aug 2024",
-            "description": "Personalized announcements + question answering by integrating Gemini with internal docs (RAG) for sales teams; selected top 3/100+ & ranked #1 in final judging.",
+            "description": "Personalized announcements + question answering by integrating Gemini with internal docs (RAG) for sales teams; selected top 3/100+ & ranked #1 in final judging by the Global Head of Partnerships with Google Canada.",
             "tags": ["LLM", "RAG", "Product"],
-            "link": ""
+            "link": [
+                {
+                    "label": "First part of presentation",
+                    "date": "2024/08/06",
+                    "url": "https://www.loom.com/share/376a027ba4e14d12a448110c923124a2?sid=6cf7e0a9-0546-48dc-aa97-7c9a7c1243e3"
+                },
+                {
+                    "label": "Second part of presentation",
+                    "date": "2024/08/06",
+                    "url": "https://www.loom.com/share/266440363ad644e49b8133d3be4a6fe1?sid=fd29156c-f2a4-4d71-8b2f-8a2f295f0a65"
+                },
+                {
+                    "label": "Third part of presentation",
+                    "date": "2024/08/06",
+                    "url": "https://www.loom.com/share/69bd7be5866142cb9308d1e192e18836?sid=9c133ebe-a1f4-4efb-b9d9-763efea1ef0f"
+                }
+            ]
         },
         {
             "title": "Peter Pan: Longevity for Everyone",
             "live": false,
-            "from": "Team Research (3 members)",
+            "from": "Team Research",
             "date": "Apr 2024 – Oct 2024",
             "description": "Researched mitochondrial theory of aging; built MVP system to help stabilize blood glucose for accessible lifespan improvement; pitched to 3 VCs.",
             "tags": ["Health", "Research", "Bio"],
-            "link": ""
+            "link": [
+                { "label": "Website", "url": "https://peterpan-ai.com/" },
+                {
+                    "label": "GitHub",
+                    "url": "https://github.com/Toricane/peterpan-ai"
+                }
+            ]
         },
         {
             "title": "CalendAI",
@@ -34,16 +102,16 @@
             "date": "Jun 2024 – Jul 2024",
             "description": "Chrome extension integrating Gemini with Google Calendar to plan weeks & schedule events via natural language; demoed at Vancouver AI Community Meetup.",
             "tags": ["Chrome Ext", "AI", "Productivity"],
-            "link": ""
-        },
-        {
-            "title": "Learning Machine Learning Journey",
-            "live": false,
-            "from": "Self‑Study",
-            "date": "Jan 2024 – Present",
-            "description": "Self‑driven study: CNN on MNIST, micrograd replication (backprop), neural networks & LLM fundamentals (3Blue1Brown, Karpathy) toward future GPT‑2 reproduction.",
-            "tags": ["ML", "Learning", "CNN", "Backprop"],
-            "link": ""
+            "link": [
+                {
+                    "label": "Demo Tweet",
+                    "url": "https://x.com/PrajwalP028/status/1808191827066917032"
+                },
+                {
+                    "label": "GitHub",
+                    "url": "https://github.com/Toricane/calendai"
+                }
+            ]
         }
     ],
     "hackathons": [
@@ -68,7 +136,16 @@
                     "from": "nwHacks 2025",
                     "description": "AI + animation tool converting user text into educational animations (Gemini + Manim).",
                     "badges": ["In-Person"],
-                    "link": ""
+                    "link": [
+                        {
+                            "label": "Project Demo",
+                            "url": "https://example.com/genimo/demo"
+                        },
+                        {
+                            "label": "Repo",
+                            "url": "https://github.com/Toricane/genimo"
+                        }
+                    ]
                 }
             ]
         },
