@@ -359,6 +359,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         sortedItems.forEach((group) => {
             const [year, month] = group.when.split("/");
+            // For awards, order items by gold -> silver -> none, then alphabetically by name
+            const items =
+                id === "awards" && Array.isArray(group.items)
+                    ? [...group.items].sort((a, b) => {
+                          const rank = (it) =>
+                              it && it.gold ? 0 : it && it.silver ? 1 : 2;
+                          const ra = rank(a);
+                          const rb = rank(b);
+                          if (ra !== rb) return ra - rb;
+                          const na = (a && a.name ? a.name : "").toLowerCase();
+                          const nb = (b && b.name ? b.name : "").toLowerCase();
+                          return na.localeCompare(nb);
+                      })
+                    : group.items || [];
             const monthNames = {
                 "01": "Jan",
                 "02": "Feb",
@@ -375,9 +389,9 @@ document.addEventListener("DOMContentLoaded", () => {
             };
             const timeDisplay = `${monthNames[month]} ${year}`;
 
-            if (group.items.length === 1) {
-                // Single item - render directly
-                const item = group.items[0];
+            if (items.length === 1) {
+                // Single item - render directly (use sorted items for awards)
+                const item = items[0];
                 const li = document.createElement("li");
                 // Support item.link as string or array
                 const itemLinks = normalizeLinks(item.link);
@@ -454,7 +468,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const summaryText =
                     group.summary || `${group.items.length} items`;
                 const expandId = `expand-${id}-${group.when.replace("/", "-")}`;
-                const itemCount = group.items.length;
+                const itemCount = items.length;
 
                 // Use appropriate terminology based on the section
                 let countText;
@@ -472,8 +486,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 // Determine category-level highlighting based on highest award type
-                const hasGold = group.items.some((item) => item.gold);
-                const hasSilver = group.items.some((item) => item.silver);
+                const hasGold = items.some((item) => item && item.gold);
+                const hasSilver = items.some((item) => item && item.silver);
                 const categoryClass = hasGold
                     ? " category-gold"
                     : hasSilver
@@ -492,7 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </h4>
                         <div class="from-line">${countText}</div>
                         <div class="timeline-items" id="${expandId}" style="display: none;">
-                            ${group.items
+                            ${items
                                 .map((item) => {
                                     const badgeItems = (
                                         showBadges && item.badges
