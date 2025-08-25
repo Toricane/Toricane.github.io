@@ -130,6 +130,12 @@
                     "from": "Scrapyard Vancouver 2025",
                     "description": "Interactive AI game resembling Pokémon with real‑world items; placed 2nd among 100+ participants.",
                     "badges": ["Second Place", "In-Person"],
+                    "images": [
+                        {
+                            "label": "Itémon 2nd Place",
+                            "path": "assets/tab-panels/scrapyard_hackathon.jpg"
+                        }
+                    ],
                     "link": [
                         {
                             "label": "GitHub",
@@ -152,6 +158,12 @@
                     "from": "nwHacks 2025",
                     "description": "AI + animation tool converting user text into educational animations (Gemini + Manim).",
                     "badges": ["In-Person"],
+                    "images": [
+                        {
+                            "label": "My teammates Jacob Lacsamana and Eric Chen!",
+                            "path": "assets/tab-panels/nwhacks_hackathon.jpg"
+                        }
+                    ],
                     "link": [
                         {
                             "label": "Devpost",
@@ -177,6 +189,12 @@
                     "from": "Hack For Youth 2024",
                     "description": "Calendar + AI chatbot for intelligent time management integrating Google Calendar.",
                     "badges": ["Winner", "In-Person"],
+                    "images": [
+                        {
+                            "label": "TimeCraft 1st Place",
+                            "path": "assets/tab-panels/hack4youth_hackathon.png"
+                        }
+                    ],
                     "link": [
                         {
                             "label": "Devpost",
@@ -204,6 +222,12 @@
                     "from": "Hack the North 2024",
                     "description": "AI interview simulation app for CS majors (Gradio, Groq, OpenAI).",
                     "badges": ["In-Person"],
+                    "images": [
+                        {
+                            "label": "Won MASV Challenge 2nd place with Leonardo Zhou!",
+                            "path": "assets/tab-panels/hackthenorth_hackathon.jpg"
+                        }
+                    ],
                     "link": [
                         {
                             "label": "Devpost",
@@ -225,6 +249,12 @@
                     "from": "yvrHacks 2024",
                     "description": "AI‑first natural language interface to discover youth events & meetups (Groq).",
                     "badges": ["Honourable Mention", "In-Person"],
+                    "images": [
+                        {
+                            "label": "yeetup Honourable Mention",
+                            "path": "assets/tab-panels/yvrhacks_hackathon.jpg"
+                        }
+                    ],
                     "link": [
                         {
                             "label": "Devpost",
@@ -288,21 +318,39 @@
                     "from": "CEMC, University of Waterloo",
                     "description": "Top 25% Canadian Senior Mathematics Contest.",
                     "tags": ["Math", "Contest"],
-                    "link": ""
+                    "link": "",
+                    "images": [
+                        {
+                            "label": "CSMC Certificate",
+                            "path": "assets/tab-panels/csmc_distinction.jpg"
+                        }
+                    ]
                 },
                 {
                     "name": "Jean Myron Memorial Scholarship (CAD$2K)",
                     "from": "Richmond Retired Teachers' Association",
                     "description": "Scholarship for outstanding achievement 2024–25.",
                     "tags": ["Scholarship"],
-                    "link": ""
+                    "link": "",
+                    "images": [
+                        {
+                            "label": "Scholarship Certificate",
+                            "path": "assets/tab-panels/jean_myron.jpg"
+                        }
+                    ]
                 },
                 {
                     "name": "Level 2 Service Award (75+ hrs)",
                     "from": "MacNeill Secondary",
                     "description": "75+ service hours (2024–25).",
                     "tags": ["Service"],
-                    "link": ""
+                    "link": "",
+                    "images": [
+                        {
+                            "label": "Level 2 Service Award Certificate",
+                            "path": "assets/tab-panels/level_2_g12.jpg"
+                        }
+                    ]
                 },
                 {
                     "name": "Top Raven Award (Gr.12)",
@@ -310,6 +358,16 @@
                     "description": "Highest award: academics, citizenship, school spirit.",
                     "tags": ["Academic", "Citizenship"],
                     "link": "",
+                    "images": [
+                        {
+                            "label": "Top Raven Trophy",
+                            "path": "assets/tab-panels/top_raven_g12_trophy.jpg"
+                        },
+                        {
+                            "label": "Top Raven Award Certificate",
+                            "path": "assets/tab-panels/top_raven_g12_certificate.jpg"
+                        }
+                    ],
                     "gold": true
                 },
                 {
@@ -318,6 +376,16 @@
                     "description": "Excellence & potential in senior sciences.",
                     "tags": ["Science", "Academic"],
                     "link": "",
+                    "images": [
+                        {
+                            "label": "Top Senior Science Student Trophy",
+                            "path": "assets/tab-panels/top_senior_science_trophy.jpg"
+                        },
+                        {
+                            "label": "Top Senior Science Student Certificate",
+                            "path": "assets/tab-panels/top_senior_science_certificate.jpg"
+                        }
+                    ],
                     "silver": true
                 },
                 {
@@ -326,6 +394,12 @@
                     "description": "Top marks AP Calc AB + self‑studied BC.",
                     "tags": ["Math", "Academic"],
                     "link": "",
+                    "images": [
+                        {
+                            "label": "Top Math 12 Certificate",
+                            "path": "assets/tab-panels/top_math_12_g12.jpg"
+                        }
+                    ],
                     "silver": true
                 },
                 {
@@ -334,6 +408,12 @@
                     "description": "AP Chem 97%, Chem 12 97%, Physics 12 96%.",
                     "tags": ["Science", "Academic"],
                     "link": "",
+                    "images": [
+                        {
+                            "label": "Top Science 12 Certificate",
+                            "path": "assets/tab-panels/top_science_12.jpg"
+                        }
+                    ],
                     "silver": true
                 }
             ]
@@ -347,6 +427,12 @@
                     "from": "CEMC, University of Waterloo",
                     "description": "Top 20% internationally.",
                     "tags": ["Chemistry", "Contest"],
+                    "images": [
+                        {
+                            "label": "Chem 13 News Distinction Certificate",
+                            "path": "assets/tab-panels/chem_13_news_distinction.jpg"
+                        }
+                    ],
                     "link": ""
                 },
                 {
@@ -354,33 +440,13 @@
                     "from": "University of Waterloo Faculty of Science",
                     "description": "Physics contest distinction (2025).",
                     "tags": ["Physics", "Contest"],
+                    "images": [
+                        {
+                            "label": "Sir Isaac Newton Exam Distinction Certificate",
+                            "path": "assets/tab-panels/sin_certificate.jpg"
+                        }
+                    ],
                     "link": ""
-                }
-            ]
-        },
-        {
-            "when": "2024/11",
-            "items": [
-                {
-                    "name": "Hack For Youth – 1st Place",
-                    "from": "Hack For Youth",
-                    "description": "TimeCraft (AI + calendar).",
-                    "tags": ["Hackathon", "AI"],
-                    "link": "",
-                    "gold": true
-                }
-            ]
-        },
-        {
-            "when": "2024/09",
-            "items": [
-                {
-                    "name": "yvrHacks Honourable Mention",
-                    "from": "yvrHacks",
-                    "description": "yeetup AI events interface.",
-                    "tags": ["Hackathon", "AI"],
-                    "link": "",
-                    "silver": true
                 }
             ]
         },
@@ -393,6 +459,12 @@
                     "from": "CEMC, University of Waterloo",
                     "description": "Top 25% Fermat contest.",
                     "tags": ["Math", "Contest"],
+                    "images": [
+                        {
+                            "label": "Fermat Distinction Certificate",
+                            "path": "assets/tab-panels/fermat_certificate.jpg"
+                        }
+                    ],
                     "link": ""
                 },
                 {
@@ -400,13 +472,19 @@
                     "from": "CEMC, University of Waterloo",
                     "description": "Score 66/75 (Group 3).",
                     "tags": ["Programming", "Contest"],
-                    "link": ""
+                    "link": "https://cemc.uwaterloo.ca/sites/default/files/documents/2024/2024CCCResults.pdf"
                 },
                 {
                     "name": "Level 2 Service Award (60+ hrs)",
                     "from": "MacNeill Secondary",
                     "description": "60+ service hours (2023–24).",
                     "tags": ["Service"],
+                    "images": [
+                        {
+                            "label": "Level 2 Service Award Certificate",
+                            "path": "assets/tab-panels/level_2_g11.jpg"
+                        }
+                    ],
                     "link": ""
                 },
                 {
@@ -414,6 +492,16 @@
                     "from": "MacNeill Secondary",
                     "description": "96.75% average over 8 courses.",
                     "tags": ["Academic"],
+                    "images": [
+                        {
+                            "label": "Top Academic Award Trophy",
+                            "path": "assets/tab-panels/top_academic_g11_trophy.jpg"
+                        },
+                        {
+                            "label": "Top Academic Award Certificate",
+                            "path": "assets/tab-panels/top_academic_g11.jpg"
+                        }
+                    ],
                     "link": "",
                     "gold": true
                 },
@@ -422,6 +510,12 @@
                     "from": "MacNeill Secondary",
                     "description": "Highest French 11 marks.",
                     "tags": ["Language", "Academic"],
+                    "images": [
+                        {
+                            "label": "Top French 11 Award Certificate",
+                            "path": "assets/tab-panels/top_french_g11.jpg"
+                        }
+                    ],
                     "link": "",
                     "silver": true
                 },
@@ -430,6 +524,12 @@
                     "from": "MacNeill Secondary",
                     "description": "Highest Pre‑Calculus 12 while in Gr.11.",
                     "tags": ["Math", "Academic"],
+                    "images": [
+                        {
+                            "label": "Top Math 12 (Gr.11) Award Certificate",
+                            "path": "assets/tab-panels/top_math_12_g11.jpg"
+                        }
+                    ],
                     "link": "",
                     "silver": true
                 },
@@ -438,6 +538,12 @@
                     "from": "MacNeill Secondary",
                     "description": "Chem 100%, Phys 99% (Gr.11).",
                     "tags": ["Science", "Academic"],
+                    "images": [
+                        {
+                            "label": "Top Science 11 Award Certificate",
+                            "path": "assets/tab-panels/top_science_11.jpg"
+                        }
+                    ],
                     "link": "",
                     "silver": true
                 }
@@ -451,6 +557,12 @@
                     "from": "University of Waterloo Faculty of Science",
                     "description": "282/3077 worldwide; 3rd school (Gr.11).",
                     "tags": ["Physics", "Contest"],
+                    "images": [
+                        {
+                            "label": "Sir Isaac Newton Exam Distinction Certificate",
+                            "path": "assets/tab-panels/sin_certificate_g11.jpg"
+                        }
+                    ],
                     "link": ""
                 }
             ]
@@ -463,6 +575,16 @@
                     "from": "Ingenious+",
                     "description": "Funding for JARVIS project.",
                     "tags": ["Grant", "AI"],
+                    "images": [
+                        {
+                            "label": "Photo with Lieutenant Governor of BC",
+                            "path": "assets/tab-panels/ingenious_plus_photo.jpg"
+                        },
+                        {
+                            "label": "Ingenious+ Regional Award Certificate",
+                            "path": "assets/tab-panels/ingenious_plus.jpg"
+                        }
+                    ],
                     "link": "",
                     "gold": true
                 }
@@ -477,6 +599,12 @@
                     "from": "MacNeill Secondary",
                     "description": "80+ service hours (2022–23).",
                     "tags": ["Service"],
+                    "images": [
+                        {
+                            "label": "Exceptional Service Award Certificate",
+                            "path": "assets/tab-panels/exceptional_service_g10.jpg"
+                        }
+                    ],
                     "link": ""
                 },
                 {
@@ -484,6 +612,16 @@
                     "from": "MacNeill Secondary",
                     "description": "95.5% average over 8 courses.",
                     "tags": ["Academic"],
+                    "images": [
+                        {
+                            "label": "Top Academic Award Trophy",
+                            "path": "assets/tab-panels/top_academic_g10_trophy.jpg"
+                        },
+                        {
+                            "label": "Top Academic Award Certificate",
+                            "path": "assets/tab-panels/top_academic_g10.jpg"
+                        }
+                    ],
                     "link": "",
                     "gold": true
                 },
@@ -492,6 +630,12 @@
                     "from": "MacNeill Secondary",
                     "description": "Highest French 10 marks.",
                     "tags": ["Language", "Academic"],
+                    "images": [
+                        {
+                            "label": "Top French 10 Award Certificate",
+                            "path": "assets/tab-panels/top_french_g10.jpg"
+                        }
+                    ],
                     "link": "",
                     "silver": true
                 },
@@ -500,6 +644,12 @@
                     "from": "MacNeill Secondary",
                     "description": "Highest Grade 11 math while in Gr.10.",
                     "tags": ["Math", "Academic"],
+                    "images": [
+                        {
+                            "label": "Top Math 11 (Gr.10) Award Certificate",
+                            "path": "assets/tab-panels/top_math_11_g10.jpg"
+                        }
+                    ],
                     "link": "",
                     "gold": true
                 },
@@ -508,6 +658,16 @@
                     "from": "MacNeill Secondary",
                     "description": "Highest award: academics & contribution.",
                     "tags": ["Academic", "Citizenship"],
+                    "images": [
+                        {
+                            "label": "Top Raven Trophy",
+                            "path": "assets/tab-panels/top_raven_g10_trophy.jpg"
+                        },
+                        {
+                            "label": "Top Raven Award Certificate",
+                            "path": "assets/tab-panels/top_raven_g10_certificate.jpg"
+                        }
+                    ],
                     "link": "",
                     "gold": true
                 },
@@ -516,6 +676,12 @@
                     "from": "MacNeill Secondary",
                     "description": "Highest Grade 10 science marks.",
                     "tags": ["Science", "Academic"],
+                    "images": [
+                        {
+                            "label": "Top Science 10 Award Certificate",
+                            "path": "assets/tab-panels/top_science_10.jpg"
+                        }
+                    ],
                     "link": "",
                     "silver": true
                 },
@@ -524,6 +690,12 @@
                     "from": "CEMC, University of Waterloo",
                     "description": "Top 25% Cayley math contest.",
                     "tags": ["Math", "Contest"],
+                    "images": [
+                        {
+                            "label": "Cayley Distinction Certificate",
+                            "path": "assets/tab-panels/cayley_certificate.jpg"
+                        }
+                    ],
                     "link": ""
                 }
             ]
@@ -537,6 +709,16 @@
                     "from": "CEMC, University of Waterloo",
                     "description": "Top 25% & school champion Pascal.",
                     "tags": ["Math", "Contest"],
+                    "images": [
+                        {
+                            "label": "Pascal School Champion Medal",
+                            "path": "assets/tab-panels/pascal_champion.jpg"
+                        },
+                        {
+                            "label": "Pascal Distinction Certificate",
+                            "path": "assets/tab-panels/pascal_certificate.jpg"
+                        }
+                    ],
                     "link": "",
                     "silver": true
                 },
@@ -545,6 +727,12 @@
                     "from": "MacNeill Secondary",
                     "description": "Highest Social Studies 9 marks.",
                     "tags": ["Academic", "Social Studies"],
+                    "images": [
+                        {
+                            "label": "Top Social Studies 9 Award Certificate",
+                            "path": "assets/tab-panels/top_socials_9.jpg"
+                        }
+                    ],
                     "link": "",
                     "silver": true
                 }
