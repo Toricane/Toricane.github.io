@@ -1038,6 +1038,48 @@ img {
     letter-spacing: .5px;
 }
 
+/* Project card gold/silver highlighting (mirror timeline aesthetics) */
+.card.gold-highlight {
+    /* Keep the card layout spacing consistent with other cards */
+    margin: 0;
+    /* override generic .gold-highlight negative margins */
+    padding: 1.1rem 1.05rem 1.2rem;
+    border-radius: calc(var(--radius) - 6px);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 193, 7, 0.03) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.12);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.04);
+}
+
+.card.gold-highlight h3 {
+    color: rgba(255, 215, 0, 0.9);
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.12);
+}
+
+.card.gold-highlight:hover {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 193, 7, 0.08) 100%);
+    border-color: rgba(255, 215, 0, 0.25);
+}
+
+.card.silver-highlight {
+    margin: 0;
+    /* override generic .silver-highlight negative margins */
+    padding: 1.1rem 1.05rem 1.2rem;
+    border-radius: calc(var(--radius) - 6px);
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.06) 0%, rgba(169, 169, 169, 0.03) 100%);
+    border: 1px solid rgba(192, 192, 192, 0.12);
+    box-shadow: 0 6px 20px rgba(192, 192, 192, 0.03);
+}
+
+.card.silver-highlight h3 {
+    color: rgba(192, 192, 192, 0.95);
+    text-shadow: 0 0 6px rgba(192, 192, 192, 0.08);
+}
+
+.card.silver-highlight:hover {
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.12) 0%, rgba(169, 169, 169, 0.08) 100%);
+    border-color: rgba(192, 192, 192, 0.25);
+}
+
 /* Timeline */
 .timeline {
     list-style: none;

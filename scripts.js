@@ -264,7 +264,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ul.className = "cards";
         sorted.forEach((p) => {
             const li = document.createElement("li");
-            li.className = "card";
+            // Allow project-level gold/silver highlighting like awards/hackathons
+            let cardClass = "card";
+            if (p.gold) cardClass += " gold-highlight";
+            else if (p.silver) cardClass += " silver-highlight";
+            li.className = cardClass;
             // Normalize links: allow p.link to be a string, object, or an array; produce {label,url}
             const links = normalizeLinks(p.link);
 

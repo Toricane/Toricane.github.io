@@ -8,6 +8,7 @@
             "end-date": "2024/12/19",
             "description": "Portable wearable AI assistant (camera, mic, speaker) giving low‑latency scene descriptions & Q/A; core translated to microcontroller (C++ + Edge Impulse).",
             "tags": ["AI", "Edge", "C++", "Embedded"],
+            "gold": true,
             "link": [
                 {
                     "label": "AI Voice Project",
@@ -64,6 +65,7 @@
             "end-date": "2024/08/06",
             "description": "Personalized announcements + question answering by integrating Gemini with internal docs (RAG) for sales teams; selected top 3/100+ & ranked #1 in final judging by the Global Head of Partnerships with Google Canada.",
             "tags": ["LLM", "RAG", "Product"],
+            "silver": true,
             "link": [
                 {
                     "label": "First part of presentation",
@@ -106,6 +108,7 @@
             "end-date": "2024/07/01",
             "description": "Chrome extension integrating Gemini with Google Calendar to plan weeks & schedule events via natural language; demoed at Vancouver AI Community Meetup.",
             "tags": ["Chrome Ext", "AI", "Productivity"],
+            "gold": true,
             "link": [
                 {
                     "label": "Demo Tweet",
