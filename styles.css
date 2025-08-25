@@ -441,6 +441,29 @@ img {
     list-style: none;
     margin: 0;
     padding: 0;
+    /* Cap popup height to avoid overflowing viewport; enable internal scrolling */
+    max-height: min(55vh, 480px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.links-popup-list::-webkit-scrollbar {
+    width: 10px;
+}
+
+.links-popup-list::-webkit-scrollbar-track {
+    background: var(--panel);
+    border-radius: 8px;
+}
+
+.links-popup-list::-webkit-scrollbar-thumb {
+    background: #243540;
+    border-radius: 8px;
+    border: 2px solid var(--panel);
+}
+
+.links-popup-list::-webkit-scrollbar-thumb:hover {
+    background: #2f4656;
 }
 
 .links-popup-item {
