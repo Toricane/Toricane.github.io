@@ -259,6 +259,28 @@
                     "description": "Chosen to deliver farewell speech (GPA 96.43%).",
                     "tags": ["Academic", "Leadership"],
                     "link": "",
+                    "images": [
+                        {
+                            "label": "I'm giving the Valedictorian speech!",
+                            "path": "assets/tab-panels/valedictorian_speech.jpeg"
+                        },
+                        {
+                            "label": "Class Valedictorian",
+                            "path": "assets/tab-panels/class_valedictorian.jpg"
+                        },
+                        {
+                            "label": "Valedictorian board",
+                            "path": "assets/tab-panels/valedictorian_board.jpg"
+                        },
+                        {
+                            "label": "Valedictorian Certificate",
+                            "path": "assets/tab-panels/valedictorian_certificate.jpg"
+                        },
+                        {
+                            "label": "Certificate from MP",
+                            "path": "assets/tab-panels/mp_valedictorian_certificate.jpg"
+                        }
+                    ],
                     "gold": true
                 },
                 {

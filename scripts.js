@@ -307,11 +307,30 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? `<p class="from-line project-date">${p.date}</p>`
                     : "";
             })();
+            // Render image thumbnails if provided (array of {label,path} or strings)
+            const images = normalizeImages(p.images, p.title);
+            const thumbHtml = images.length
+                ? `<div class="card-images">${images
+                      .map(
+                          (img, i) =>
+                              `<button class="card-thumb" data-src="${escapeHtml(
+                                  img.path
+                              )}" data-label="${escapeHtml(
+                                  img.label || `Image ${i + 1}`
+                              )}" aria-label="Open image ${escapeHtml(
+                                  img.label || `Image ${i + 1}`
+                              )}" style="background-image:url('${escapeHtml(
+                                  img.path
+                              )}')"></button>`
+                      )
+                      .join("")}</div>`
+                : "";
+
             li.innerHTML = `<h3>${p.title}${
                 p.live ? ' <span class="dot live"></span>' : ""
             }</h3>${fromLine}${dateLine}<p>${
                 p.description
-            }</p><div class="tags">${(p.tags || [])
+            }</p>${thumbHtml}<div class="tags">${(p.tags || [])
                 .map((t) => `<span>${t}</span>`)
                 .join("")}</div>`;
             ul.appendChild(li);
@@ -392,6 +411,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 const fromLine = item.from
                     ? `<div class="from-line">${item.from}</div>`
                     : "";
+                // Render images for this timeline item (show small thumbnails)
+                const images = normalizeImages(item.images, item.name);
+                const imagesBlock = images.length
+                    ? `<div class="timeline-images">${images
+                          .map(
+                              (img, i) =>
+                                  `<button class="timeline-thumb" data-src="${escapeHtml(
+                                      img.path
+                                  )}" data-label="${escapeHtml(
+                                      img.label || `Image ${i + 1}`
+                                  )}" aria-label="Open image ${escapeHtml(
+                                      img.label || `Image ${i + 1}`
+                                  )}" style="background-image:url('${escapeHtml(
+                                      img.path
+                                  )}')"></button>`
+                          )
+                          .join("")}</div>`
+                    : "";
                 const tagItems = (item.tags || []).map(
                     (t) =>
                         `<span class="badge tag-${t
@@ -407,7 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     : item.silver
                     ? " silver-highlight"
                     : "";
-                li.innerHTML = `<div class="time">${timeDisplay}</div><div class="entry${highlightClass}"><h4>${item.name}</h4>${fromLine}<p>${item.description}</p>${badgesBlock}</div>`;
+                li.innerHTML = `<div class="time">${timeDisplay}</div><div class="entry${highlightClass}"><h4>${item.name}</h4>${fromLine}<p>${item.description}</p>${imagesBlock}${badgesBlock}</div>`;
                 ol.appendChild(li);
             } else {
                 // Multiple items - render with toggle
@@ -492,6 +529,30 @@ document.addEventListener("DOMContentLoaded", () => {
                                           )}</div>`
                                         : "";
 
+                                    // Inline images for collapsed timeline items
+                                    const images = normalizeImages(
+                                        item.images,
+                                        item.name
+                                    );
+                                    const imagesBlock = images.length
+                                        ? `<div class="timeline-images">${images
+                                              .map(
+                                                  (img, i) =>
+                                                      `<button class="timeline-thumb" data-src="${escapeHtml(
+                                                          img.path
+                                                      )}" data-label="${escapeHtml(
+                                                          img.label ||
+                                                              `Image ${i + 1}`
+                                                      )}" aria-label="Open image ${escapeHtml(
+                                                          img.label ||
+                                                              `Image ${i + 1}`
+                                                      )}" style="background-image:url('${escapeHtml(
+                                                          img.path
+                                                      )}')"></button>`
+                                              )
+                                              .join("")}</div>`
+                                        : "";
+
                                     const itemHighlight = item.gold
                                         ? " gold-highlight"
                                         : item.silver
@@ -509,6 +570,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                         <h5>${item.name}</h5>
                                         ${fromLine}
                                         <p>${item.description}</p>
+                                        ${imagesBlock}
                                         ${badgesBlock}
                                     </div>
                                 `;
@@ -783,6 +845,248 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Setup footnotes
     setupFootnotes();
+
+    // Image viewer: delegate thumbnail clicks to open a basic fullscreen viewer
+    // Viewer state
+    let _viewerList = [];
+    let _viewerIndex = 0;
+    let _viewerKeyHandler = null;
+
+    function openImageViewer(list, startIndex = 0) {
+        // list: array of {path,label}
+        if (!list || !list.length) return;
+        _viewerList = list;
+        _viewerIndex = Math.max(0, Math.min(startIndex || 0, list.length - 1));
+
+        // Reuse existing viewer if present
+        let viewer = document.getElementById("_img_viewer");
+        if (!viewer) {
+            viewer = document.createElement("div");
+            viewer.id = "_img_viewer";
+            viewer.className = "_img_viewer";
+            viewer.innerHTML = `
+                <button class="viewer-nav viewer-prev" aria-label="Previous image">‹</button>
+                <div class="viewer-inner">
+                    <div class="viewer-media">
+                        <div class="viewer-spinner" aria-hidden="true"></div>
+                        <img id="_img_viewer_img" src="" alt="" />
+                    </div>
+                    <div id="_img_viewer_caption" class="viewer-caption"></div>
+                    <div id="_img_viewer_pos" class="viewer-pos" aria-hidden="true"></div>
+                </div>
+                <button class="viewer-nav viewer-next" aria-label="Next image">›</button>
+            `;
+            document.body.appendChild(viewer);
+
+            // Close when clicking outside the inner area
+            viewer.addEventListener("click", (e) => {
+                if (e.target === viewer) closeViewer();
+            });
+
+            // Prev/Next buttons
+            viewer
+                .querySelector(".viewer-prev")
+                .addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    showImageAt(_viewerIndex - 1);
+                });
+            viewer
+                .querySelector(".viewer-next")
+                .addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    showImageAt(_viewerIndex + 1);
+                });
+
+            // Touch / pointer swipe support
+            let pointerDown = false;
+            let startX = 0;
+            let startY = 0;
+            let moved = false;
+            const swipeThreshold = 40; // px
+
+            const onPointerDown = (ev) => {
+                // Only handle touch or pen to avoid interfering with mouse drag
+                if (
+                    ev.pointerType &&
+                    ev.pointerType !== "touch" &&
+                    ev.pointerType !== "pen"
+                )
+                    return;
+                pointerDown = true;
+                startX = ev.clientX;
+                startY = ev.clientY;
+                moved = false;
+                // capture to receive move/up
+                ev.target.setPointerCapture &&
+                    ev.target.setPointerCapture(ev.pointerId);
+            };
+            const onPointerMove = (ev) => {
+                if (!pointerDown) return;
+                const dx = ev.clientX - startX;
+                const dy = ev.clientY - startY;
+                if (Math.abs(dx) > 6) moved = true;
+            };
+            const onPointerUp = (ev) => {
+                if (!pointerDown) return;
+                pointerDown = false;
+                const dx = ev.clientX - startX;
+                const dy = ev.clientY - startY;
+                // horizontal swipe
+                if (
+                    Math.abs(dx) > Math.abs(dy) &&
+                    Math.abs(dx) > swipeThreshold
+                ) {
+                    if (dx < 0) showImageAt(_viewerIndex + 1);
+                    else showImageAt(_viewerIndex - 1);
+                }
+            };
+
+            viewer.addEventListener("pointerdown", onPointerDown);
+            viewer.addEventListener("pointermove", onPointerMove);
+            viewer.addEventListener("pointerup", onPointerUp);
+            viewer.addEventListener("pointercancel", onPointerUp);
+        }
+
+        // show initial
+        showImageAt(_viewerIndex);
+
+        // keyboard handler
+        if (!_viewerKeyHandler) {
+            _viewerKeyHandler = (e) => {
+                if (!document.getElementById("_img_viewer")) return;
+                if (e.key === "Escape") closeViewer();
+                if (e.key === "ArrowLeft") showImageAt(_viewerIndex - 1);
+                if (e.key === "ArrowRight") showImageAt(_viewerIndex + 1);
+            };
+            document.addEventListener("keydown", _viewerKeyHandler);
+        }
+    }
+
+    function closeViewer() {
+        const viewer = document.getElementById("_img_viewer");
+        if (viewer) viewer.remove();
+        _viewerList = [];
+        _viewerIndex = 0;
+        if (_viewerKeyHandler) {
+            document.removeEventListener("keydown", _viewerKeyHandler);
+            _viewerKeyHandler = null;
+        }
+    }
+
+    function showImageAt(idx) {
+        if (!_viewerList || !_viewerList.length) return;
+        // wrap-around
+        if (idx < 0) idx = _viewerList.length - 1;
+        if (idx >= _viewerList.length) idx = 0;
+        _viewerIndex = idx;
+        const imgObj = _viewerList[_viewerIndex];
+        const imgEl = document.getElementById("_img_viewer_img");
+        const cap = document.getElementById("_img_viewer_caption");
+        const pos = document.getElementById("_img_viewer_pos");
+        const spinner = document.querySelector(".viewer-spinner");
+
+        // Update position indicator
+        if (pos)
+            pos.textContent = `${_viewerIndex + 1} / ${_viewerList.length}`;
+
+        if (imgEl) {
+            // show spinner
+            spinner && (spinner.style.display = "block");
+            imgEl.style.opacity = 0;
+            // Preload image then swap when loaded to avoid flicker
+            const temp = new Image();
+            temp.onload = () => {
+                imgEl.src = imgObj.path;
+                imgEl.alt = imgObj.label || "";
+                // fade in
+                requestAnimationFrame(() => {
+                    imgEl.style.transition = "opacity .22s ease";
+                    imgEl.style.opacity = 1;
+                    spinner && (spinner.style.display = "none");
+                });
+            };
+            temp.onerror = () => {
+                // hide spinner on error
+                spinner && (spinner.style.display = "none");
+                imgEl.style.opacity = 1;
+            };
+            temp.src = imgObj.path;
+
+            // Preload neighbors (next and previous)
+            const prevIdx =
+                (_viewerIndex - 1 + _viewerList.length) % _viewerList.length;
+            const nextIdx = (_viewerIndex + 1) % _viewerList.length;
+            [prevIdx, nextIdx].forEach((i) => {
+                const n = new Image();
+                n.src = _viewerList[i].path;
+            });
+        }
+        if (cap) cap.textContent = imgObj.label || "";
+    }
+
+    // Normalize images input: accept array of strings or objects {label,path}
+    function normalizeImages(field, fallbackLabel) {
+        if (!field) return [];
+        const toObj = (x, i) => {
+            if (!x) return null;
+            if (typeof x === "string") {
+                return {
+                    label: `${fallbackLabel || ""} ${i + 1}`.trim(),
+                    path: x,
+                };
+            }
+            if (typeof x === "object") {
+                const path = x.path || x.src || x.url || x.href || null;
+                const label =
+                    x.label || x.name || x.caption || fallbackLabel || "";
+                if (!path) return null;
+                return { label: label, path: path };
+            }
+            return null;
+        };
+        if (Array.isArray(field)) return field.map(toObj).filter(Boolean);
+        const single = toObj(field, 0);
+        return single ? [single] : [];
+    }
+
+    // Delegate clicks for thumbnails (now with label support)
+    document.body.addEventListener("click", (e) => {
+        const btn =
+            e.target.closest &&
+            e.target.closest("button.card-thumb, button.timeline-thumb");
+        if (!btn) return;
+
+        // Collect sibling thumbnails within the same gallery (card-images or timeline-images)
+        const gallery = btn.closest(".card-images, .timeline-images");
+        let list = [];
+        let startIndex = 0;
+        if (gallery) {
+            const thumbs = Array.from(
+                gallery.querySelectorAll(
+                    "button.card-thumb, button.timeline-thumb"
+                )
+            );
+            list = thumbs
+                .map((t) => ({
+                    path: t.getAttribute("data-src"),
+                    label: t.getAttribute("data-label") || "",
+                }))
+                .filter((x) => x.path);
+            startIndex = thumbs.indexOf(btn);
+            if (startIndex < 0) startIndex = 0;
+        } else {
+            // Single button without gallery: open only that image
+            list = [
+                {
+                    path: btn.getAttribute("data-src"),
+                    label: btn.getAttribute("data-label") || "",
+                },
+            ];
+            startIndex = 0;
+        }
+
+        if (list.length) openImageViewer(list, startIndex);
+    });
 
     // Pause intensive operations when page is not visible (mobile performance)
     document.addEventListener("visibilitychange", () => {

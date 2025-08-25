@@ -71,6 +71,30 @@ img {
     padding: clamp(1.5rem, 3vw, 3.5rem);
 }
 
+.card-images {
+    display: flex;
+    gap: 8px;
+    margin: 0.75rem 0;
+}
+
+.card-thumb {
+    width: 72px;
+    height: 56px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: var(--panel);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    padding: 0;
+    cursor: pointer;
+}
+
+.card-thumb:focus {
+    outline: 2px solid rgba(77, 181, 255, 0.6);
+}
+
 .hero-inner {
     width: 100%;
     max-width: 1400px;
@@ -1193,6 +1217,119 @@ img {
     font-size: .78rem;
     line-height: 1.45;
     color: var(--text-dim);
+}
+
+.timeline-images {
+    display: flex;
+    gap: 8px;
+    margin: 0.5rem 0;
+}
+
+.timeline-thumb {
+    width: 56px;
+    height: 40px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: var(--panel);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0;
+    cursor: pointer;
+}
+
+.timeline-thumb:focus {
+    outline: 2px solid rgba(77, 181, 255, 0.6);
+}
+
+/* Fullscreen image viewer caption */
+#_img_viewer_caption {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+}
+
+/* Fullscreen viewer container + nav */
+._img_viewer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(6, 8, 9, 0.95);
+    z-index: 99999;
+}
+
+._img_viewer .viewer-inner {
+    max-width: 95%;
+    text-align: center;
+}
+
+._img_viewer img#_img_viewer_img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 8px;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
+    display: block;
+}
+
+.viewer-nav {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 2.6rem;
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.viewer-nav:focus {
+    outline: 2px solid rgba(77, 181, 255, 0.4);
+}
+
+.viewer-prev {
+    margin-right: 1rem;
+}
+
+.viewer-next {
+    margin-left: 1rem;
+}
+
+/* spinner inside viewer */
+.viewer-media {
+    position: relative;
+    display: inline-block;
+}
+
+.viewer-spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 36px;
+    height: 36px;
+    margin-left: -18px;
+    margin-top: -18px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.08);
+    border-top-color: var(--accent);
+    animation: viewer-spin 1s linear infinite;
+    display: none;
+}
+
+@keyframes viewer-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* position indicator */
+.viewer-pos {
+    color: var(--text-dim);
+    font-size: .9rem;
+    margin-top: .4rem;
 }
 
 .from-line {
