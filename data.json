@@ -8,6 +8,24 @@
             "end-date": "2024/12/19",
             "description": "Portable wearable AI assistant (camera, mic, speaker) giving low‑latency scene descriptions & Q/A; core translated to microcontroller (C++ + Edge Impulse).",
             "tags": ["AI", "Edge", "C++", "Embedded"],
+            "images": [
+                {
+                    "label": "AI Meetup Demo",
+                    "path": "assets/tab-panels/vanaimay.jpg"
+                },
+                {
+                    "label": "Ingenious+ Regional Award CAD$1K",
+                    "path": "assets/tab-panels/ingenious_plus_photo.jpg"
+                },
+                {
+                    "label": "2nd Prototype",
+                    "path": "assets/tab-panels/2nd_prototype.jpg"
+                },
+                {
+                    "label": "2nd Prototype Continued",
+                    "path": "assets/tab-panels/2nd_prototype_continued.jpg"
+                }
+            ],
             "gold": true,
             "link": [
                 {
@@ -65,6 +83,12 @@
             "end-date": "2024/08/06",
             "description": "Personalized announcements + question answering by integrating Gemini with internal docs (RAG) for sales teams; selected top 3/100+ & ranked #1 in final judging by the Global Head of Partnerships with Google Canada.",
             "tags": ["LLM", "RAG", "Product"],
+            "images": [
+                {
+                    "label": "Presentation first slide",
+                    "path": "assets/tab-panels/google_internal_announcements_1.png"
+                }
+            ],
             "silver": true,
             "link": [
                 {
@@ -92,6 +116,12 @@
             "end-date": "2024/10/01",
             "description": "Researched mitochondrial theory of aging; built MVP system to help stabilize blood glucose for accessible lifespan improvement; pitched to 3 VCs.",
             "tags": ["Health", "Research", "Bio"],
+            "images": [
+                {
+                    "label": "Presentation first slide",
+                    "path": "assets/tab-panels/peter_pan_1.png"
+                }
+            ],
             "link": [
                 { "label": "Website", "url": "https://peterpan-ai.com/" },
                 {
@@ -108,6 +138,24 @@
             "end-date": "2024/07/01",
             "description": "Chrome extension integrating Gemini with Google Calendar to plan weeks & schedule events via natural language; demoed at Vancouver AI Community Meetup.",
             "tags": ["Chrome Ext", "AI", "Productivity"],
+            "images": [
+                {
+                    "label": "CalendAI presentation at an AI meetup in Vancouver",
+                    "path": "assets/tab-panels/calendai_demo.jpeg"
+                },
+                {
+                    "label": "Met Rahul Behal, co-founder of Gumloop!",
+                    "path": "assets/tab-panels/rahul_behal.jpg"
+                },
+                {
+                    "label": "Met Max Brodeur-Urbas, co-founder of Gumloop!",
+                    "path": "assets/tab-panels/max_brodeur-urbas.jpg"
+                },
+                {
+                    "label": "buildspace idea",
+                    "path": "assets/tab-panels/buildspace_idea.png"
+                }
+            ],
             "gold": true,
             "link": [
                 {

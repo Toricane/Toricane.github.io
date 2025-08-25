@@ -275,7 +275,18 @@ document.addEventListener("DOMContentLoaded", () => {
             if (links.length) {
                 li.style.cursor = "pointer";
                 // Click opens single link directly, or shows chooser for multiple
+                // If the click originated from an image thumbnail, ignore here so
+                // the image viewer can handle it instead of opening the links popup.
                 li.addEventListener("click", (e) => {
+                    // If a thumbnail button was the origin, do nothing here
+                    if (
+                        e.target &&
+                        e.target.closest &&
+                        e.target.closest(
+                            "button.card-thumb, button.timeline-thumb"
+                        )
+                    )
+                        return;
                     e.stopPropagation();
                     if (links.length === 1) {
                         window.open(links[0].url, "_blank", "noopener");
@@ -398,6 +409,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (itemLinks.length) {
                     li.style.cursor = "pointer";
                     li.addEventListener("click", (e) => {
+                        // Ignore clicks originating from image thumbnails so the
+                        // image viewer can handle them instead of opening the links popup.
+                        if (
+                            e.target &&
+                            e.target.closest &&
+                            e.target.closest(
+                                "button.card-thumb, button.timeline-thumb"
+                            )
+                        )
+                            return;
                         e.stopPropagation();
                         if (itemLinks.length === 1) {
                             window.open(itemLinks[0].url, "_blank", "noopener");
@@ -611,6 +632,16 @@ document.addEventListener("DOMContentLoaded", () => {
                                 el.style.cursor = "pointer";
                                 el.tabIndex = 0;
                                 el.addEventListener("click", (e) => {
+                                    // If click came from a thumbnail button, let the
+                                    // image viewer handle it instead of opening links.
+                                    if (
+                                        e.target &&
+                                        e.target.closest &&
+                                        e.target.closest(
+                                            "button.card-thumb, button.timeline-thumb"
+                                        )
+                                    )
+                                        return;
                                     e.stopPropagation();
                                     if (links.length === 1) {
                                         window.open(
