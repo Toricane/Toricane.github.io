@@ -130,7 +130,16 @@
                     "from": "Scrapyard Vancouver 2025",
                     "description": "Interactive AI game resembling Pokémon with real‑world items; placed 2nd among 100+ participants.",
                     "badges": ["Second Place", "In-Person"],
-                    "link": "",
+                    "link": [
+                        {
+                            "label": "GitHub",
+                            "url": "https://github.com/Toricane/itemon"
+                        },
+                        {
+                            "label": "Hackathon Website",
+                            "url": "https://scrapyard.bcydc.ca/"
+                        }
+                    ],
                     "gold": true
                 }
             ]
@@ -145,12 +154,16 @@
                     "badges": ["In-Person"],
                     "link": [
                         {
-                            "label": "Project Demo",
-                            "url": "https://example.com/genimo/demo"
+                            "label": "Devpost",
+                            "url": "https://devpost.com/software/genimo"
                         },
                         {
-                            "label": "Repo",
-                            "url": "https://github.com/Toricane/genimo"
+                            "label": "GitHub",
+                            "url": "https://github.com/falldownstairs/Genimo"
+                        },
+                        {
+                            "label": "Hackathon Website",
+                            "url": "https://2025.nwhacks.io/"
                         }
                     ]
                 }
@@ -164,7 +177,20 @@
                     "from": "Hack For Youth 2024",
                     "description": "Calendar + AI chatbot for intelligent time management integrating Google Calendar.",
                     "badges": ["Winner", "In-Person"],
-                    "link": "",
+                    "link": [
+                        {
+                            "label": "Devpost",
+                            "url": "https://devpost.com/software/timecraft-wgcb0u"
+                        },
+                        {
+                            "label": "GitHub",
+                            "url": "https://github.com/Toricane/timecraft"
+                        },
+                        {
+                            "label": "Hackathon Website",
+                            "url": "https://hack-for-youth.devpost.com/"
+                        }
+                    ],
                     "gold": true
                 }
             ]
@@ -178,14 +204,45 @@
                     "from": "Hack the North 2024",
                     "description": "AI interview simulation app for CS majors (Gradio, Groq, OpenAI).",
                     "badges": ["In-Person"],
-                    "link": ""
+                    "link": [
+                        {
+                            "label": "Devpost",
+                            "url": "https://devpost.com/software/davinci-solve"
+                        },
+                        {
+                            "label": "GitHub",
+                            "url": "https://github.com/luckyducky037/DaVinci-Solve"
+                        },
+                        {
+                            "label": "Hackathon Website",
+                            "url": "https://2024.hackthenorth.com/"
+                        }
+                    ],
+                    "silver": true
                 },
                 {
                     "name": "yvrHacks – yeetup (Honourable Mention)",
                     "from": "yvrHacks 2024",
                     "description": "AI‑first natural language interface to discover youth events & meetups (Groq).",
                     "badges": ["Honourable Mention", "In-Person"],
-                    "link": "",
+                    "link": [
+                        {
+                            "label": "Devpost",
+                            "url": "https://devpost.com/software/yeetup"
+                        },
+                        {
+                            "label": "Demo Video",
+                            "url": "https://www.loom.com/share/ade389ebef6f4ae2a47d585ab6ec850b?sid=50f8440b-03b6-4edf-996f-d6cc1a8911eb"
+                        },
+                        {
+                            "label": "GitHub",
+                            "url": "https://github.com/Toricane/yeetup"
+                        },
+                        {
+                            "label": "Hackathon Website",
+                            "url": "https://yvrhacks.bcydc.ca/"
+                        }
+                    ],
                     "silver": true
                 }
             ]

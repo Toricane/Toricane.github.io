@@ -967,7 +967,7 @@ img {
 }
 
 .card {
-    background: var(--panel);
+    background: rgba(77, 181, 255, 0.06);
     border: 1px solid var(--panel-edge);
     padding: 1.1rem 1.05rem 1.2rem;
     border-radius: calc(var(--radius) - 6px);
@@ -980,7 +980,7 @@ img {
 }
 
 .card[style*="cursor: pointer"]:hover {
-    background: rgba(77, 181, 255, 0.06);
+    background: rgba(77, 181, 255, 0.1);
     border-color: rgba(77, 181, 255, 0.3);
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(77, 181, 255, 0.15);
