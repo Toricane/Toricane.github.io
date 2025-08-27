@@ -793,29 +793,50 @@ document.addEventListener("DOMContentLoaded", () => {
             if (rafId == null) rafId = requestAnimationFrame(loop);
         }
 
-        if (!bar) return;
+        // Throttle mouse move events for better performance
+        let lastMoveTime = 0;
+        const moveThrottle = 16; // ~60fps
 
-        // Compute overflow and toggle classes on the wrapper so fades can appear
-        function updateButtons() {
-            const canScrollLeft = bar.scrollLeft > 2;
-            const canScrollRight =
-                bar.scrollWidth - bar.clientWidth - bar.scrollLeft > 2;
-            wrap.classList.toggle("can-scroll-left", canScrollLeft);
-            wrap.classList.toggle("can-scroll-right", canScrollRight);
+        function handleMove(e) {
+            const currentTime = Date.now();
+            if (currentTime - lastMoveTime < moveThrottle) return;
+            lastMoveTime = currentTime;
+
+            if (!hovering) return;
+            const rect = wrapperEl.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width; // 0..1
+            const y = (e.clientY - rect.top) / rect.height; // 0..1
+            targetState.ry = lerp(-cfg.max, cfg.max, x);
+            targetState.rx = lerp(cfg.max, -cfg.max, y);
+            targetState.tz = 18;
+            targetState.scale = cfg.scale;
+            ensureLoop();
         }
 
-        // Show/hide fades when user scrolls the bar
-        bar.addEventListener(
-            "scroll",
-            () => {
-                if (window.requestAnimationFrame) {
-                    window.requestAnimationFrame(updateButtons);
-                } else {
-                    setTimeout(updateButtons, 50);
-                }
-            },
-            { passive: true }
-        );
+        function enter() {
+            hovering = true;
+            targetState.scale = cfg.scale;
+            targetState.tz = 12;
+            ensureLoop();
+        }
+
+        function leave() {
+            hovering = false;
+            targetState.rx = 0;
+            targetState.ry = 0;
+            targetState.tz = 0;
+            targetState.scale = 1;
+            ensureLoop();
+        }
+
+        wrapperEl.addEventListener("pointerenter", enter);
+        wrapperEl.addEventListener("pointermove", handleMove);
+        wrapperEl.addEventListener("pointerleave", leave);
+        // Touch: gentle press effect
+        wrapperEl.addEventListener("touchstart", (e) => {
+            enter(e);
+        });
+        wrapperEl.addEventListener("touchend", leave);
     }
 
     // Setup Cover Flow interaction - Infinite carousel version
@@ -894,9 +915,14 @@ document.addEventListener("DOMContentLoaded", () => {
     ).matches;
 
     if (!reduceMotion) {
-        // Setup 3D tilt for highlight image only
+        // Setup 3D tilt for the highlight area. Prefer the figure wrapper (more stable),
+        // fall back to the image if needed.
+        const highlightFigureEl = document.querySelector(
+            ".tab-highlight-figure"
+        );
         const highlightImgEl = document.getElementById("tabHighlightImage");
-        setupTilt(highlightImgEl, { max: 12, scale: 1.02 });
+        const tiltTarget = highlightFigureEl || highlightImgEl;
+        setupTilt(tiltTarget, { max: 12, scale: 1.02 });
     }
 
     // Initialize Cover Flow functionality
@@ -1199,8 +1225,15 @@ document.addEventListener("DOMContentLoaded", () => {
         let isDown = false;
         let startX = 0;
         let scrollLeftStart = 0;
+        let hasMoved = false;
+        const dragThreshold = 6; // px before we treat movement as a drag
 
         bar.addEventListener("pointerdown", (e) => {
+            // If the pointerdown started on a tab button, don't start a drag so
+            // the button's click handler can run. This preserves tab switching.
+            if (e.target && e.target.closest && e.target.closest(".tab"))
+                return;
+
             isDown = true;
             bar.setPointerCapture && bar.setPointerCapture(e.pointerId);
             startX = e.clientX;
@@ -1210,6 +1243,8 @@ document.addEventListener("DOMContentLoaded", () => {
         bar.addEventListener("pointermove", (e) => {
             if (!isDown) return;
             const dx = startX - e.clientX;
+            if (!hasMoved && Math.abs(dx) < dragThreshold) return;
+            hasMoved = true;
             bar.scrollLeft = scrollLeftStart + dx;
         });
         const stopPointer = (e) => {
@@ -1220,7 +1255,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     bar.releasePointerCapture(e.pointerId);
             } catch (_) {}
             bar.classList.remove("dragging");
-            updateButtons();
+            // small delay to ensure click events on tabs still fire if this wasn't a drag
+            setTimeout(() => updateButtons(), 10);
+            hasMoved = false;
         };
         bar.addEventListener("pointerup", stopPointer);
         bar.addEventListener("pointercancel", stopPointer);
