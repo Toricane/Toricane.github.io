@@ -232,6 +232,8 @@ assets/
 
 Filenames are hard‑coded – adjust in `scripts.js` (`highlightMap`) if you prefer different names or formats (PNG / WebP also fine). Missing images are ignored gracefully.
 
+**Recommended size**: For optimal quality across all screen sizes, use 1440px width (2x the maximum display width of 500px) with aspect ratio preserved.
+
 ### Tab Panel Images
 
 Images displayed in the Projects, Hackathons, and Awards sections support an optimized preview system for better performance:
