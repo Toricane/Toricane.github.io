@@ -34,9 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const panels = Array.from(document.querySelectorAll(".tab-panel"));
     const highlightImg = document.getElementById("tabHighlightImage");
     const highlightMap = {
-        projects: "assets/projects_highlight.jpg",
-        hackathons: "assets/hackathons_highlight.jpg",
-        awards: "assets/awards_highlight.jpg",
+        projects: "assets/projects_highlight.webp",
+        hackathons: "assets/hackathons_highlight.webp",
+        awards: "assets/awards_highlight.webp",
     };
     // Preload images (they can 404 silently if not yet added – user can supply assets later)
     Object.values(highlightMap).forEach((src) => {
@@ -331,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
                               )}" aria-label="Open image ${escapeHtml(
                                   img.label || `Image ${i + 1}`
                               )}" style="background-image:url('${escapeHtml(
-                                  img.path
+                                  getPreviewPath(img.path)
                               )}')"></button>`
                       )
                       .join("")}</div>`
@@ -459,7 +459,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                   )}" aria-label="Open image ${escapeHtml(
                                       img.label || `Image ${i + 1}`
                                   )}" style="background-image:url('${escapeHtml(
-                                      img.path
+                                      getPreviewPath(img.path)
                                   )}')"></button>`
                           )
                           .join("")}</div>`
@@ -582,7 +582,9 @@ document.addEventListener("DOMContentLoaded", () => {
                                                           img.label ||
                                                               `Image ${i + 1}`
                                                       )}" style="background-image:url('${escapeHtml(
-                                                          img.path
+                                                          getPreviewPath(
+                                                              img.path
+                                                          )
                                                       )}')"></button>`
                                               )
                                               .join("")}</div>`
@@ -1683,4 +1685,12 @@ function formatProjectDate(sRaw, eRaw) {
     if (s && !e) return `${fmt(s)} – Present`;
     if (!s && e) return `– ${fmt(e)}`;
     return "";
+}
+
+// Helper function to get preview image path
+function getPreviewPath(originalPath) {
+    if (originalPath.includes("tab-panels/")) {
+        return originalPath.replace("tab-panels/", "tab-panels/preview/");
+    }
+    return originalPath;
 }

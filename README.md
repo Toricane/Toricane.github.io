@@ -52,7 +52,11 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 │   ├── northernlights.jpg     # Hero portrait image
 │   ├── projects_highlight.jpg # Projects tab highlight
 │   ├── hackathons_highlight.jpg # Hackathons tab highlight
-│   └── awards_highlight.jpg   # Awards tab highlight
+│   ├── awards_highlight.jpg   # Awards tab highlight
+│   └── tab-panels/            # Full-size images for projects/hackathons/awards
+│       ├── [image files].jpg  # Original high-resolution images
+│       └── preview/           # Optimized preview images (400px max width, WebP)
+│           └── [image files].webp # Smaller versions for fast loading thumbnails
 ├── connect4/               # Connect Four game sub-project
 │   ├── index.html
 │   ├── connect4_script.js
@@ -147,6 +151,7 @@ Navigate to `http://localhost:8080`
 -   **Animation Mode**: Add `?tap=true` to see enhanced connection pill animations
 -   **Content Updates**: Simply edit `data.json` and refresh – no build step required
 -   **Image Assets**: Replace files in `/assets/` to update highlight images
+-   **Image Optimization**: Tab panel images use preview thumbnails (400px max width, WebP) for fast loading, with full-size originals shown in the viewer on click
 
 ### Browser Support
 
@@ -226,6 +231,17 @@ assets/
 ```
 
 Filenames are hard‑coded – adjust in `scripts.js` (`highlightMap`) if you prefer different names or formats (PNG / WebP also fine). Missing images are ignored gracefully.
+
+### Tab Panel Images
+
+Images displayed in the Projects, Hackathons, and Awards sections support an optimized preview system for better performance:
+
+-   **Full-size images**: Store original high-resolution images in `assets/tab-panels/`
+-   **Preview images**: Create smaller WebP versions (400px max width, preserving aspect ratio) in `assets/tab-panels/preview/`
+-   **Automatic switching**: Thumbnails load preview images for fast display; clicking opens the full-size image in a viewer
+-   **Fallback**: If preview doesn't exist, falls back to the original image
+
+This system reduces initial page load time while maintaining image quality in the viewer.
 
 ## Roadmap Ideas
 
