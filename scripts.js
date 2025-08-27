@@ -3,6 +3,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const yearEl = document.getElementById("year");
     if (yearEl) yearEl.textContent = new Date().getFullYear();
 
+    // Theme toggle
+    const themeToggle = document.getElementById("theme-toggle");
+    const themeIcon = themeToggle?.querySelector("i");
+
+    // Get saved theme or default to dark
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    // Update icon based on current theme
+    function updateThemeIcon(theme) {
+        if (themeIcon) {
+            themeIcon.className =
+                theme === "light" ? "fas fa-sun" : "fas fa-moon";
+        }
+    }
+    updateThemeIcon(savedTheme);
+
+    // Toggle theme
+    if (themeToggle) {
+        themeToggle.addEventListener("click", () => {
+            const currentTheme =
+                document.documentElement.getAttribute("data-theme") || "dark";
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+            document.documentElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme);
+            updateThemeIcon(newTheme);
+        });
+    }
+
     // Scroll button
     const scrollBtn = document.getElementById("scrollMore");
     if (scrollBtn) {
