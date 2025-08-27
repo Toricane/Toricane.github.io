@@ -211,28 +211,32 @@
         <!-- MAIN SECTIONS / TABS -->
         <main id="content" class="content">
             <section class="tabs" aria-label="Work sections">
-                <div class="tab-bar" role="tablist">
-                    <button
-                        class="tab active"
-                        role="tab"
-                        aria-selected="true"
-                        data-tab="projects"
-                        data-image-alt="Highlighted project image"
-                    >Projects</button>
-                    <button
-                        class="tab"
-                        role="tab"
-                        aria-selected="false"
-                        data-tab="hackathons"
-                        data-image-alt="Highlighted hackathon image"
-                    >Hackathons</button>
-                    <button
-                        class="tab"
-                        role="tab"
-                        aria-selected="false"
-                        data-tab="awards"
-                        data-image-alt="Highlighted award image"
-                    >Awards</button>
+                <div class="tab-scroll-wrap">
+                    <span class="tab-scroll-fade left" aria-hidden="true"></span>
+                    <div class="tab-bar" role="tablist">
+                        <button
+                            class="tab active"
+                            role="tab"
+                            aria-selected="true"
+                            data-tab="projects"
+                            data-image-alt="Highlighted project image"
+                        >Projects</button>
+                        <button
+                            class="tab"
+                            role="tab"
+                            aria-selected="false"
+                            data-tab="hackathons"
+                            data-image-alt="Highlighted hackathon image"
+                        >Hackathons</button>
+                        <button
+                            class="tab"
+                            role="tab"
+                            aria-selected="false"
+                            data-tab="awards"
+                            data-image-alt="Highlighted award image"
+                        >Awards</button>
+                    </div>
+                    <span class="tab-scroll-fade right" aria-hidden="true"></span>
                 </div>
                 <div class="tab-layout">
                     <div class="tab-panels" id="tabPanels">

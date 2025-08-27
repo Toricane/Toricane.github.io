@@ -793,47 +793,29 @@ document.addEventListener("DOMContentLoaded", () => {
             if (rafId == null) rafId = requestAnimationFrame(loop);
         }
 
-        // Throttle mouse move events for better performance
-        let lastMoveTime = 0;
-        const moveThrottle = 16; // ~60fps
+        if (!bar) return;
 
-        function handleMove(e) {
-            const currentTime = Date.now();
-            if (currentTime - lastMoveTime < moveThrottle) return;
-            lastMoveTime = currentTime;
+        // Compute overflow and toggle classes on the wrapper so fades can appear
+        function updateButtons() {
+            const canScrollLeft = bar.scrollLeft > 2;
+            const canScrollRight =
+                bar.scrollWidth - bar.clientWidth - bar.scrollLeft > 2;
+            wrap.classList.toggle("can-scroll-left", canScrollLeft);
+            wrap.classList.toggle("can-scroll-right", canScrollRight);
+        }
 
-            if (!hovering) return;
-            const rect = wrapperEl.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width; // 0..1
-            const y = (e.clientY - rect.top) / rect.height; // 0..1
-            targetState.ry = lerp(-cfg.max, cfg.max, x);
-            targetState.rx = lerp(cfg.max, -cfg.max, y);
-            targetState.tz = 18;
-            targetState.scale = cfg.scale;
-            ensureLoop();
-        }
-        function enter() {
-            hovering = true;
-            targetState.scale = cfg.scale;
-            targetState.tz = 12;
-            ensureLoop();
-        }
-        function leave() {
-            hovering = false;
-            targetState.rx = 0;
-            targetState.ry = 0;
-            targetState.tz = 0;
-            targetState.scale = 1;
-            ensureLoop();
-        }
-        wrapperEl.addEventListener("pointerenter", enter);
-        wrapperEl.addEventListener("pointermove", handleMove);
-        wrapperEl.addEventListener("pointerleave", leave);
-        // Touch: gentle press effect
-        wrapperEl.addEventListener("touchstart", (e) => {
-            enter(e);
-        });
-        wrapperEl.addEventListener("touchend", leave);
+        // Show/hide fades when user scrolls the bar
+        bar.addEventListener(
+            "scroll",
+            () => {
+                if (window.requestAnimationFrame) {
+                    window.requestAnimationFrame(updateButtons);
+                } else {
+                    setTimeout(updateButtons, 50);
+                }
+            },
+            { passive: true }
+        );
     }
 
     // Setup Cover Flow interaction - Infinite carousel version
@@ -1183,103 +1165,178 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     });
-});
 
-// Helper functions hoisted outside to ensure availability
-function mkWidget(title) {
-    const el = document.createElement("article");
-    el.className = "widget";
-    el.innerHTML = `<h4>${title}</h4><p class="loading">Loading…</p>`;
-    return {
-        el,
-        set(html) {
-            const p = el.querySelector(".loading");
-            if (p) p.outerHTML = html;
-        },
-    };
-}
-function fetchSubstack(feedUrl, widget) {
-    // Use localStorage cache to avoid frequent proxy calls (6h TTL)
-    try {
-        const cached = JSON.parse(
-            localStorage.getItem("newsletterCache") || "null"
-        );
-        if (cached && Date.now() - cached.time < 1000 * 60 * 60 * 6) {
-            widget.set(cached.html);
-            // Set up interactivity for cached content
-            setTimeout(() => {
-                const widgetEl = document.querySelector(
-                    ".widget-link[data-url]"
-                );
-                if (widgetEl) {
-                    setupWidgetInteraction(widgetEl);
-                }
-            }, 10);
-            return;
+    // Initialize horizontal scroll controls for tab bar (Option A)
+    function initScrollableTabs() {
+        const wrap = document.querySelector(".tab-scroll-wrap");
+        if (!wrap) return;
+        const bar = wrap.querySelector(".tab-bar");
+        if (!bar) return;
+
+        // Compute overflow and toggle classes on the wrapper so CSS fades can appear
+        function updateButtons() {
+            const canScrollLeft = bar.scrollLeft > 2;
+            const canScrollRight =
+                bar.scrollWidth - bar.clientWidth - bar.scrollLeft > 2;
+            wrap.classList.toggle("can-scroll-left", canScrollLeft);
+            wrap.classList.toggle("can-scroll-right", canScrollRight);
         }
-    } catch (_) {}
 
-    const proxy =
-        "https://api.rss2json.com/v1/api.json?rss_url=" +
-        encodeURIComponent(feedUrl);
-    fetch(proxy)
-        .then((r) => r.json())
-        .then((j) => {
-            const first = j.items && j.items[0];
-            if (!first) throw 0;
-
-            // Extract image from content if available
-            let imageHtml = "";
-            let bodyText = "";
-
-            if (first.content) {
-                const imgMatch = first.content.match(
-                    /<img[^>]+src="([^"]+)"[^>]*>/i
-                );
-                if (imgMatch && imgMatch[1]) {
-                    imageHtml = `<div class="widget-image"><img src="${imgMatch[1]}" alt="Post image" loading="lazy"></div>`;
-                }
-
-                // Extract text content for a longer excerpt
-                bodyText = first.content
-                    .replace(/<img[^>]*>/gi, "") // Remove images
-                    .replace(/<[^>]+>/g, " ") // Remove HTML tags
-                    .replace(/\s+/g, " ") // Normalize whitespace
-                    .trim();
-            }
-
-            // Use content if available and longer, otherwise use description
-            const sourceText =
-                bodyText &&
-                bodyText.length >
-                    first.description.replace(/<[^>]+>/g, " ").trim().length
-                    ? bodyText
-                    : first.description.replace(/<[^>]+>/g, " ").trim();
-
-            // Show content up to first punctuation after 250 chars, max 400 chars
-            let fullContent = sourceText;
-            if (sourceText.length > 250) {
-                // Find first punctuation mark after 250 characters
-                const afterMin = sourceText.slice(250, 400);
-                const punctMatch = afterMin.match(/[.!?;:]/);
-
-                if (punctMatch) {
-                    // Cut at first punctuation + 1 character after 250
-                    const cutPoint = 250 + punctMatch.index + 1;
-                    fullContent = sourceText.slice(0, cutPoint).trim();
-                    // Add ellipsis if there's more content after the cut
-                    if (sourceText.length > cutPoint) {
-                        fullContent += " ...";
-                    }
+        // Show/hide fades when user scrolls the bar
+        bar.addEventListener(
+            "scroll",
+            () => {
+                if (window.requestAnimationFrame) {
+                    window.requestAnimationFrame(updateButtons);
                 } else {
-                    // No punctuation found, cut at 400 chars max
-                    fullContent = sourceText.slice(0, 400).trim();
-                    if (sourceText.length > 400) {
-                        fullContent += " ...";
+                    setTimeout(updateButtons, 50);
+                }
+            },
+            { passive: true }
+        );
+
+        // Pointer drag to scroll for desktop
+        let isDown = false;
+        let startX = 0;
+        let scrollLeftStart = 0;
+
+        bar.addEventListener("pointerdown", (e) => {
+            isDown = true;
+            bar.setPointerCapture && bar.setPointerCapture(e.pointerId);
+            startX = e.clientX;
+            scrollLeftStart = bar.scrollLeft;
+            bar.classList.add("dragging");
+        });
+        bar.addEventListener("pointermove", (e) => {
+            if (!isDown) return;
+            const dx = startX - e.clientX;
+            bar.scrollLeft = scrollLeftStart + dx;
+        });
+        const stopPointer = (e) => {
+            if (!isDown) return;
+            isDown = false;
+            try {
+                bar.releasePointerCapture &&
+                    bar.releasePointerCapture(e.pointerId);
+            } catch (_) {}
+            bar.classList.remove("dragging");
+            updateButtons();
+        };
+        bar.addEventListener("pointerup", stopPointer);
+        bar.addEventListener("pointercancel", stopPointer);
+        bar.addEventListener("pointerleave", stopPointer);
+
+        // Recompute on resize and when fonts/images load
+        window.addEventListener("resize", updateButtons);
+        window.addEventListener("load", updateButtons);
+
+        // Also observe the bar for child changes (if tabs are added dynamically)
+        if ("MutationObserver" in window) {
+            const mo = new MutationObserver(() => updateButtons());
+            mo.observe(bar, { childList: true, subtree: false });
+        }
+
+        // Initial state
+        updateButtons();
+    }
+
+    initScrollableTabs();
+
+    // Helper functions hoisted outside to ensure availability
+    function mkWidget(title) {
+        const el = document.createElement("article");
+        el.className = "widget";
+        el.innerHTML = `<h4>${title}</h4><p class="loading">Loading…</p>`;
+        return {
+            el,
+            set(html) {
+                const p = el.querySelector(".loading");
+                if (p) p.outerHTML = html;
+            },
+        };
+    }
+    function fetchSubstack(feedUrl, widget) {
+        // Use localStorage cache to avoid frequent proxy calls (6h TTL)
+        try {
+            const cached = JSON.parse(
+                localStorage.getItem("newsletterCache") || "null"
+            );
+            if (cached && Date.now() - cached.time < 1000 * 60 * 60 * 6) {
+                widget.set(cached.html);
+                // Set up interactivity for cached content
+                setTimeout(() => {
+                    const widgetEl = document.querySelector(
+                        ".widget-link[data-url]"
+                    );
+                    if (widgetEl) {
+                        setupWidgetInteraction(widgetEl);
+                    }
+                }, 10);
+                return;
+            }
+        } catch (_) {}
+
+        const proxy =
+            "https://api.rss2json.com/v1/api.json?rss_url=" +
+            encodeURIComponent(feedUrl);
+        fetch(proxy)
+            .then((r) => r.json())
+            .then((j) => {
+                const first = j.items && j.items[0];
+                if (!first) throw 0;
+
+                // Extract image from content if available
+                let imageHtml = "";
+                let bodyText = "";
+
+                if (first.content) {
+                    const imgMatch = first.content.match(
+                        /<img[^>]+src="([^"]+)"[^>]*>/i
+                    );
+                    if (imgMatch && imgMatch[1]) {
+                        imageHtml = `<div class="widget-image"><img src="${imgMatch[1]}" alt="Post image" loading="lazy"></div>`;
+                    }
+
+                    // Extract text content for a longer excerpt
+                    bodyText = first.content
+                        .replace(/<img[^>]*>/gi, "") // Remove images
+                        .replace(/<[^>]+>/g, " ") // Remove HTML tags
+                        .replace(/\s+/g, " ") // Normalize whitespace
+                        .trim();
+                }
+
+                // Use content if available and longer, otherwise use description
+                const sourceText =
+                    bodyText &&
+                    bodyText.length >
+                        first.description.replace(/<[^>]+>/g, " ").trim().length
+                        ? bodyText
+                        : first.description.replace(/<[^>]+>/g, " ").trim();
+
+                // Show content up to first punctuation after 250 chars, max 400 chars
+                let fullContent = sourceText;
+                if (sourceText.length > 250) {
+                    // Find first punctuation mark after 250 characters
+                    const afterMin = sourceText.slice(250, 400);
+                    const punctMatch = afterMin.match(/[.!?;:]/);
+
+                    if (punctMatch) {
+                        // Cut at first punctuation + 1 character after 250
+                        const cutPoint = 250 + punctMatch.index + 1;
+                        fullContent = sourceText.slice(0, cutPoint).trim();
+                        // Add ellipsis if there's more content after the cut
+                        if (sourceText.length > cutPoint) {
+                            fullContent += " ...";
+                        }
+                    } else {
+                        // No punctuation found, cut at 400 chars max
+                        fullContent = sourceText.slice(0, 400).trim();
+                        if (sourceText.length > 400) {
+                            fullContent += " ...";
+                        }
                     }
                 }
-            }
-            const html = `
+                const html = `
                 <div class="widget-link" data-url="${first.link}">
                     <div class="widget-layout">
                         <div class="widget-content">
@@ -1295,432 +1352,439 @@ function fetchSubstack(feedUrl, widget) {
                         ${imageHtml}
                     </div>
                 </div>`;
-            widget.set(html);
+                widget.set(html);
 
-            // Add interactive behavior after widget is rendered
-            setTimeout(() => {
-                const widgetEl = document.querySelector(
-                    ".widget-link[data-url]"
-                );
-                if (widgetEl) {
-                    setupWidgetInteraction(widgetEl);
-                }
-            }, 10);
+                // Add interactive behavior after widget is rendered
+                setTimeout(() => {
+                    const widgetEl = document.querySelector(
+                        ".widget-link[data-url]"
+                    );
+                    if (widgetEl) {
+                        setupWidgetInteraction(widgetEl);
+                    }
+                }, 10);
 
-            try {
-                localStorage.setItem(
-                    "newsletterCache",
-                    JSON.stringify({ time: Date.now(), html })
-                );
-            } catch (_) {}
-        })
-        .catch(() => widget.set("<p>Could not load newsletter.</p>"));
-}
-function escapeHtml(s) {
-    return s.replace(
-        /[&<>"']/g,
-        (c) =>
-            ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#39;",
-            }[c])
-    );
-}
-
-function setupWidgetInteraction(widgetEl) {
-    const url = widgetEl.getAttribute("data-url");
-    const widget = widgetEl.closest(".widget");
-
-    let hasRingActive = false;
-    let tapTimeout = null;
-
-    // Check if device is mobile
-    const isMobile =
-        window.matchMedia("(max-width: 768px)").matches ||
-        "ontouchstart" in window;
-
-    function showBlueRing() {
-        if (hasRingActive) return;
-        hasRingActive = true;
-        widget.classList.add("widget-ring-active");
+                try {
+                    localStorage.setItem(
+                        "newsletterCache",
+                        JSON.stringify({ time: Date.now(), html })
+                    );
+                } catch (_) {}
+            })
+            .catch(() => widget.set("<p>Could not load newsletter.</p>"));
+    }
+    function escapeHtml(s) {
+        return s.replace(
+            /[&<>"']/g,
+            (c) =>
+                ({
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;",
+                }[c])
+        );
     }
 
-    function hideBlueRing() {
-        if (!hasRingActive) return;
-        hasRingActive = false;
-        widget.classList.remove("widget-ring-active");
-    }
+    function setupWidgetInteraction(widgetEl) {
+        const url = widgetEl.getAttribute("data-url");
+        const widget = widgetEl.closest(".widget");
 
-    function openLink() {
-        window.open(url, "_blank", "noopener");
-    }
+        let hasRingActive = false;
+        let tapTimeout = null;
 
-    if (isMobile) {
-        // Mobile behavior: tap opens link directly
-        widgetEl.addEventListener("click", (e) => {
-            e.preventDefault();
-            openLink();
-        });
-    } else {
-        // Desktop behavior: hover shows ring, click opens link
-        widgetEl.addEventListener("mouseenter", () => {
-            showBlueRing();
-        });
+        // Check if device is mobile
+        const isMobile =
+            window.matchMedia("(max-width: 768px)").matches ||
+            "ontouchstart" in window;
 
-        widgetEl.addEventListener("mouseleave", () => {
-            hideBlueRing();
-        });
-
-        widgetEl.addEventListener("click", (e) => {
-            e.preventDefault();
-            openLink();
-        });
-    }
-}
-
-function setupFootnotes() {
-    const footnotes = document.querySelectorAll(".footnote");
-
-    const closeAllFootnotes = (exceptThisOne = null) => {
-        footnotes.forEach((f) => {
-            if (f !== exceptThisOne) {
-                f.classList.remove("active", "flipped");
-            }
-        });
-    };
-
-    footnotes.forEach((footnote) => {
-        const sup = footnote.querySelector("sup");
-        if (!sup) return;
-
-        sup.addEventListener("click", (e) => {
-            e.stopPropagation();
-
-            const wasActive = footnote.classList.contains("active");
-
-            closeAllFootnotes(footnote);
-
-            footnote.classList.toggle("active", !wasActive);
-
-            if (!wasActive) {
-                const content = footnote.querySelector(".footnote-content");
-                if (content) {
-                    // Use a timeout to allow the element to render before getting its position
-                    setTimeout(() => {
-                        const rect = content.getBoundingClientRect();
-
-                        // Vertical check
-                        if (rect.top < 0) {
-                            footnote.classList.add("flipped");
-                        }
-
-                        // Horizontal check
-                        const viewportWidth = window.innerWidth;
-                        if (rect.right > viewportWidth) {
-                            const overflow = rect.right - viewportWidth;
-                            content.style.transform = `translateX(calc(-50% - ${
-                                overflow + 10
-                            }px))`;
-                        } else if (rect.left < 0) {
-                            const overflow = -rect.left;
-                            content.style.transform = `translateX(calc(-50% + ${
-                                overflow + 10
-                            }px))`;
-                        }
-                    }, 0);
-                }
-            } else {
-                // Reset transform when closing
-                const content = footnote.querySelector(".footnote-content");
-                if (content) {
-                    content.style.transform = "";
-                }
-            }
-        });
-    });
-
-    document.addEventListener("click", () => closeAllFootnotes());
-    window.addEventListener("scroll", () => closeAllFootnotes(), {
-        passive: true,
-    });
-}
-
-// Links popup chooser: creates a floating menu near click target with multiple links
-function openLinksPopup(event, links, title) {
-    // Remove existing popup
-    const existing = document.querySelector(".links-popup");
-    if (existing) existing.remove();
-
-    const popup = document.createElement("div");
-    popup.className = "links-popup";
-    popup.setAttribute("role", "menu");
-    popup.setAttribute("aria-label", title || "Open link");
-
-    const list = document.createElement("ul");
-    list.className = "links-popup-list";
-
-    // links can be strings or objects { label, url }
-    links.forEach((l, i) => {
-        const href = typeof l === "string" ? l : l.url;
-        const label =
-            typeof l === "string"
-                ? l.replace(/^https?:\/\//, "")
-                : l.label || l.url.replace(/^https?:\/\//, "");
-        const dateVal = typeof l === "object" && l.date ? l.date : null;
-        const li = document.createElement("li");
-        li.className = "links-popup-item";
-        const a = document.createElement("a");
-        a.href = href;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.setAttribute("role", "menuitem");
-
-        const labelSpan = document.createElement("span");
-        labelSpan.className = "link-label";
-        labelSpan.textContent = label;
-
-        const urlSpan = document.createElement("small");
-        urlSpan.className = "link-url";
-        try {
-            const u = new URL(href);
-            urlSpan.textContent =
-                u.hostname +
-                (u.pathname && u.pathname !== "/" ? u.pathname : "");
-        } catch (_) {
-            urlSpan.textContent = href.replace(/^https?:\/\//, "");
+        function showBlueRing() {
+            if (hasRingActive) return;
+            hasRingActive = true;
+            widget.classList.add("widget-ring-active");
         }
 
-        a.appendChild(labelSpan);
-        if (dateVal) {
-            const dateSpan = document.createElement("div");
-            dateSpan.className = "link-date";
-            dateSpan.textContent = formatLinkDate(dateVal);
-            a.appendChild(dateSpan);
+        function hideBlueRing() {
+            if (!hasRingActive) return;
+            hasRingActive = false;
+            widget.classList.remove("widget-ring-active");
         }
-        a.appendChild(urlSpan);
 
-        li.appendChild(a);
-        list.appendChild(li);
-    });
-
-    popup.appendChild(list);
-    document.body.appendChild(popup);
-
-    // Positioning near the event (click or keyboard)
-    const rect = (event.target &&
-        event.target.getBoundingClientRect &&
-        event.target.getBoundingClientRect()) || {
-        left: event.clientX,
-        top: event.clientY,
-        width: 0,
-        height: 0,
-    };
-    const left = rect.left + rect.width / 2;
-    const top = rect.top + rect.height + 8;
-
-    // Basic clamp to viewport
-    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-    const popupRect = popup.getBoundingClientRect();
-    const x = clamp(
-        left - popupRect.width / 2,
-        8,
-        window.innerWidth - popupRect.width - 8
-    );
-    const y = clamp(top, 8, window.innerHeight - popupRect.height - 8);
-
-    popup.style.left = x + "px";
-    popup.style.top = y + "px";
-
-    // Focus first link for keyboard accessibility
-    const firstLink = popup.querySelector("a");
-    if (firstLink) firstLink.focus();
-
-    // Close handlers
-    const close = () => popup.remove();
-    setTimeout(() => {
-        document.addEventListener("click", function onDocClick(e) {
-            if (!popup.contains(e.target)) {
-                document.removeEventListener("click", onDocClick);
-                close();
-            }
-        });
-    }, 0);
-
-    // Escape key closes
-    const onKey = (e) => {
-        if (e.key === "Escape") {
-            close();
-            document.removeEventListener("keydown", onKey);
+        function openLink() {
+            window.open(url, "_blank", "noopener");
         }
-    };
-    document.addEventListener("keydown", onKey);
-}
 
-// Normalize link inputs into array of {label, url}
-function normalizeLinks(field) {
-    if (!field) return [];
-    const toObj = (x) => {
-        if (!x) return null;
-        if (typeof x === "string") {
-            return { label: x.replace(/^https?:\/\//, ""), url: x };
-        }
-        if (typeof x === "object") {
-            // Accept {label, url, date} or {href, label, date}
-            if (x.url || x.href) {
-                return {
-                    label: x.label || x.name || x.url || x.href,
-                    url: x.url || x.href,
-                    date: x.date || x.when || null,
-                };
-            }
-            // Fallback: try to stringify
-            return null;
-        }
-        return null;
-    };
-
-    if (Array.isArray(field)) {
-        return field.map(toObj).filter(Boolean);
-    }
-    const single = toObj(field);
-    return single ? [single] : [];
-}
-
-// Format a link date string "yyyy/mm/dd" into "Mon dd, yyyy (x months ago)"
-function formatLinkDate(s) {
-    if (!s) return "";
-    // Accept yyyy/mm/dd or yyyy-mm-dd
-    const parts = s.split(/[-\/]/).map((p) => parseInt(p, 10));
-    if (!parts || parts.length < 3 || parts.some(isNaN)) return s;
-    const [y, m, d] = parts;
-    const date = new Date(y, m - 1, d);
-    if (isNaN(date.getTime())) return s;
-
-    const monthNames = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-    ];
-    const formatted = `${
-        monthNames[date.getMonth()]
-    } ${date.getDate()}, ${date.getFullYear()}`;
-
-    // Relative time
-    const now = new Date();
-    const diffMs = now - date;
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays < 1) return `${formatted} (today)`;
-    if (diffDays < 30)
-        return `${formatted} (${diffDays} day${diffDays === 1 ? "" : "s"} ago)`;
-    const diffMonths = Math.floor(diffDays / 30);
-    if (diffMonths < 12)
-        return `${formatted} (${diffMonths} month${
-            diffMonths === 1 ? "" : "s"
-        } ago)`;
-    const diffYears = Math.floor(diffMonths / 12);
-    return `${formatted} (${diffYears} year${diffYears === 1 ? "" : "s"} ago)`;
-}
-
-// Helpers for project start/end date handling
-function parseYMD(s) {
-    if (!s) return null;
-    // Accept yyyy/mm/dd or yyyy-mm-dd or yyyy/mm or yyyy-mm or yyyy
-    const parts = s.split(/[-\/]/).map((p) => parseInt(p, 10));
-    if (!parts || parts.some((x) => Number.isNaN(x))) return null;
-    const [y, m, d] = parts;
-    if (parts.length === 1) return new Date(y, 0, 1);
-    if (parts.length === 2) return new Date(y, (m || 1) - 1, 1);
-    return new Date(y, (m || 1) - 1, d || 1);
-}
-
-function projectEndTimestamp(p) {
-    // Look for end-date (preferred), fall back to parsing p.date for range like "Jun 2024 – Dec 2024"
-    const eRaw = p["end-date"] || p["end_date"] || p.endDate || null;
-    if (eRaw) {
-        const parsed = parseYMD(eRaw);
-        if (parsed) return parsed.getTime();
-        if (/present|ongoing/i.test(String(eRaw))) return Infinity;
-    }
-    // Try to parse a simple p.date string like `Jan 2024 – Dec 2024` or `Dec 2023 – Aug 2024`
-    if (p.date && typeof p.date === "string") {
-        const parts = p.date.split("–").map((s) => s.trim());
-        if (parts.length === 2) {
-            const end = parts[1];
-            const parsed = parseYMD(
-                end.replace(/\s+/g, " ").replace(/ /g, "/")
-            );
-            if (parsed) return parsed.getTime();
-            if (/present|ongoing/i.test(end)) return Infinity;
-        }
-    }
-    // If no explicit end date is found, treat the project as ongoing
-    // (so it sorts first). This covers cases where end-date was omitted
-    // but the project should still appear at the top of the list.
-    return Infinity;
-}
-
-function formatProjectDate(sRaw, eRaw) {
-    const monthNames = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-    ];
-    const fmt = (d) => `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
-    const s = sRaw ? parseYMD(sRaw) : null;
-    const e = eRaw
-        ? /(present|ongoing)/i.test(String(eRaw))
-            ? null
-            : parseYMD(eRaw)
-        : null;
-    if (s && e) {
-        // compute relative time from end date
-        const now = new Date();
-        const months =
-            (now.getFullYear() - e.getFullYear()) * 12 +
-            (now.getMonth() - e.getMonth());
-        let rel = null;
-        if (months < 1) {
-            const days = Math.floor((now - e) / (1000 * 60 * 60 * 24));
-            rel =
-                days <= 1 ? "today" : `${days} day${days === 1 ? "" : "s"} ago`;
-        } else if (months < 12) {
-            rel = `${months} month${months === 1 ? "" : "s"} ago`;
+        if (isMobile) {
+            // Mobile behavior: tap opens link directly
+            widgetEl.addEventListener("click", (e) => {
+                e.preventDefault();
+                openLink();
+            });
         } else {
-            const years = Math.floor(months / 12);
-            rel = `${years} year${years === 1 ? "" : "s"} ago`;
-        }
-        return `${fmt(s)} – ${fmt(e)} (${rel})`;
-    }
-    if (s && !e) return `${fmt(s)} – Present`;
-    if (!s && e) return `– ${fmt(e)}`;
-    return "";
-}
+            // Desktop behavior: hover shows ring, click opens link
+            widgetEl.addEventListener("mouseenter", () => {
+                showBlueRing();
+            });
 
-// Helper function to get preview image path
-function getPreviewPath(originalPath) {
-    if (originalPath.includes("tab-panels/")) {
-        return originalPath.replace("tab-panels/", "tab-panels/preview/");
+            widgetEl.addEventListener("mouseleave", () => {
+                hideBlueRing();
+            });
+
+            widgetEl.addEventListener("click", (e) => {
+                e.preventDefault();
+                openLink();
+            });
+        }
     }
-    return originalPath;
-}
+
+    function setupFootnotes() {
+        const footnotes = document.querySelectorAll(".footnote");
+
+        const closeAllFootnotes = (exceptThisOne = null) => {
+            footnotes.forEach((f) => {
+                if (f !== exceptThisOne) {
+                    f.classList.remove("active", "flipped");
+                }
+            });
+        };
+
+        footnotes.forEach((footnote) => {
+            const sup = footnote.querySelector("sup");
+            if (!sup) return;
+
+            sup.addEventListener("click", (e) => {
+                e.stopPropagation();
+
+                const wasActive = footnote.classList.contains("active");
+
+                closeAllFootnotes(footnote);
+
+                footnote.classList.toggle("active", !wasActive);
+
+                if (!wasActive) {
+                    const content = footnote.querySelector(".footnote-content");
+                    if (content) {
+                        // Use a timeout to allow the element to render before getting its position
+                        setTimeout(() => {
+                            const rect = content.getBoundingClientRect();
+
+                            // Vertical check
+                            if (rect.top < 0) {
+                                footnote.classList.add("flipped");
+                            }
+
+                            // Horizontal check
+                            const viewportWidth = window.innerWidth;
+                            if (rect.right > viewportWidth) {
+                                const overflow = rect.right - viewportWidth;
+                                content.style.transform = `translateX(calc(-50% - ${
+                                    overflow + 10
+                                }px))`;
+                            } else if (rect.left < 0) {
+                                const overflow = -rect.left;
+                                content.style.transform = `translateX(calc(-50% + ${
+                                    overflow + 10
+                                }px))`;
+                            }
+                        }, 0);
+                    }
+                } else {
+                    // Reset transform when closing
+                    const content = footnote.querySelector(".footnote-content");
+                    if (content) {
+                        content.style.transform = "";
+                    }
+                }
+            });
+        });
+
+        document.addEventListener("click", () => closeAllFootnotes());
+        window.addEventListener("scroll", () => closeAllFootnotes(), {
+            passive: true,
+        });
+    }
+
+    // Links popup chooser: creates a floating menu near click target with multiple links
+    function openLinksPopup(event, links, title) {
+        // Remove existing popup
+        const existing = document.querySelector(".links-popup");
+        if (existing) existing.remove();
+
+        const popup = document.createElement("div");
+        popup.className = "links-popup";
+        popup.setAttribute("role", "menu");
+        popup.setAttribute("aria-label", title || "Open link");
+
+        const list = document.createElement("ul");
+        list.className = "links-popup-list";
+
+        // links can be strings or objects { label, url }
+        links.forEach((l, i) => {
+            const href = typeof l === "string" ? l : l.url;
+            const label =
+                typeof l === "string"
+                    ? l.replace(/^https?:\/\//, "")
+                    : l.label || l.url.replace(/^https?:\/\//, "");
+            const dateVal = typeof l === "object" && l.date ? l.date : null;
+            const li = document.createElement("li");
+            li.className = "links-popup-item";
+            const a = document.createElement("a");
+            a.href = href;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.setAttribute("role", "menuitem");
+
+            const labelSpan = document.createElement("span");
+            labelSpan.className = "link-label";
+            labelSpan.textContent = label;
+
+            const urlSpan = document.createElement("small");
+            urlSpan.className = "link-url";
+            try {
+                const u = new URL(href);
+                urlSpan.textContent =
+                    u.hostname +
+                    (u.pathname && u.pathname !== "/" ? u.pathname : "");
+            } catch (_) {
+                urlSpan.textContent = href.replace(/^https?:\/\//, "");
+            }
+
+            a.appendChild(labelSpan);
+            if (dateVal) {
+                const dateSpan = document.createElement("div");
+                dateSpan.className = "link-date";
+                dateSpan.textContent = formatLinkDate(dateVal);
+                a.appendChild(dateSpan);
+            }
+            a.appendChild(urlSpan);
+
+            li.appendChild(a);
+            list.appendChild(li);
+        });
+
+        popup.appendChild(list);
+        document.body.appendChild(popup);
+
+        // Positioning near the event (click or keyboard)
+        const rect = (event.target &&
+            event.target.getBoundingClientRect &&
+            event.target.getBoundingClientRect()) || {
+            left: event.clientX,
+            top: event.clientY,
+            width: 0,
+            height: 0,
+        };
+        const left = rect.left + rect.width / 2;
+        const top = rect.top + rect.height + 8;
+
+        // Basic clamp to viewport
+        const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+        const popupRect = popup.getBoundingClientRect();
+        const x = clamp(
+            left - popupRect.width / 2,
+            8,
+            window.innerWidth - popupRect.width - 8
+        );
+        const y = clamp(top, 8, window.innerHeight - popupRect.height - 8);
+
+        popup.style.left = x + "px";
+        popup.style.top = y + "px";
+
+        // Focus first link for keyboard accessibility
+        const firstLink = popup.querySelector("a");
+        if (firstLink) firstLink.focus();
+
+        // Close handlers
+        const close = () => popup.remove();
+        setTimeout(() => {
+            document.addEventListener("click", function onDocClick(e) {
+                if (!popup.contains(e.target)) {
+                    document.removeEventListener("click", onDocClick);
+                    close();
+                }
+            });
+        }, 0);
+
+        // Escape key closes
+        const onKey = (e) => {
+            if (e.key === "Escape") {
+                close();
+                document.removeEventListener("keydown", onKey);
+            }
+        };
+        document.addEventListener("keydown", onKey);
+    }
+
+    // Normalize link inputs into array of {label, url}
+    function normalizeLinks(field) {
+        if (!field) return [];
+        const toObj = (x) => {
+            if (!x) return null;
+            if (typeof x === "string") {
+                return { label: x.replace(/^https?:\/\//, ""), url: x };
+            }
+            if (typeof x === "object") {
+                // Accept {label, url, date} or {href, label, date}
+                if (x.url || x.href) {
+                    return {
+                        label: x.label || x.name || x.url || x.href,
+                        url: x.url || x.href,
+                        date: x.date || x.when || null,
+                    };
+                }
+                // Fallback: try to stringify
+                return null;
+            }
+            return null;
+        };
+
+        if (Array.isArray(field)) {
+            return field.map(toObj).filter(Boolean);
+        }
+        const single = toObj(field);
+        return single ? [single] : [];
+    }
+
+    // Format a link date string "yyyy/mm/dd" into "Mon dd, yyyy (x months ago)"
+    function formatLinkDate(s) {
+        if (!s) return "";
+        // Accept yyyy/mm/dd or yyyy-mm-dd
+        const parts = s.split(/[-\/]/).map((p) => parseInt(p, 10));
+        if (!parts || parts.length < 3 || parts.some(isNaN)) return s;
+        const [y, m, d] = parts;
+        const date = new Date(y, m - 1, d);
+        if (isNaN(date.getTime())) return s;
+
+        const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+        const formatted = `${
+            monthNames[date.getMonth()]
+        } ${date.getDate()}, ${date.getFullYear()}`;
+
+        // Relative time
+        const now = new Date();
+        const diffMs = now - date;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays < 1) return `${formatted} (today)`;
+        if (diffDays < 30)
+            return `${formatted} (${diffDays} day${
+                diffDays === 1 ? "" : "s"
+            } ago)`;
+        const diffMonths = Math.floor(diffDays / 30);
+        if (diffMonths < 12)
+            return `${formatted} (${diffMonths} month${
+                diffMonths === 1 ? "" : "s"
+            } ago)`;
+        const diffYears = Math.floor(diffMonths / 12);
+        return `${formatted} (${diffYears} year${
+            diffYears === 1 ? "" : "s"
+        } ago)`;
+    }
+
+    // Helpers for project start/end date handling
+    function parseYMD(s) {
+        if (!s) return null;
+        // Accept yyyy/mm/dd or yyyy-mm-dd or yyyy/mm or yyyy-mm or yyyy
+        const parts = s.split(/[-\/]/).map((p) => parseInt(p, 10));
+        if (!parts || parts.some((x) => Number.isNaN(x))) return null;
+        const [y, m, d] = parts;
+        if (parts.length === 1) return new Date(y, 0, 1);
+        if (parts.length === 2) return new Date(y, (m || 1) - 1, 1);
+        return new Date(y, (m || 1) - 1, d || 1);
+    }
+
+    function projectEndTimestamp(p) {
+        // Look for end-date (preferred), fall back to parsing p.date for range like "Jun 2024 – Dec 2024"
+        const eRaw = p["end-date"] || p["end_date"] || p.endDate || null;
+        if (eRaw) {
+            const parsed = parseYMD(eRaw);
+            if (parsed) return parsed.getTime();
+            if (/present|ongoing/i.test(String(eRaw))) return Infinity;
+        }
+        // Try to parse a simple p.date string like `Jan 2024 – Dec 2024` or `Dec 2023 – Aug 2024`
+        if (p.date && typeof p.date === "string") {
+            const parts = p.date.split("–").map((s) => s.trim());
+            if (parts.length === 2) {
+                const end = parts[1];
+                const parsed = parseYMD(
+                    end.replace(/\s+/g, " ").replace(/ /g, "/")
+                );
+                if (parsed) return parsed.getTime();
+                if (/present|ongoing/i.test(end)) return Infinity;
+            }
+        }
+        // If no explicit end date is found, treat the project as ongoing
+        // (so it sorts first). This covers cases where end-date was omitted
+        // but the project should still appear at the top of the list.
+        return Infinity;
+    }
+
+    function formatProjectDate(sRaw, eRaw) {
+        const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+        const fmt = (d) => `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+        const s = sRaw ? parseYMD(sRaw) : null;
+        const e = eRaw
+            ? /(present|ongoing)/i.test(String(eRaw))
+                ? null
+                : parseYMD(eRaw)
+            : null;
+        if (s && e) {
+            // compute relative time from end date
+            const now = new Date();
+            const months =
+                (now.getFullYear() - e.getFullYear()) * 12 +
+                (now.getMonth() - e.getMonth());
+            let rel = null;
+            if (months < 1) {
+                const days = Math.floor((now - e) / (1000 * 60 * 60 * 24));
+                rel =
+                    days <= 1
+                        ? "today"
+                        : `${days} day${days === 1 ? "" : "s"} ago`;
+            } else if (months < 12) {
+                rel = `${months} month${months === 1 ? "" : "s"} ago`;
+            } else {
+                const years = Math.floor(months / 12);
+                rel = `${years} year${years === 1 ? "" : "s"} ago`;
+            }
+            return `${fmt(s)} – ${fmt(e)} (${rel})`;
+        }
+        if (s && !e) return `${fmt(s)} – Present`;
+        if (!s && e) return `– ${fmt(e)}`;
+        return "";
+    }
+
+    // Helper function to get preview image path
+    function getPreviewPath(originalPath) {
+        if (originalPath.includes("tab-panels/")) {
+            return originalPath.replace("tab-panels/", "tab-panels/preview/");
+        }
+        return originalPath;
+    }
+});

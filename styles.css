@@ -867,7 +867,7 @@ img {
     border: 0;
     background: transparent;
     color: var(--text-dim);
-    padding: .65rem 1.1rem;
+    padding: 0.5rem;
     font-size: .8rem;
     font-weight: 600;
     border-radius: 1000px;
@@ -2071,3 +2071,90 @@ img {
     background: linear-gradient(135deg, #f2f2f2 0%, #e6e6e6 100%);
     border: 1px solid rgba(120, 120, 120, 0.14);
 }
+
+/* --- Scrollable tab-bar (Option A) ------------------------------------------------- */
+/* Wrapper that holds the tab bar and optional scroll buttons */
+.tab-scroll-wrap {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    position: relative;
+    width: 100%;
+}
+
+/* Make the tab bar horizontally scrollable while keeping pill layout */
+.tab-scroll-wrap .tab-bar {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    padding-bottom: 4px;
+    /* room for hidden scrollbar */
+    scrollbar-width: thin;
+}
+
+/* Hide native scrollbar visually but keep it usable */
+.tab-scroll-wrap .tab-bar::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tab-scroll-wrap .tab-bar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tab-scroll-wrap .tab-bar::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04));
+    border-radius: 999px;
+}
+
+/* Keep each tab from flexing to fill space; allow truncation if needed */
+.tab-scroll-wrap .tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    max-width: 14rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* Subtle fade indicators (no buttons) */
+.tab-scroll-fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 56px;
+    pointer-events: none;
+    transition: opacity var(--transition);
+    opacity: 0;
+}
+
+.tab-scroll-fade.left {
+    left: 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.30), transparent);
+}
+
+.tab-scroll-fade.right {
+    right: 0;
+    background: linear-gradient(-90deg, rgba(0, 0, 0, 0.30), transparent);
+}
+
+/* Show fades only on wrapper hover and when overflow exists (JS toggles can-scroll-* classes) */
+.tab-scroll-wrap:hover .tab-scroll-fade {
+    opacity: 1;
+}
+
+.tab-scroll-wrap.can-scroll-left .tab-scroll-fade.left {
+    opacity: 1;
+}
+
+.tab-scroll-wrap.can-scroll-right .tab-scroll-fade.right {
+    opacity: 1;
+}
+
+/* Ensure the tab bar doesn't shrink the layout in narrow contexts */
+.tabs {
+    width: 100%;
+}
+
+/* end scrollable tab-bar */
