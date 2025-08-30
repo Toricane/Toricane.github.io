@@ -228,10 +228,51 @@ img {
     border-bottom: 1px solid rgba(77, 181, 255, 0.25);
 }
 
+/* Inline tag icons placed before links in the tagline. They behave like emoji (1em). */
+.tag-icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.12em;
+    /* align like an emoji */
+    margin-left: .4ch;
+    /* small space between icon and link text */
+    object-fit: contain;
+    filter: none;
+    /* keep original colors; can adjust in dark/light if needed */
+}
+
+/* Reduce visual noise on very small screens */
+@media (max-width: 420px) {
+    .tag-icon {
+        width: 0.95em;
+        height: 0.95em;
+        margin-left: .3ch;
+    }
+}
+
 .tagline a:hover, .tagline a:focus-visible {
     background-color: rgba(77, 181, 255, 0.1);
     color: #a9d9ff;
     border-bottom-color: rgba(77, 181, 255, 0.5);
+}
+
+/* Animate tag icons on link hover/focus (scale like an emoji) */
+.tag-icon {
+    transition: transform var(--transition), width var(--transition), height var(--transition);
+    transform-origin: center center;
+}
+
+.tagline a:hover .tag-icon,
+.tagline a:focus-visible .tag-icon {
+    transform: translateY(-0.06em) scale(1.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tag-icon {
+        transition: none;
+        transform: none !important;
+    }
 }
 
 .footnote {

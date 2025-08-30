@@ -215,6 +215,37 @@ Main theme colors defined in CSS custom properties:
 3. **Portfolio Content**: Manage via `data.json`
 4. **Footnotes**: Inline expandable explanations
 
+### Tagline Icons
+
+Tagline icons (inline emoji-sized icons)
+
+-   Path: `assets/icons/`
+-   Purpose: Small square, transparent WEBP icons inserted immediately before certain links in the tagline (they behave like inline emoji and are sized via CSS to `1em`).
+-   Filenames referenced by `index.html` (default):
+    -   `langara.webp`
+    -   `ubc.webp`
+    -   `jarvis.webp`
+    -   `vancouver-ai.webp`
+    -   `hackthenorth.webp`
+    -   `nwhacks.webp`
+-   Recommended source size: export square transparent WEBP files at 128×128 px for a good balance of quality and file size.
+-   High-DPI / srcset (optional): provide a `@2x` version (256×256 px) and use `srcset` so browsers pick the best pixel density. Example markup used in `index.html` can be:
+
+    ```html
+    <img
+        class="tag-icon"
+        src="assets/icons/langara.webp"
+        srcset="assets/icons/langara.webp 1x, assets/icons/langara@2x.webp 2x"
+        alt=""
+        aria-hidden="true"
+    />
+    ```
+
+-   Notes:
+    -   The CSS forces the icon to render at `1em` (roughly 16px on most browsers). Supplying a 128px source makes the icon crisp on Retina / high-DPR displays.
+    -   For accessibility the icons currently use empty `alt` and `aria-hidden="true"` because descriptive link text follows the icon; if you want the icon announced, set an appropriate `alt` value and remove `aria-hidden`.
+    -   If you prefer vector graphics, replace WEBP with SVG and update the `src` attributes accordingly.
+
 ---
 
 Built with ❤️ by [Prajwal Prashanth](https://prajwal.is-a.dev) • Licensed under MIT
