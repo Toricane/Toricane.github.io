@@ -29,6 +29,10 @@
             "gold": true,
             "link": [
                 {
+                    "label": "[award] Ingenious+ Regional Award CAD$1K",
+                    "url": "#awards/ingenious-regional-grant-cad1k"
+                },
+                {
                     "label": "AI Voice Project",
                     "date": "2024/03/03",
                     "url": "https://www.linkedin.com/posts/prajwal-prashanth_create-your-own-ai-voice-assistant-for-free-activity-7169593571602362368-Rn7y"
@@ -204,7 +208,7 @@
                 {
                     "name": "nwHacks 2025 – Genimo",
                     "from": "nwHacks 2025",
-                    "description": "AI + animation tool converting user text into educational animations (Gemini + Manim).",
+                    "description": "AI + animation tool converting user text into educational animations (Generate + Manim).",
                     "badges": ["In-Person"],
                     "images": [
                         {
@@ -633,7 +637,16 @@
                             "path": "assets/tab-panels/ingenious_plus.webp"
                         }
                     ],
-                    "link": "",
+                    "link": [
+                        {
+                            "label": "[project] JARVIS for the Visually Impaired",
+                            "url": "#projects/jarvis-for-the-visually-impaired"
+                        },
+                        {
+                            "label": "Ingenious+ 2024 Regional Winners",
+                            "url": "https://ingeniousplus.ca/celebrating-the-ingenious-2024-innovation-challenge-regional-winners/#:~:text=JARVIS%20for%20the,about%20their%20surroundings."
+                        }
+                    ],
                     "gold": true
                 }
             ]

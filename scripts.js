@@ -299,6 +299,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (p.gold) cardClass += " gold-highlight";
             else if (p.silver) cardClass += " silver-highlight";
             li.className = cardClass;
+            // Add a stable slug so internal links can target this project
+            const projSlug = slugify(p.title || "");
+            if (projSlug) li.setAttribute("data-slug", projSlug);
             // Normalize links: allow p.link to be a string, object, or an array; produce {label,url}
             const links = normalizeLinks(p.link);
 
@@ -319,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         return;
                     e.stopPropagation();
                     if (links.length === 1) {
-                        window.open(links[0].url, "_blank", "noopener");
+                        openExternalOrInternal(links[0].url, e);
                     } else {
                         openLinksPopup(e, links, p.title || "");
                     }
@@ -434,6 +437,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Single item - render directly (use sorted items for awards)
                 const item = items[0];
                 const li = document.createElement("li");
+                // add data-slug for internal linking
+                const singleSlug = slugify(item.name || "");
+                if (singleSlug) li.setAttribute("data-slug", singleSlug);
                 // Support item.link as string or array
                 const itemLinks = normalizeLinks(item.link);
                 if (itemLinks.length) {
@@ -451,7 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             return;
                         e.stopPropagation();
                         if (itemLinks.length === 1) {
-                            window.open(itemLinks[0].url, "_blank", "noopener");
+                            openExternalOrInternal(itemLinks[0].url, e);
                         } else {
                             openLinksPopup(e, itemLinks, item.name || "");
                         }
@@ -632,8 +638,13 @@ document.addEventListener("DOMContentLoaded", () => {
                                               itemLinks
                                           ).replace(/'/g, "&#39;")}'`
                                         : "";
+                                    // add data-slug for internal linking
+                                    const itemSlug = slugify(item.name || "");
+                                    const slugAttr = itemSlug
+                                        ? ` data-slug="${itemSlug}"`
+                                        : "";
                                     return `
-                                    <div class="timeline-item${itemHighlight}" ${dataAttr}>
+                                    <div class="timeline-item${itemHighlight}" ${dataAttr}${slugAttr}>
                                         <h5>${item.name}</h5>
                                         ${fromLine}
                                         <p>${item.description}</p>
@@ -676,11 +687,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                         return;
                                     e.stopPropagation();
                                     if (links.length === 1) {
-                                        window.open(
-                                            links[0].url,
-                                            "_blank",
-                                            "noopener"
-                                        );
+                                        openExternalOrInternal(links[0].url, e);
                                     } else {
                                         openLinksPopup(
                                             e,
@@ -1571,6 +1578,16 @@ document.addEventListener("DOMContentLoaded", () => {
             a.target = "_blank";
             a.rel = "noopener noreferrer";
             a.setAttribute("role", "menuitem");
+            // Intercept click so internal links route within the page and close popup
+            a.addEventListener("click", (ev) => {
+                ev.preventDefault();
+                try {
+                    openExternalOrInternal(href, ev);
+                } finally {
+                    // Close popup immediately after activation
+                    popup.remove();
+                }
+            });
 
             const labelSpan = document.createElement("span");
             labelSpan.className = "link-label";
@@ -1681,6 +1698,156 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const single = toObj(field);
         return single ? [single] : [];
+    }
+
+    // -------------------- Internal navigation helpers --------------------
+    // Create a URL-friendly slug from a title
+    function slugify(s) {
+        if (!s) return "";
+        return String(s)
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+    }
+
+    // Navigate to an internal target like "projects:slug" or "awards:slug"
+    function navigateToInternal(target) {
+        if (!target) return false;
+        // Accept formats: "projects:slug", "awards:slug", "hackathons:slug"
+        const parts = String(target).split(":");
+        if (parts.length !== 2) return false;
+        const tab = parts[0];
+        const slug = parts[1];
+        // Activate tab
+        const tabBtn = Array.from(document.querySelectorAll(".tab")).find(
+            (t) => t.dataset.tab === tab
+        );
+        if (!tabBtn) return false;
+        activate(tab);
+        // Find target element with data-slug and scroll into view
+        // Defer to allow tab panels to become active and render
+        setTimeout(() => {
+            const panel = document.getElementById(tab);
+            if (!panel) return;
+            const targetEl = panel.querySelector(`[data-slug="${slug}"]`);
+            if (!targetEl) return;
+
+            // If this target is inside a collapsed timeline group, expand it first
+            const timelineContainer = targetEl.closest(".timeline-items");
+            if (
+                timelineContainer &&
+                timelineContainer.style.display === "none"
+            ) {
+                const expandId = timelineContainer.id;
+                const summaryEl = panel.querySelector(
+                    `.timeline-summary[data-target="${expandId}"]`
+                );
+                // Expand: mirror the toggle behavior used when a user clicks the summary
+                const targetBlock = document.getElementById(expandId);
+                if (targetBlock) targetBlock.style.display = "block";
+                if (summaryEl) {
+                    summaryEl.setAttribute("aria-expanded", "true");
+                    const toggleIcon =
+                        summaryEl.querySelector(".timeline-toggle i");
+                    if (toggleIcon)
+                        toggleIcon.style.transform = "rotate(180deg)";
+                }
+            }
+
+            // Scroll to target after any expansion.
+            // Use a robust approach: scroll the nearest scrollable ancestor to center the target,
+            // and retry a couple times in case layout continues to change (e.g., target at end).
+            const scrollToTarget = (el) => {
+                if (!el) return;
+                // Find nearest scrollable ancestor
+                const isScrollable = (node) => {
+                    if (!node || node === document) return false;
+                    const style = window.getComputedStyle(node);
+                    const overflowY = style.overflowY;
+                    const canScroll =
+                        node.scrollHeight > node.clientHeight &&
+                        (overflowY === "auto" || overflowY === "scroll");
+                    return canScroll;
+                };
+
+                let ancestor = el.parentElement;
+                while (
+                    ancestor &&
+                    ancestor !== document.body &&
+                    !isScrollable(ancestor)
+                ) {
+                    ancestor = ancestor.parentElement;
+                }
+                // If none found, use window
+                if (!ancestor || ancestor === document.body) {
+                    // use window scrollIntoView which scrolls the viewport
+                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                } else {
+                    // compute target top within ancestor and center it
+                    const ancRect = ancestor.getBoundingClientRect();
+                    const elRect = el.getBoundingClientRect();
+                    const offsetTop =
+                        elRect.top - ancRect.top + ancestor.scrollTop;
+                    const targetScroll = Math.max(
+                        0,
+                        Math.floor(
+                            offsetTop -
+                                ancestor.clientHeight / 2 +
+                                elRect.height / 2
+                        )
+                    );
+                    ancestor.scrollTo({
+                        top: targetScroll,
+                        behavior: "smooth",
+                    });
+                }
+                try {
+                    el.focus && el.focus();
+                } catch (_) {}
+            };
+
+            // Try immediately, then retry after short delays to handle async layout shifts
+            scrollToTarget(targetEl);
+            setTimeout(() => scrollToTarget(targetEl), 120);
+            setTimeout(() => scrollToTarget(targetEl), 360);
+        }, 40);
+        return true;
+    }
+
+    // Opens an external URL or routes internal links that use the special scheme:
+    // internal:projects:slug  or internal:awards:slug
+    function openExternalOrInternal(href, event) {
+        if (!href) return;
+        // internal links may be specified as "internal:tab:slug" or "#tab/slug"
+        if (typeof href === "string") {
+            if (href.startsWith("internal:")) {
+                const parts = href.split(":"), // [internal, tab, slug]
+                    tab = parts[1],
+                    slug = parts.slice(2).join(":");
+                if (tab && slug) {
+                    navigateToInternal(tab + ":" + slug);
+                    event && event.preventDefault && event.preventDefault();
+                    return;
+                }
+            }
+            // Support hash-style: #tab/slug
+            if (href.startsWith("#")) {
+                const clean = href.slice(1);
+                const parts = clean.split("/");
+                if (parts.length === 2) {
+                    navigateToInternal(parts[0] + ":" + parts[1]);
+                    event && event.preventDefault && event.preventDefault();
+                    return;
+                }
+            }
+        }
+        // Fallback: open in new tab
+        try {
+            window.open(href, "_blank", "noopener");
+        } catch (_) {
+            window.location.href = href;
+        }
     }
 
     // Format a link date string "yyyy/mm/dd" into "Mon dd, yyyy (x months ago)"
