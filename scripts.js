@@ -1810,9 +1810,25 @@ document.addEventListener("DOMContentLoaded", () => {
             // Try immediately, then retry after short delays to handle async layout shifts
             scrollToTarget(targetEl);
             setTimeout(() => scrollToTarget(targetEl), 120);
-            setTimeout(() => scrollToTarget(targetEl), 360);
+            setTimeout(() => {
+                scrollToTarget(targetEl);
+                // briefly flash a visual highlight so the user can spot the navigated item
+                flashHighlight(targetEl);
+            }, 360);
         }, 40);
         return true;
+    }
+
+    // Add and remove a temporary highlight class for visibility when navigating
+    function flashHighlight(el) {
+        if (!el || !el.classList) return;
+        const cls = "nav-highlight";
+        el.classList.remove(cls);
+        // force reflow to restart animation if already present
+        void el.offsetWidth;
+        el.classList.add(cls);
+        // Remove class after animation completes (keep a safe timeout)
+        setTimeout(() => el.classList.remove(cls), 1900);
     }
 
     // Opens an external URL or routes internal links that use the special scheme:
