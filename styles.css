@@ -891,6 +891,29 @@ img {
     margin-top: 1.75rem;
 }
 
+/* Reserve scrollbar gutter so it remains present when panels toggle */
+.tab-panels {
+    /* Keep a stable gutter so layout doesn't shift and the scrollbar area stays visible */
+    scrollbar-gutter: stable both-edges;
+    /* WebKit doesn't support scrollbar-gutter, offer a hint (ignored by most browsers) */
+    -webkit-scrollbar-gutter: stable;
+}
+
+/* Make sure the WebKit scrollbar visuals remain visible (when overflow exists) */
+.tab-panels::-webkit-scrollbar {
+    width: 10px;
+    /* explicit width to avoid overlay behavior */
+    background: var(--scroll-bg);
+    opacity: 1 !important;
+}
+
+.tab-panels::-webkit-scrollbar-thumb {
+    background: #243540;
+    border-radius: 10px;
+    border: 2px solid #121d25;
+    opacity: 1 !important;
+}
+
 .tab-panel {
     display: none;
     animation: fade .4s ease forwards;
