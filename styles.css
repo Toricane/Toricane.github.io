@@ -969,6 +969,30 @@ img {
     background: #2f4656;
 }
 
+/* Ensure vertical scrollbar is always visible for tab panels */
+.tab-panels {
+    overflow-y: scroll;
+    /* Enable vertical scrolling */
+    scrollbar-width: auto;
+    /* For Firefox: show scrollbar */
+    -ms-overflow-style: auto;
+    /* For IE/Edge: show scrollbar */
+}
+
+/* For Webkit browsers (Chrome, Safari, etc.) */
+.tab-panels::-webkit-scrollbar {
+    display: block;
+    /* Always show scrollbar */
+}
+
+/* Prevent scrollbar from hiding when not interacting */
+.tab-panels {
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling for mobile */
+    overflow-y: scroll;
+    /* Always show scrollbar */
+}
+
 .tab-highlight {
     position: sticky;
     top: 5.5rem;
