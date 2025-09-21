@@ -1380,6 +1380,19 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     }
                 }
+                // Include optional description field from feed (if present) and render below the title.
+                const feedDescription = first.description
+                    ? String(first.description)
+                          .replace(/<[^>]+>/g, " ")
+                          .trim()
+                    : "";
+
+                const descriptionHtml = feedDescription
+                    ? `<p class="widget-description">${escapeHtml(
+                          feedDescription
+                      )}</p>`
+                    : "";
+
                 const html = `
                 <div class="widget-link" data-url="${first.link}">
                     <div class="widget-layout">
@@ -1387,6 +1400,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <h3 class="widget-title">${escapeHtml(
                                 first.title
                             )}</h3>
+                            ${descriptionHtml}
                             <div class="widget-excerpt-container">
                                 <p class="widget-excerpt">${escapeHtml(
                                     fullContent
