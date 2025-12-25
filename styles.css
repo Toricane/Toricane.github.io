@@ -363,7 +363,7 @@ img {
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: .35rem;
+    gap: .5rem;
     justify-content: center;
 }
 
@@ -539,6 +539,10 @@ img {
     .coverflow-group {
         gap: 15px;
         padding-right: 15px;
+    }
+
+    .connections ul {
+        gap: .25rem;
     }
 }
 
@@ -938,31 +942,10 @@ img {
     color: var(--text);
 }
 
+
 .tab-panels {
     margin-top: 1.75rem;
-}
-
-/* Reserve scrollbar gutter so it remains present when panels toggle */
-.tab-panels {
-    /* Keep a stable gutter so layout doesn't shift and the scrollbar area stays visible */
-    scrollbar-gutter: stable both-edges;
-    /* WebKit doesn't support scrollbar-gutter, offer a hint (ignored by most browsers) */
-    -webkit-scrollbar-gutter: stable;
-}
-
-/* Make sure the WebKit scrollbar visuals remain visible (when overflow exists) */
-.tab-panels::-webkit-scrollbar {
-    width: 10px;
-    /* explicit width to avoid overlay behavior */
-    background: var(--scroll-bg);
-    opacity: 1 !important;
-}
-
-.tab-panels::-webkit-scrollbar-thumb {
-    background: #243540;
-    border-radius: 10px;
-    border: 2px solid #121d25;
-    opacity: 1 !important;
+    grid-area: panels;
 }
 
 .tab-panel {
@@ -982,11 +965,6 @@ img {
     grid-template-areas: "panels highlight";
     gap: 2rem;
     align-items: start;
-}
-
-/* Assign grid areas */
-.tab-panels {
-    grid-area: panels;
 }
 
 .tab-highlight {
@@ -1014,58 +992,7 @@ img {
     }
 }
 
-/* Scroll constraint */
-.tab-panels {
-    max-height: 70vh;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #243540 #121d25;
-    padding-right: .3rem;
-    /* room for custom scrollbar */
-}
-
-.tab-panels::-webkit-scrollbar {
-    width: 10px;
-}
-
-.tab-panels::-webkit-scrollbar-track {
-    background: #121d25;
-    border-radius: 10px;
-}
-
-.tab-panels::-webkit-scrollbar-thumb {
-    background: #243540;
-    border-radius: 10px;
-    border: 2px solid #121d25;
-}
-
-.tab-panels::-webkit-scrollbar-thumb:hover {
-    background: #2f4656;
-}
-
-/* Ensure vertical scrollbar is always visible for tab panels */
-.tab-panels {
-    overflow-y: scroll;
-    /* Enable vertical scrolling */
-    scrollbar-width: auto;
-    /* For Firefox: show scrollbar */
-    -ms-overflow-style: auto;
-    /* For IE/Edge: show scrollbar */
-}
-
-/* For Webkit browsers (Chrome, Safari, etc.) */
-.tab-panels::-webkit-scrollbar {
-    display: block;
-    /* Always show scrollbar */
-}
-
-/* Prevent scrollbar from hiding when not interacting */
-.tab-panels {
-    -webkit-overflow-scrolling: touch;
-    /* Smooth scrolling for mobile */
-    overflow-y: scroll;
-    /* Always show scrollbar */
-}
+/* Removed scroll constraints so panels grow naturally without internal scrolling */
 
 .tab-highlight {
     position: sticky;
@@ -1136,9 +1063,9 @@ img {
 
 @media (max-width:600px) {
     .tab-panels {
-        max-height: 70vh;
+        /* max-height: 70vh; */
         /* Keep scroll constraint on mobile */
-        overflow-y: auto;
+        /* overflow-y: auto; */
         -webkit-overflow-scrolling: touch;
         /* smooth momentum */
     }
