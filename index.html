@@ -41,6 +41,22 @@
         <meta name="twitter:description" content="Student developer building AI + systems projects, turning ideas into fast, thoughtful products.">
         <meta name="twitter:image" content="/apple-touch-icon.png">
         <link rel="stylesheet" href="styles.css">
+        <link rel="modulepreload" href="scripts/components/coverflow.js">
+        <link rel="modulepreload" href="scripts/components/footnotes.js">
+        <link rel="modulepreload" href="scripts/components/imageViewer.js">
+        <link rel="modulepreload" href="scripts/components/navigation.js">
+        <link rel="modulepreload" href="scripts/components/renderProjects.js">
+        <link rel="modulepreload" href="scripts/components/renderTimeline.js">
+        <link rel="modulepreload" href="scripts/components/scrollableTabs.js">
+        <link rel="modulepreload" href="scripts/components/scrollButton.js">
+        <link rel="modulepreload" href="scripts/components/tabs.js">
+        <link rel="modulepreload" href="scripts/components/tapMode.js">
+        <link rel="modulepreload" href="scripts/components/theme.js">
+        <link rel="modulepreload" href="scripts/components/tilt.js">
+        <link rel="modulepreload" href="scripts/components/visibilityPause.js">
+        <link rel="modulepreload" href="scripts/components/widgets.js">
+        <link rel="modulepreload" href="scripts/utils/data.js">
+        <link rel="modulepreload" href="scripts/components/linksPopup.js">
         <script type="application/ld+json">{
             "@context":"https://schema.org","@type":"Person","name":"Prajwal Prashanth","url":"https://prajwal.is-a.dev","sameAs":["https://linkedin.com/in/prajwal-prashanth","https://github.com/Toricane","https://x.com/PrajwalP028"],"jobTitle":"Student Developer","description":"Student developer building AI + systems projects and shipping fast, thoughtful products."}
         </script>
@@ -79,6 +95,8 @@
                                 src="assets/icons/langara.webp"
                                 alt=""
                                 aria-hidden="true"
+                                width="15"
+                                height="15"
                             >
                             Langara College,
                         </a>
@@ -92,6 +110,8 @@
                             <img
                                 class="tag-icon"
                                 src="assets/icons/ubc.webp"
+                                width="15"
+                                height="15"
                                 alt=""
                                 aria-hidden="true"
                             >
@@ -106,6 +126,8 @@
                                 src="assets/icons/jarvis.webp"
                                 alt=""
                                 aria-hidden="true"
+                                width="15"
+                                height="15"
                             >
                             JARVIS
                         </a>
@@ -116,6 +138,8 @@
                                 src="assets/icons/vancouver-ai.webp"
                                 alt=""
                                 aria-hidden="true"
+                                width="15"
+                                height="15"
                             >
                             Vancouver AI meetups,
                         </a>
@@ -129,6 +153,8 @@
                             <img
                                 class="tag-icon"
                                 src="assets/icons/hackthenorth.webp"
+                                width="15"
+                                height="15"
                                 alt=""
                                 aria-hidden="true"
                             >
@@ -139,6 +165,8 @@
                             <img
                                 class="tag-icon"
                                 src="assets/icons/nwhacks.webp"
+                                width="15"
+                                height="15"
                                 alt=""
                                 aria-hidden="true"
                             >
@@ -221,31 +249,79 @@
                         <div class="coverflow-cards">
                             <div class="coverflow-group">
                                 <div class="coverflow-card">
-                                    <img src="assets/northernlights.webp" alt="Prajwal portrait" loading="lazy">
+                                    <img
+                                        src="assets/northernlights.webp"
+                                        alt="Prajwal portrait"
+                                        loading="lazy"
+                                        width="200"
+                                        height="280"
+                                    >
                                 </div>
                                 <div class="coverflow-card">
-                                    <img src="assets/projects_highlight.webp" alt="Projects showcase" loading="lazy">
+                                    <img
+                                        src="assets/projects_highlight.webp"
+                                        alt="Projects showcase"
+                                        loading="lazy"
+                                        width="200"
+                                        height="280"
+                                    >
                                 </div>
                                 <div class="coverflow-card">
-                                    <img src="assets/hackathons_highlight.webp" alt="Hackathons showcase" loading="lazy">
+                                    <img
+                                        src="assets/hackathons_highlight.webp"
+                                        alt="Hackathons showcase"
+                                        loading="lazy"
+                                        width="200"
+                                        height="280"
+                                    >
                                 </div>
                                 <div class="coverflow-card">
-                                    <img src="assets/awards_highlight.webp" alt="Awards showcase" loading="lazy">
+                                    <img
+                                        src="assets/awards_highlight.webp"
+                                        alt="Awards showcase"
+                                        loading="lazy"
+                                        width="200"
+                                        height="280"
+                                    >
                                 </div>
                             </div>
                             <!-- Duplicate group for seamless infinite loop -->
                             <div aria-hidden="true" class="coverflow-group">
                                 <div class="coverflow-card">
-                                    <img src="assets/northernlights.webp" alt="Prajwal portrait" loading="lazy">
+                                    <img
+                                        src="assets/northernlights.webp"
+                                        alt="Prajwal portrait"
+                                        loading="lazy"
+                                        width="200"
+                                        height="280"
+                                    >
                                 </div>
                                 <div class="coverflow-card">
-                                    <img src="assets/projects_highlight.webp" alt="Projects showcase" loading="lazy">
+                                    <img
+                                        src="assets/projects_highlight.webp"
+                                        alt="Projects showcase"
+                                        loading="lazy"
+                                        width="200"
+                                        height="280"
+                                    >
                                 </div>
                                 <div class="coverflow-card">
-                                    <img src="assets/hackathons_highlight.webp" alt="Hackathons showcase" loading="lazy">
+                                    <img
+                                        src="assets/hackathons_highlight.webp"
+                                        alt="Hackathons showcase"
+                                        loading="lazy"
+                                        width="200"
+                                        height="280"
+                                    >
                                 </div>
                                 <div class="coverflow-card">
-                                    <img src="assets/awards_highlight.webp" alt="Awards showcase" loading="lazy">
+                                    <img
+                                        src="assets/awards_highlight.webp"
+                                        alt="Awards showcase"
+                                        loading="lazy"
+                                        width="200"
+                                        height="280"
+                                    >
                                 </div>
                             </div>
                         </div>
