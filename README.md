@@ -249,10 +249,6 @@ Tagline icons (inline emoji-sized icons)
     -   For accessibility the icons currently use empty `alt` and `aria-hidden="true"` because descriptive link text follows the icon; if you want the icon announced, set an appropriate `alt` value and remove `aria-hidden`.
     -   If you prefer vector graphics, replace WEBP with SVG and update the `src` attributes accordingly.
 
----
-
-Built with ❤️ by [Prajwal Prashanth](https://prajwal.is-a.dev) • Licensed under MIT
-
 ### Tab Highlight Images
 
 The Projects / Hackathons / Awards tabs support an optional visual highlight card on the right (or below on mobile). To enable, add any (or all) of these files under `assets/`:
@@ -291,3 +287,8 @@ This system reduces initial page load time while maintaining image quality in th
 All custom code MIT. Personal content © Prajwal Prashanth.
 
 Design inspired by [kevinjosethomas.com](https://www.kevinjosethomas.com/) ([GitHub](https://github.com/kevinjosethomas/kevinjosethomas)).
+
+---
+
+Built with ❤️ by [Prajwal Prashanth](https://prajwal.is-a.dev) • Licensed under MIT
+
