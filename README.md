@@ -12,7 +12,7 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 
 -   **Split Hero Section**: Engaging introduction with animated image carousel
 -   **Tabbed Content System**: Interactive Projects / Hackathons / Awards sections
--   **Coverflow Gallery**: Smooth infinite-scroll image showcase
+-   **Coverflow Gallery**: Smooth infinite-scroll image showcase with dynamic color-extracted glow effects
 -   **Dynamic Highlight Images**: Tab-synchronized visual previews
 -   **Responsive Design**: Mobile-first approach with adaptive layouts
 
@@ -33,6 +33,7 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 
 ### 🎭 Interactive Elements
 
+-   **Dynamic Neon Glows**: Coverflow images dynamically project a colorful neon border and shadow based on the image's intrinsic colors
 -   **Footnote System**: Hover/tap expandable footnotes in the introduction
 -   **Connection Pills**: Animated social media links with labels
 -   **Scroll Interactions**: Smart scroll-to-content and button hiding
@@ -43,8 +44,10 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 
 ```
 ├── index.html              # Main portfolio page
-├── styles.css              # Complete styling (1600+ lines)
-├── scripts.js              # Interactive functionality (950+ lines)
+├── styles.css              # Complete monolithic styling
+├── AGENT_CONTEXT.md        # Architectural rules and context for AI agents
+├── scripts/                # Modular JavaScript components
+│   └── main.js             # Entry point for logic
 ├── data.json               # Content data (projects, hackathons, awards)
 ├── site.webmanifest        # PWA configuration
 ├── CNAME                   # Custom domain configuration
