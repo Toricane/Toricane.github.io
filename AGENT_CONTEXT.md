@@ -19,7 +19,8 @@ This document provides architectural, stylistic, and operational context for any
 *   **Responsive**: Mobile-first approach with flexible grids and flexbox.
 
 ## 3. Notable Components Update Rules
-*   **Coverflow (`coverflow.js`)**: Pulls images dynamically from `data.json` where `"face": true`. Recent updates implemented dynamic, image-based colored borders and "faded" glows on hover. If modifying the coverflow, ensure clipping issues are avoided (especially on enlarged hover states).
+*   **Coverflow (`coverflow.js`)**: Pulls images dynamically from `data.json` where `"face": true`. Recent updates implemented pre-calculated colored borders and "faded" glows on hover to improve performance. 
+    *   **CRITICAL:** When you add a new image to `data.json` with `"face": true`, you MUST run `python scripts/update_colors.py` (requires `Pillow`, install via `pip install -r requirements.txt`) to extract the dominant color and update `colors.json`. This `colors.json` prevents heavy client-side canvas processing on page load.
 *   **Tabs & Timeline**: The middle section uses a tabbed switcher (Projects/Hackathons/Awards) connected to a vertical timeline. Highlight images are updated depending on the active tab and scroll position.
 *   **Image Management**: 
     *   Uses high-res images in `assets/tab-panels/` and WebP thumbnails in `assets/tab-panels/preview/` for optimization.

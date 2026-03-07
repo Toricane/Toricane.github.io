@@ -153,9 +153,11 @@ document.addEventListener("DOMContentLoaded", () => {
   initWidgets();
   initTapMode();
 
-  fetch("data.json", { cache: "no-store" })
-    .then((r) => r.json())
-    .then((data) => {
+  Promise.all([
+    fetch("data.json", { cache: "no-store" }).then((r) => r.json()),
+    fetch("colors.json", { cache: "no-store" }).then((r) => r.json()).catch(() => ({}))
+  ])
+    .then(([data, colors]) => {
       renderProjects(data.projects || []);
       renderTimeline("hackathons", data.hackathons || [], true);
       renderTimeline("awards", data.awards || [], false);
@@ -165,9 +167,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Collect face-tagged images and initialise the coverflow
       const faceImages = collectFaceImages(data);
-      initCoverFlow(faceImages);
+      initCoverFlow(faceImages, colors);
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error(err);
       const fail = (msg) =>
         `<p style="font-size:.8rem;color:#aa6464">${msg}</p>`;
       const projects = document.getElementById("projects");
@@ -175,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
         projects.innerHTML = fail("Failed to load projects.");
       }
       // Still initialise coverflow with empty array so the container is clean
-      initCoverFlow([]);
+      initCoverFlow([], {});
     });
 
   const reduceMotion = window.matchMedia(

@@ -143,6 +143,12 @@ All portfolio content is managed through `data.json` with the following structur
 git clone https://github.com/Toricane/Toricane.github.io.git
 cd Toricane.github.io
 
+# Setup Python Virtual Environment (for image color extraction)
+python -m venv .venv
+# On Windows: .venv\Scripts\activate
+# On Mac/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+
 # Start local development server
 python -m http.server 8080
 ```
@@ -152,7 +158,8 @@ Navigate to `http://localhost:8080`
 ### Special Features
 
 -   **Animation Mode**: Add `?tap=true` to see enhanced connection pill animations
--   **Content Updates**: Simply edit `data.json` and refresh – no build step required
+-   **Content Updates**: Simply edit `data.json` and refresh – no build step required natively.
+    -   *Exception*: If you added a new image with `"face": true` (which appears in the Coverflow), you must run `python scripts/update_colors.py` to pre-calculate its glow color into `colors.json`.
 -   **Image Assets**: Replace files in `/assets/` to update highlight images
 -   **Image Optimization**: Tab panel images use preview thumbnails (400px max width, WebP) for fast loading, with full-size originals shown in the viewer on click
 

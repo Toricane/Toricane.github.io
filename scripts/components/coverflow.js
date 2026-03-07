@@ -34,57 +34,7 @@ let totalCards = 0;
 
 let loadedSet = new Set();
 
-/**
- * Extracts a dominant, saturated color from an image using a hidden canvas.
- */
-function getDominantRGB(imgEl) {
-  const src = imgEl.src;
-  if (!src) return '77, 181, 255';
 
-  if (!getDominantRGB.cache) getDominantRGB.cache = new Map();
-  if (getDominantRGB.cache.has(src)) {
-    return getDominantRGB.cache.get(src);
-  }
-
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = 64;
-  canvas.height = 64;
-  
-  try {
-    ctx.drawImage(imgEl, 0, 0, 64, 64);
-    const data = ctx.getImageData(0, 0, 64, 64).data;
-    
-    let rSum = 0, gSum = 0, bSum = 0, weightSum = 0;
-    
-    for (let i = 0; i < data.length; i += 16) {
-      const r = data[i];
-      const g = data[i+1];
-      const b = data[i+2];
-      
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
-      // Weight more saturated and brighter pixels higher
-      let weight = (max - min) + (max * 0.5); 
-      // Add a base weight so even dark images get an average
-      weight = (weight * weight) + 10; 
-      
-      rSum += r * weight;
-      gSum += g * weight;
-      bSum += b * weight;
-      weightSum += weight;
-    }
-    
-    if (weightSum > 0) {
-      const result = `${Math.floor(rSum / weightSum)}, ${Math.floor(gSum / weightSum)}, ${Math.floor(bSum / weightSum)}`;
-      getDominantRGB.cache.set(src, result);
-      return result;
-    }
-  } catch(e) {
-    // Ignore CORS or broken images
-  }
-  return '77, 181, 255'; // Fallback to accent
-}
 
 function shuffle(arr) {
   const a = [...arr];
@@ -200,7 +150,7 @@ function loadVisibleImages() {
   });
 }
 
-function renderCards(images) {
+function renderCards(images, colors = {}) {
   if (!cardsEl) return;
   cardsEl.innerHTML = "";
   loadedSet = new Set();
@@ -254,17 +204,12 @@ function renderCards(images) {
       } else {
         card.classList.remove("portrait");
       }
-      
-      // Skip heavy canvas pixel extraction for the placeholder SVG
-      if (imgEl.src.startsWith('data:image/svg+xml')) {
-        card.style.setProperty('--card-glow-rgb', '31, 44, 53'); // Default dark glow
-      } else {
-        const dominantRgb = getDominantRGB(imgEl);
-        card.style.setProperty('--card-glow-rgb', dominantRgb);
-      }
 
       requestBaseMetrics();
     });
+
+    const dominantRgb = colors[img.path] || '77, 181, 255';
+    card.style.setProperty('--card-glow-rgb', dominantRgb);
 
     card.appendChild(imgEl);
 
@@ -375,7 +320,7 @@ function handleResize() {
   loadVisibleImages();
 }
 
-export function initCoverFlow(images) {
+export function initCoverFlow(images, colors = {}) {
   containerEl = document.querySelector(".coverflow-container");
   cardsEl = document.getElementById("coverflowCards");
   if (!containerEl || !cardsEl) return;
@@ -386,7 +331,7 @@ export function initCoverFlow(images) {
   }
 
   coverflowImages = shuffle(images);
-  renderCards(coverflowImages);
+  renderCards(coverflowImages, colors);
 
   // We must calculate baseMetrics right away based on rendered layouts
   // But images might not be loaded. calcBaseMetrics triggers on image load too.
