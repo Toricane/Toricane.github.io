@@ -12,6 +12,14 @@ let isHovered = false;
 let isInteracting = false;
 let scrollTimeoutId = null;
 let autoScrollIntervalId = null;
+let metricsTimeoutId = null;
+
+function requestBaseMetrics() {
+  if (metricsTimeoutId) clearTimeout(metricsTimeoutId);
+  metricsTimeoutId = setTimeout(() => {
+    calcBaseMetrics();
+  }, 50);
+}
 
 // How often auto-scroll jumps to the next page
 const AUTO_SCROLL_MS = 2500;
@@ -240,7 +248,7 @@ function renderCards(images) {
       const dominantRgb = getDominantRGB(imgEl);
       card.style.setProperty('--card-glow-rgb', dominantRgb);
 
-      calcBaseMetrics();
+      requestBaseMetrics();
     });
 
     card.appendChild(imgEl);
