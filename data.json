@@ -1,803 +1,822 @@
 {
-    "projects": [
+  "coverflowImages": [
+    {
+      "label": "Northern Lights",
+      "path": "assets/northernlights.webp",
+      "face": true
+    }
+  ],
+  "projects": [
+    {
+      "title": "JARVIS for the Visually Impaired",
+      "live": false,
+      "from": "Independent / TKS",
+      "start-date": "2024/01/01",
+      "end-date": "2024/12/19",
+      "description": "Portable wearable AI assistant (camera, mic, speaker) giving low‑latency scene descriptions & Q/A; core translated to microcontroller (C++ + Edge Impulse).",
+      "tags": ["AI", "Edge", "C++", "Embedded"],
+      "images": [
         {
-            "title": "JARVIS for the Visually Impaired",
-            "live": false,
-            "from": "Independent / TKS",
-            "start-date": "2024/01/01",
-            "end-date": "2024/12/19",
-            "description": "Portable wearable AI assistant (camera, mic, speaker) giving low‑latency scene descriptions & Q/A; core translated to microcontroller (C++ + Edge Impulse).",
-            "tags": ["AI", "Edge", "C++", "Embedded"],
-            "images": [
-                {
-                    "label": "AI Meetup Demo",
-                    "path": "assets/tab-panels/vanaimay.webp"
-                },
-                {
-                    "label": "Ingenious+ Regional Award CAD$1K",
-                    "path": "assets/tab-panels/ingenious_plus_photo.webp"
-                },
-                {
-                    "label": "2nd Prototype",
-                    "path": "assets/tab-panels/2nd_prototype.webp"
-                },
-                {
-                    "label": "2nd Prototype Continued",
-                    "path": "assets/tab-panels/2nd_prototype_continued.webp"
-                }
-            ],
-            "gold": true,
-            "link": [
-                {
-                    "label": "[award] Ingenious+ Regional Award CAD$1K",
-                    "url": "#awards/ingenious-regional-grant-cad1k"
-                },
-                {
-                    "label": "AI Voice Project",
-                    "date": "2024/03/03",
-                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_create-your-own-ai-voice-assistant-for-free-activity-7169593571602362368-Rn7y"
-                },
-                {
-                    "label": "Ingenious+ Regional Award CAD$1K",
-                    "date": "2024/04/16",
-                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_last-tuesday-i-had-the-incredible-opportunity-activity-7188737473236160513-mCiZ"
-                },
-                {
-                    "label": "1st Demo (500 reactions)",
-                    "date": "2024/04/28",
-                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_demo-video-of-my-jarvis-project-jarvis-activity-7190196909771268096-mV2p"
-                },
-                {
-                    "label": "AI Meetup Demo",
-                    "date": "2024/05/30",
-                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_second-demo-video-of-my-jarvis-project-with-activity-7204007352314851329-QSDR"
-                },
-                {
-                    "label": "TKS Showcase Demo",
-                    "date": "2024/06/09",
-                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_on-sunday-june-9th-i-demoed-my-jarvis-project-activity-7209208311588528129-9Qt-"
-                },
-                {
-                    "label": "BCYDC Spotlight Demo",
-                    "date": "2024/06/27",
-                    "url": "https://www.linkedin.com/posts/bcydc_ai-innovation-tech-activity-7216507096656199680-Gqqm"
-                },
-                {
-                    "label": "2nd AI Meetup Demo",
-                    "date": "2024/06/27",
-                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_last-night-at-the-june-future-proof-creatives-activity-7214142470563975170-4g_L"
-                },
-                {
-                    "label": "2nd Prototype Demo",
-                    "date": "2024/08/29",
-                    "url": "https://www.linkedin.com/posts/prajwal-prashanth_vancouverai-futureproofcreatives-healthcarerevolution-activity-7236979912601964544-gUnx"
-                },
-                {
-                    "label": "TKS Focus Showcase",
-                    "date": "2024/12/19",
-                    "url": "https://tksworld.notion.site/JARVIS-AI-Voice-Assistant-with-Vision-for-the-Visually-Impaired-15cb825036e280a1b04bc4b23943b625"
-                }
-            ]
+          "label": "AI Meetup Demo",
+          "path": "assets/tab-panels/vanaimay.webp",
+          "face": true
         },
         {
-            "title": "Google Internal Announcements RAG MVP",
-            "live": false,
-            "from": "Google Canada Challenge Winner",
-            "start-date": "2023/12/01",
-            "end-date": "2024/08/06",
-            "description": "Personalized announcements + question answering by integrating Gemini with internal docs (RAG) for sales teams; selected top 3/100+ & ranked #1 in final judging by the Global Head of Partnerships with Google Canada.",
-            "tags": ["LLM", "RAG", "Product"],
-            "images": [
-                {
-                    "label": "Presentation first slide",
-                    "path": "assets/tab-panels/google_internal_announcements_1.webp"
-                }
-            ],
-            "silver": true,
-            "link": [
-                {
-                    "label": "First part of presentation",
-                    "date": "2024/08/06",
-                    "url": "https://www.loom.com/share/376a027ba4e14d12a448110c923124a2?sid=6cf7e0a9-0546-48dc-aa97-7c9a7c1243e3"
-                },
-                {
-                    "label": "Second part of presentation",
-                    "date": "2024/08/06",
-                    "url": "https://www.loom.com/share/266440363ad644e49b8133d3be4a6fe1?sid=fd29156c-f2a4-4d71-8b2f-8a2f295f0a65"
-                },
-                {
-                    "label": "Third part of presentation",
-                    "date": "2024/08/06",
-                    "url": "https://www.loom.com/share/69bd7be5866142cb9308d1e192e18836?sid=9c133ebe-a1f4-4efb-b9d9-763efea1ef0f"
-                }
-            ]
+          "label": "Ingenious+ Regional Award CAD$1K",
+          "path": "assets/tab-panels/ingenious_plus_photo.webp",
+          "face": true
         },
         {
-            "title": "Peter Pan: Longevity for Everyone",
-            "live": false,
-            "from": "Team Research",
-            "start-date": "2024/04/01",
-            "end-date": "2024/10/01",
-            "description": "Researched mitochondrial theory of aging; built MVP system to help stabilize blood glucose for accessible lifespan improvement; pitched to 3 VCs.",
-            "tags": ["Health", "Research", "Bio"],
-            "images": [
-                {
-                    "label": "Presentation first slide",
-                    "path": "assets/tab-panels/peter_pan_1.webp"
-                }
-            ],
-            "link": [
-                { "label": "Website", "url": "https://peterpan-ai.com/" },
-                {
-                    "label": "GitHub",
-                    "url": "https://github.com/Toricane/peterpan-ai"
-                }
-            ]
+          "label": "2nd Prototype",
+          "path": "assets/tab-panels/2nd_prototype.webp"
         },
         {
-            "title": "CalendAI",
-            "live": false,
-            "from": "buildspace / Community Meetup Demo",
-            "start-date": "2024/06/01",
-            "end-date": "2024/07/01",
-            "description": "Chrome extension integrating Gemini with Google Calendar to plan weeks & schedule events via natural language; demoed at Vancouver AI Community Meetup.",
-            "tags": ["Chrome Ext", "AI", "Productivity"],
-            "images": [
-                {
-                    "label": "CalendAI presentation at an AI meetup in Vancouver",
-                    "path": "assets/tab-panels/calendai_demo.webp"
-                },
-                {
-                    "label": "Met Rahul Behal, co-founder of Gumloop!",
-                    "path": "assets/tab-panels/rahul_behal.webp"
-                },
-                {
-                    "label": "Met Max Brodeur-Urbas, co-founder of Gumloop!",
-                    "path": "assets/tab-panels/max_brodeur-urbas.webp"
-                },
-                {
-                    "label": "buildspace idea",
-                    "path": "assets/tab-panels/buildspace_idea.webp"
-                }
-            ],
-            "gold": true,
-            "link": [
-                {
-                    "label": "Demo Tweet",
-                    "url": "https://x.com/PrajwalP028/status/1808191827066917032"
-                },
-                {
-                    "label": "GitHub",
-                    "url": "https://github.com/Toricane/calendai"
-                }
-            ]
+          "label": "2nd Prototype Continued",
+          "path": "assets/tab-panels/2nd_prototype_continued.webp"
         }
-    ],
-    "hackathons": [
+      ],
+      "gold": true,
+      "link": [
         {
-            "when": "2025/03",
-            "items": [
-                {
-                    "name": "Scrapyard Vancouver – Itémon (2nd Place)",
-                    "from": "Scrapyard Vancouver 2025",
-                    "description": "Interactive AI game resembling Pokémon with real‑world items; placed 2nd among 100+ participants.",
-                    "badges": ["Second Place", "In-Person"],
-                    "images": [
-                        {
-                            "label": "Itémon 2nd Place",
-                            "path": "assets/tab-panels/scrapyard_hackathon.webp"
-                        }
-                    ],
-                    "link": [
-                        {
-                            "label": "GitHub",
-                            "url": "https://github.com/Toricane/itemon"
-                        },
-                        {
-                            "label": "Hackathon Website",
-                            "url": "https://scrapyard.bcydc.ca/"
-                        }
-                    ],
-                    "gold": true
-                }
-            ]
+          "label": "[award] Ingenious+ Regional Award CAD$1K",
+          "url": "#awards/ingenious-regional-grant-cad1k"
         },
         {
-            "when": "2025/01",
-            "items": [
-                {
-                    "name": "nwHacks 2025 – Genimo",
-                    "from": "nwHacks 2025",
-                    "description": "AI + animation tool converting user text into educational animations (Generate + Manim).",
-                    "badges": ["In-Person"],
-                    "images": [
-                        {
-                            "label": "My teammates Jacob Lacsamana and Eric Chen!",
-                            "path": "assets/tab-panels/nwhacks_hackathon.webp"
-                        }
-                    ],
-                    "link": [
-                        {
-                            "label": "Devpost",
-                            "url": "https://devpost.com/software/genimo"
-                        },
-                        {
-                            "label": "GitHub",
-                            "url": "https://github.com/falldownstairs/Genimo"
-                        },
-                        {
-                            "label": "Hackathon Website",
-                            "url": "https://2025.nwhacks.io/"
-                        }
-                    ]
-                }
-            ]
+          "label": "AI Voice Project",
+          "date": "2024/03/03",
+          "url": "https://www.linkedin.com/posts/prajwal-prashanth_create-your-own-ai-voice-assistant-for-free-activity-7169593571602362368-Rn7y"
         },
         {
-            "when": "2024/11",
-            "items": [
-                {
-                    "name": "Hack For Youth – TimeCraft (1st Place)",
-                    "from": "Hack For Youth 2024",
-                    "description": "Calendar + AI chatbot for intelligent time management integrating Google Calendar.",
-                    "badges": ["Winner", "In-Person"],
-                    "images": [
-                        {
-                            "label": "TimeCraft 1st Place",
-                            "path": "assets/tab-panels/hack4youth_hackathon.webp"
-                        }
-                    ],
-                    "link": [
-                        {
-                            "label": "Devpost",
-                            "url": "https://devpost.com/software/timecraft-wgcb0u"
-                        },
-                        {
-                            "label": "GitHub",
-                            "url": "https://github.com/Toricane/timecraft"
-                        },
-                        {
-                            "label": "Hackathon Website",
-                            "url": "https://hack-for-youth.devpost.com/"
-                        }
-                    ],
-                    "gold": true
-                }
-            ]
+          "label": "Ingenious+ Regional Award CAD$1K",
+          "date": "2024/04/16",
+          "url": "https://www.linkedin.com/posts/prajwal-prashanth_last-tuesday-i-had-the-incredible-opportunity-activity-7188737473236160513-mCiZ"
         },
         {
-            "when": "2024/09",
-            "summary": "Two hackathons with AI-focused projects",
-            "items": [
-                {
-                    "name": "Hack the North 2024 – DaVinci Solve",
-                    "from": "Hack the North 2024",
-                    "description": "AI interview simulation app for CS majors (Gradio, Groq, OpenAI).",
-                    "badges": ["In-Person"],
-                    "images": [
-                        {
-                            "label": "Won MASV Challenge 2nd place with Leonardo Zhou!",
-                            "path": "assets/tab-panels/hackthenorth_hackathon.webp"
-                        }
-                    ],
-                    "link": [
-                        {
-                            "label": "Devpost",
-                            "url": "https://devpost.com/software/davinci-solve"
-                        },
-                        {
-                            "label": "GitHub",
-                            "url": "https://github.com/luckyducky037/DaVinci-Solve"
-                        },
-                        {
-                            "label": "Hackathon Website",
-                            "url": "https://2024.hackthenorth.com/"
-                        }
-                    ],
-                    "silver": true
-                },
-                {
-                    "name": "yvrHacks – yeetup (Honourable Mention)",
-                    "from": "yvrHacks 2024",
-                    "description": "AI‑first natural language interface to discover youth events & meetups (Groq).",
-                    "badges": ["Honourable Mention", "In-Person"],
-                    "images": [
-                        {
-                            "label": "yeetup Honourable Mention",
-                            "path": "assets/tab-panels/yvrhacks_hackathon.webp"
-                        }
-                    ],
-                    "link": [
-                        {
-                            "label": "Devpost",
-                            "url": "https://devpost.com/software/yeetup"
-                        },
-                        {
-                            "label": "Demo Video",
-                            "url": "https://www.loom.com/share/ade389ebef6f4ae2a47d585ab6ec850b?sid=50f8440b-03b6-4edf-996f-d6cc1a8911eb"
-                        },
-                        {
-                            "label": "GitHub",
-                            "url": "https://github.com/Toricane/yeetup"
-                        },
-                        {
-                            "label": "Hackathon Website",
-                            "url": "https://yvrhacks.bcydc.ca/"
-                        }
-                    ],
-                    "silver": true
-                }
-            ]
+          "label": "1st Demo (500 reactions)",
+          "date": "2024/04/28",
+          "url": "https://www.linkedin.com/posts/prajwal-prashanth_demo-video-of-my-jarvis-project-jarvis-activity-7190196909771268096-mV2p"
+        },
+        {
+          "label": "AI Meetup Demo",
+          "date": "2024/05/30",
+          "url": "https://www.linkedin.com/posts/prajwal-prashanth_second-demo-video-of-my-jarvis-project-with-activity-7204007352314851329-QSDR"
+        },
+        {
+          "label": "TKS Showcase Demo",
+          "date": "2024/06/09",
+          "url": "https://www.linkedin.com/posts/prajwal-prashanth_on-sunday-june-9th-i-demoed-my-jarvis-project-activity-7209208311588528129-9Qt-"
+        },
+        {
+          "label": "BCYDC Spotlight Demo",
+          "date": "2024/06/27",
+          "url": "https://www.linkedin.com/posts/bcydc_ai-innovation-tech-activity-7216507096656199680-Gqqm"
+        },
+        {
+          "label": "2nd AI Meetup Demo",
+          "date": "2024/06/27",
+          "url": "https://www.linkedin.com/posts/prajwal-prashanth_last-night-at-the-june-future-proof-creatives-activity-7214142470563975170-4g_L"
+        },
+        {
+          "label": "2nd Prototype Demo",
+          "date": "2024/08/29",
+          "url": "https://www.linkedin.com/posts/prajwal-prashanth_vancouverai-futureproofcreatives-healthcarerevolution-activity-7236979912601964544-gUnx"
+        },
+        {
+          "label": "TKS Focus Showcase",
+          "date": "2024/12/19",
+          "url": "https://tksworld.notion.site/JARVIS-AI-Voice-Assistant-with-Vision-for-the-Visually-Impaired-15cb825036e280a1b04bc4b23943b625"
         }
-    ],
-    "awards": [
+      ]
+    },
+    {
+      "title": "Google Internal Announcements RAG MVP",
+      "live": false,
+      "from": "Google Canada Challenge Winner",
+      "start-date": "2023/12/01",
+      "end-date": "2024/08/06",
+      "description": "Personalized announcements + question answering by integrating Gemini with internal docs (RAG) for sales teams; selected top 3/100+ & ranked #1 in final judging by the Global Head of Partnerships with Google Canada.",
+      "tags": ["LLM", "RAG", "Product"],
+      "images": [
         {
-            "when": "2025/06",
-            "summary": "Graduation awards and academic achievements",
-            "items": [
-                {
-                    "name": "Class Valedictorian",
-                    "from": "MacNeill Secondary",
-                    "description": "Chosen to deliver farewell speech (GPA 96.43%).",
-                    "tags": ["Academic", "Leadership"],
-                    "link": "",
-                    "images": [
-                        {
-                            "label": "I'm giving the Valedictorian speech!",
-                            "path": "assets/tab-panels/valedictorian_speech.webp"
-                        },
-                        {
-                            "label": "Class Valedictorian",
-                            "path": "assets/tab-panels/class_valedictorian.webp"
-                        },
-                        {
-                            "label": "Valedictorian board",
-                            "path": "assets/tab-panels/valedictorian_board.webp"
-                        },
-                        {
-                            "label": "Valedictorian Certificate",
-                            "path": "assets/tab-panels/valedictorian_certificate.webp"
-                        },
-                        {
-                            "label": "Certificate from MP",
-                            "path": "assets/tab-panels/mp_valedictorian_certificate.webp"
-                        }
-                    ],
-                    "gold": true
-                },
-                {
-                    "name": "Certificate of Distinction – CSMC",
-                    "from": "CEMC, University of Waterloo",
-                    "description": "Top 25% Canadian Senior Mathematics Contest.",
-                    "tags": ["Math", "Contest"],
-                    "link": "",
-                    "images": [
-                        {
-                            "label": "CSMC Certificate",
-                            "path": "assets/tab-panels/csmc_distinction.webp"
-                        }
-                    ]
-                },
-                {
-                    "name": "Jean Myron Memorial Scholarship (CAD$2K)",
-                    "from": "Richmond Retired Teachers' Association",
-                    "description": "Scholarship for outstanding achievement 2024–25.",
-                    "tags": ["Scholarship"],
-                    "link": "",
-                    "images": [
-                        {
-                            "label": "Scholarship Certificate",
-                            "path": "assets/tab-panels/jean_myron.webp"
-                        }
-                    ]
-                },
-                {
-                    "name": "Level 2 Service Award (75+ hrs)",
-                    "from": "MacNeill Secondary",
-                    "description": "75+ service hours (2024–25).",
-                    "tags": ["Service"],
-                    "link": "",
-                    "images": [
-                        {
-                            "label": "Level 2 Service Award Certificate",
-                            "path": "assets/tab-panels/level_2_g12.webp"
-                        }
-                    ]
-                },
-                {
-                    "name": "Top Raven Award (Gr.12)",
-                    "from": "MacNeill Secondary",
-                    "description": "Highest award: academics, citizenship, school spirit.",
-                    "tags": ["Academic", "Citizenship"],
-                    "link": "",
-                    "images": [
-                        {
-                            "label": "Top Raven Trophy",
-                            "path": "assets/tab-panels/top_raven_g12_trophy.webp"
-                        },
-                        {
-                            "label": "Top Raven Award Certificate",
-                            "path": "assets/tab-panels/top_raven_g12_certificate.webp"
-                        }
-                    ],
-                    "gold": true
-                },
-                {
-                    "name": "Top Senior Science Student",
-                    "from": "MacNeill Secondary",
-                    "description": "Excellence & potential in senior sciences.",
-                    "tags": ["Science", "Academic"],
-                    "link": "",
-                    "images": [
-                        {
-                            "label": "Top Senior Science Student Trophy",
-                            "path": "assets/tab-panels/top_senior_science_trophy.webp"
-                        },
-                        {
-                            "label": "Top Senior Science Student Certificate",
-                            "path": "assets/tab-panels/top_senior_science_certificate.webp"
-                        }
-                    ],
-                    "silver": true
-                },
-                {
-                    "name": "Top Mathematics 12 Award",
-                    "from": "MacNeill Secondary",
-                    "description": "Top marks AP Calc AB + self‑studied BC.",
-                    "tags": ["Math", "Academic"],
-                    "link": "",
-                    "images": [
-                        {
-                            "label": "Top Math 12 Certificate",
-                            "path": "assets/tab-panels/top_math_12_g12.webp"
-                        }
-                    ],
-                    "silver": true
-                },
-                {
-                    "name": "Top Science 12 Award",
-                    "from": "MacNeill Secondary",
-                    "description": "AP Chem 97%, Chem 12 97%, Physics 12 96%.",
-                    "tags": ["Science", "Academic"],
-                    "link": "",
-                    "images": [
-                        {
-                            "label": "Top Science 12 Certificate",
-                            "path": "assets/tab-panels/top_science_12.webp"
-                        }
-                    ],
-                    "silver": true
-                }
-            ]
-        },
-        {
-            "when": "2025/05",
-            "summary": "Contest distinctions in chemistry and physics",
-            "items": [
-                {
-                    "name": "Distinction – Chem 13 News Exam",
-                    "from": "CEMC, University of Waterloo",
-                    "description": "Top 20% internationally.",
-                    "tags": ["Chemistry", "Contest"],
-                    "images": [
-                        {
-                            "label": "Chem 13 News Distinction Certificate",
-                            "path": "assets/tab-panels/chem_13_news_distinction.webp"
-                        }
-                    ],
-                    "link": ""
-                },
-                {
-                    "name": "Distinction – Sir Isaac Newton Exam",
-                    "from": "University of Waterloo Faculty of Science",
-                    "description": "Physics contest distinction (2025).",
-                    "tags": ["Physics", "Contest"],
-                    "images": [
-                        {
-                            "label": "Sir Isaac Newton Exam Distinction Certificate",
-                            "path": "assets/tab-panels/sin_certificate.webp"
-                        }
-                    ],
-                    "link": ""
-                }
-            ]
-        },
-        {
-            "when": "2024/06",
-            "summary": "Grade 11 academic excellence and contest achievements",
-            "items": [
-                {
-                    "name": "Certificate of Distinction – Fermat",
-                    "from": "CEMC, University of Waterloo",
-                    "description": "Top 25% Fermat contest.",
-                    "tags": ["Math", "Contest"],
-                    "images": [
-                        {
-                            "label": "Fermat Distinction Certificate",
-                            "path": "assets/tab-panels/fermat_certificate.webp"
-                        }
-                    ],
-                    "link": ""
-                },
-                {
-                    "name": "CCC Junior Honour Roll",
-                    "from": "CEMC, University of Waterloo",
-                    "description": "Score 66/75 (Group 3).",
-                    "tags": ["Programming", "Contest"],
-                    "link": "https://cemc.uwaterloo.ca/sites/default/files/documents/2024/2024CCCResults.pdf"
-                },
-                {
-                    "name": "Level 2 Service Award (60+ hrs)",
-                    "from": "MacNeill Secondary",
-                    "description": "60+ service hours (2023–24).",
-                    "tags": ["Service"],
-                    "images": [
-                        {
-                            "label": "Level 2 Service Award Certificate",
-                            "path": "assets/tab-panels/level_2_g11.webp"
-                        }
-                    ],
-                    "link": ""
-                },
-                {
-                    "name": "Top Academic Award (Gr.11)",
-                    "from": "MacNeill Secondary",
-                    "description": "96.75% average over 8 courses.",
-                    "tags": ["Academic"],
-                    "images": [
-                        {
-                            "label": "Top Academic Award Trophy",
-                            "path": "assets/tab-panels/top_academic_g11_trophy.webp"
-                        },
-                        {
-                            "label": "Top Academic Award Certificate",
-                            "path": "assets/tab-panels/top_academic_g11.webp"
-                        }
-                    ],
-                    "link": "",
-                    "gold": true
-                },
-                {
-                    "name": "Top French 11 Award",
-                    "from": "MacNeill Secondary",
-                    "description": "Highest French 11 marks.",
-                    "tags": ["Language", "Academic"],
-                    "images": [
-                        {
-                            "label": "Top French 11 Award Certificate",
-                            "path": "assets/tab-panels/top_french_g11.webp"
-                        }
-                    ],
-                    "link": "",
-                    "silver": true
-                },
-                {
-                    "name": "Top Mathematics 12 (Gr.11)",
-                    "from": "MacNeill Secondary",
-                    "description": "Highest Pre‑Calculus 12 while in Gr.11.",
-                    "tags": ["Math", "Academic"],
-                    "images": [
-                        {
-                            "label": "Top Math 12 (Gr.11) Award Certificate",
-                            "path": "assets/tab-panels/top_math_12_g11.webp"
-                        }
-                    ],
-                    "link": "",
-                    "silver": true
-                },
-                {
-                    "name": "Top Science 11 Award",
-                    "from": "MacNeill Secondary",
-                    "description": "Chem 100%, Phys 99% (Gr.11).",
-                    "tags": ["Science", "Academic"],
-                    "images": [
-                        {
-                            "label": "Top Science 11 Award Certificate",
-                            "path": "assets/tab-panels/top_science_11.webp"
-                        }
-                    ],
-                    "link": "",
-                    "silver": true
-                }
-            ]
-        },
-        {
-            "when": "2024/05",
-            "items": [
-                {
-                    "name": "Distinction – Sir Isaac Newton Exam",
-                    "from": "University of Waterloo Faculty of Science",
-                    "description": "282/3077 worldwide; 3rd school (Gr.11).",
-                    "tags": ["Physics", "Contest"],
-                    "images": [
-                        {
-                            "label": "Sir Isaac Newton Exam Distinction Certificate",
-                            "path": "assets/tab-panels/sin_certificate_g11.webp"
-                        }
-                    ],
-                    "link": ""
-                }
-            ]
-        },
-        {
-            "when": "2024/04",
-            "items": [
-                {
-                    "name": "Ingenious+ Regional Grant (CAD$1K)",
-                    "from": "Ingenious+",
-                    "description": "Funding for JARVIS project.",
-                    "tags": ["Grant", "AI"],
-                    "images": [
-                        {
-                            "label": "Photo with Lieutenant Governor of BC",
-                            "path": "assets/tab-panels/ingenious_plus_photo.webp"
-                        },
-                        {
-                            "label": "Ingenious+ Regional Award Certificate",
-                            "path": "assets/tab-panels/ingenious_plus.webp"
-                        }
-                    ],
-                    "link": [
-                        {
-                            "label": "[project] JARVIS for the Visually Impaired",
-                            "url": "#projects/jarvis-for-the-visually-impaired"
-                        },
-                        {
-                            "label": "Ingenious+ 2024 Regional Winners",
-                            "url": "https://ingeniousplus.ca/celebrating-the-ingenious-2024-innovation-challenge-regional-winners/#:~:text=JARVIS%20for%20the,about%20their%20surroundings."
-                        }
-                    ],
-                    "gold": true
-                }
-            ]
-        },
-        {
-            "when": "2023/06",
-            "summary": "Grade 10 academic excellence and achievements",
-            "items": [
-                {
-                    "name": "Exceptional Service Award (80+ hrs)",
-                    "from": "MacNeill Secondary",
-                    "description": "80+ service hours (2022–23).",
-                    "tags": ["Service"],
-                    "images": [
-                        {
-                            "label": "Exceptional Service Award Certificate",
-                            "path": "assets/tab-panels/exceptional_service_g10.webp"
-                        }
-                    ],
-                    "link": ""
-                },
-                {
-                    "name": "Top Academic Award (Gr.10)",
-                    "from": "MacNeill Secondary",
-                    "description": "95.5% average over 8 courses.",
-                    "tags": ["Academic"],
-                    "images": [
-                        {
-                            "label": "Top Academic Award Trophy",
-                            "path": "assets/tab-panels/top_academic_g10_trophy.webp"
-                        },
-                        {
-                            "label": "Top Academic Award Certificate",
-                            "path": "assets/tab-panels/top_academic_g10.webp"
-                        }
-                    ],
-                    "link": "",
-                    "gold": true
-                },
-                {
-                    "name": "Top French 10 Award",
-                    "from": "MacNeill Secondary",
-                    "description": "Highest French 10 marks.",
-                    "tags": ["Language", "Academic"],
-                    "images": [
-                        {
-                            "label": "Top French 10 Award Certificate",
-                            "path": "assets/tab-panels/top_french_g10.webp"
-                        }
-                    ],
-                    "link": "",
-                    "silver": true
-                },
-                {
-                    "name": "Top Math 11 (Gr.10)",
-                    "from": "MacNeill Secondary",
-                    "description": "Highest Grade 11 math while in Gr.10.",
-                    "tags": ["Math", "Academic"],
-                    "images": [
-                        {
-                            "label": "Top Math 11 (Gr.10) Award Certificate",
-                            "path": "assets/tab-panels/top_math_11_g10.webp"
-                        }
-                    ],
-                    "link": "",
-                    "gold": true
-                },
-                {
-                    "name": "Top Raven Award (Gr.10)",
-                    "from": "MacNeill Secondary",
-                    "description": "Highest award: academics & contribution.",
-                    "tags": ["Academic", "Citizenship"],
-                    "images": [
-                        {
-                            "label": "Top Raven Trophy",
-                            "path": "assets/tab-panels/top_raven_g10_trophy.webp"
-                        },
-                        {
-                            "label": "Top Raven Award Certificate",
-                            "path": "assets/tab-panels/top_raven_g10_certificate.webp"
-                        }
-                    ],
-                    "link": "",
-                    "gold": true
-                },
-                {
-                    "name": "Top Science 10 Award",
-                    "from": "MacNeill Secondary",
-                    "description": "Highest Grade 10 science marks.",
-                    "tags": ["Science", "Academic"],
-                    "images": [
-                        {
-                            "label": "Top Science 10 Award Certificate",
-                            "path": "assets/tab-panels/top_science_10.webp"
-                        }
-                    ],
-                    "link": "",
-                    "silver": true
-                },
-                {
-                    "name": "Distinction – Cayley Contest",
-                    "from": "CEMC, University of Waterloo",
-                    "description": "Top 25% Cayley math contest.",
-                    "tags": ["Math", "Contest"],
-                    "images": [
-                        {
-                            "label": "Cayley Distinction Certificate",
-                            "path": "assets/tab-panels/cayley_certificate.webp"
-                        }
-                    ],
-                    "link": ""
-                }
-            ]
-        },
-        {
-            "when": "2022/06",
-            "summary": "Grade 9 academic achievements",
-            "items": [
-                {
-                    "name": "School Champion – Pascal Contest (Champion)",
-                    "from": "CEMC, University of Waterloo",
-                    "description": "Top 25% & school champion Pascal.",
-                    "tags": ["Math", "Contest"],
-                    "images": [
-                        {
-                            "label": "Pascal School Champion Medal",
-                            "path": "assets/tab-panels/pascal_champion.webp"
-                        },
-                        {
-                            "label": "Pascal Distinction Certificate",
-                            "path": "assets/tab-panels/pascal_certificate.webp"
-                        }
-                    ],
-                    "link": "",
-                    "silver": true
-                },
-                {
-                    "name": "Top Social Studies 9 Award",
-                    "from": "MacNeill Secondary",
-                    "description": "Highest Social Studies 9 marks.",
-                    "tags": ["Academic", "Social Studies"],
-                    "images": [
-                        {
-                            "label": "Top Social Studies 9 Award Certificate",
-                            "path": "assets/tab-panels/top_socials_9.webp"
-                        }
-                    ],
-                    "link": "",
-                    "silver": true
-                }
-            ]
+          "label": "Presentation first slide",
+          "path": "assets/tab-panels/google_internal_announcements_1.webp"
         }
-    ]
+      ],
+      "silver": true,
+      "link": [
+        {
+          "label": "First part of presentation",
+          "date": "2024/08/06",
+          "url": "https://www.loom.com/share/376a027ba4e14d12a448110c923124a2?sid=6cf7e0a9-0546-48dc-aa97-7c9a7c1243e3"
+        },
+        {
+          "label": "Second part of presentation",
+          "date": "2024/08/06",
+          "url": "https://www.loom.com/share/266440363ad644e49b8133d3be4a6fe1?sid=fd29156c-f2a4-4d71-8b2f-8a2f295f0a65"
+        },
+        {
+          "label": "Third part of presentation",
+          "date": "2024/08/06",
+          "url": "https://www.loom.com/share/69bd7be5866142cb9308d1e192e18836?sid=9c133ebe-a1f4-4efb-b9d9-763efea1ef0f"
+        }
+      ]
+    },
+    {
+      "title": "Peter Pan: Longevity for Everyone",
+      "live": false,
+      "from": "Team Research",
+      "start-date": "2024/04/01",
+      "end-date": "2024/10/01",
+      "description": "Researched mitochondrial theory of aging; built MVP system to help stabilize blood glucose for accessible lifespan improvement; pitched to 3 VCs.",
+      "tags": ["Health", "Research", "Bio"],
+      "images": [
+        {
+          "label": "Presentation first slide",
+          "path": "assets/tab-panels/peter_pan_1.webp"
+        }
+      ],
+      "link": [
+        { "label": "Website", "url": "https://peterpan-ai.com/" },
+        {
+          "label": "GitHub",
+          "url": "https://github.com/Toricane/peterpan-ai"
+        }
+      ]
+    },
+    {
+      "title": "CalendAI",
+      "live": false,
+      "from": "buildspace / Community Meetup Demo",
+      "start-date": "2024/06/01",
+      "end-date": "2024/07/01",
+      "description": "Chrome extension integrating Gemini with Google Calendar to plan weeks & schedule events via natural language; demoed at Vancouver AI Community Meetup.",
+      "tags": ["Chrome Ext", "AI", "Productivity"],
+      "images": [
+        {
+          "label": "CalendAI presentation at an AI meetup in Vancouver",
+          "path": "assets/tab-panels/calendai_demo.webp",
+          "face": true
+        },
+        {
+          "label": "Met Rahul Behal, co-founder of Gumloop!",
+          "path": "assets/tab-panels/rahul_behal.webp",
+          "face": true
+        },
+        {
+          "label": "Met Max Brodeur-Urbas, co-founder of Gumloop!",
+          "path": "assets/tab-panels/max_brodeur-urbas.webp",
+          "face": true
+        },
+        {
+          "label": "buildspace idea",
+          "path": "assets/tab-panels/buildspace_idea.webp"
+        }
+      ],
+      "gold": true,
+      "link": [
+        {
+          "label": "Demo Tweet",
+          "url": "https://x.com/PrajwalP028/status/1808191827066917032"
+        },
+        {
+          "label": "GitHub",
+          "url": "https://github.com/Toricane/calendai"
+        }
+      ]
+    }
+  ],
+  "hackathons": [
+    {
+      "when": "2025/03",
+      "items": [
+        {
+          "name": "Scrapyard Vancouver – Itémon (2nd Place)",
+          "from": "Scrapyard Vancouver 2025",
+          "description": "Interactive AI game resembling Pokémon with real‑world items; placed 2nd among 100+ participants.",
+          "badges": ["Second Place", "In-Person"],
+          "images": [
+            {
+              "label": "Itémon 2nd Place",
+              "path": "assets/tab-panels/scrapyard_hackathon.webp",
+              "face": true
+            }
+          ],
+          "link": [
+            {
+              "label": "GitHub",
+              "url": "https://github.com/Toricane/itemon"
+            },
+            {
+              "label": "Hackathon Website",
+              "url": "https://scrapyard.bcydc.ca/"
+            }
+          ],
+          "gold": true
+        }
+      ]
+    },
+    {
+      "when": "2025/01",
+      "items": [
+        {
+          "name": "nwHacks 2025 – Genimo",
+          "from": "nwHacks 2025",
+          "description": "AI + animation tool converting user text into educational animations (Generate + Manim).",
+          "badges": ["In-Person"],
+          "images": [
+            {
+              "label": "My teammates Jacob Lacsamana and Eric Chen!",
+              "path": "assets/tab-panels/nwhacks_hackathon.webp",
+              "face": true
+            }
+          ],
+          "link": [
+            {
+              "label": "Devpost",
+              "url": "https://devpost.com/software/genimo"
+            },
+            {
+              "label": "GitHub",
+              "url": "https://github.com/falldownstairs/Genimo"
+            },
+            {
+              "label": "Hackathon Website",
+              "url": "https://2025.nwhacks.io/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "when": "2024/11",
+      "items": [
+        {
+          "name": "Hack For Youth – TimeCraft (1st Place)",
+          "from": "Hack For Youth 2024",
+          "description": "Calendar + AI chatbot for intelligent time management integrating Google Calendar.",
+          "badges": ["Winner", "In-Person"],
+          "images": [
+            {
+              "label": "TimeCraft 1st Place",
+              "path": "assets/tab-panels/hack4youth_hackathon.webp",
+              "face": true
+            }
+          ],
+          "link": [
+            {
+              "label": "Devpost",
+              "url": "https://devpost.com/software/timecraft-wgcb0u"
+            },
+            {
+              "label": "GitHub",
+              "url": "https://github.com/Toricane/timecraft"
+            },
+            {
+              "label": "Hackathon Website",
+              "url": "https://hack-for-youth.devpost.com/"
+            }
+          ],
+          "gold": true
+        }
+      ]
+    },
+    {
+      "when": "2024/09",
+      "summary": "Two hackathons with AI-focused projects",
+      "items": [
+        {
+          "name": "Hack the North 2024 – DaVinci Solve",
+          "from": "Hack the North 2024",
+          "description": "AI interview simulation app for CS majors (Gradio, Groq, OpenAI).",
+          "badges": ["In-Person"],
+          "images": [
+            {
+              "label": "Won MASV Challenge 2nd place with Leonardo Zhou!",
+              "path": "assets/tab-panels/hackthenorth_hackathon.webp",
+              "face": true
+            }
+          ],
+          "link": [
+            {
+              "label": "Devpost",
+              "url": "https://devpost.com/software/davinci-solve"
+            },
+            {
+              "label": "GitHub",
+              "url": "https://github.com/luckyducky037/DaVinci-Solve"
+            },
+            {
+              "label": "Hackathon Website",
+              "url": "https://2024.hackthenorth.com/"
+            }
+          ],
+          "silver": true
+        },
+        {
+          "name": "yvrHacks – yeetup (Honourable Mention)",
+          "from": "yvrHacks 2024",
+          "description": "AI‑first natural language interface to discover youth events & meetups (Groq).",
+          "badges": ["Honourable Mention", "In-Person"],
+          "images": [
+            {
+              "label": "yeetup Honourable Mention",
+              "path": "assets/tab-panels/yvrhacks_hackathon.webp",
+              "face": true
+            }
+          ],
+          "link": [
+            {
+              "label": "Devpost",
+              "url": "https://devpost.com/software/yeetup"
+            },
+            {
+              "label": "Demo Video",
+              "url": "https://www.loom.com/share/ade389ebef6f4ae2a47d585ab6ec850b?sid=50f8440b-03b6-4edf-996f-d6cc1a8911eb"
+            },
+            {
+              "label": "GitHub",
+              "url": "https://github.com/Toricane/yeetup"
+            },
+            {
+              "label": "Hackathon Website",
+              "url": "https://yvrhacks.bcydc.ca/"
+            }
+          ],
+          "silver": true
+        }
+      ]
+    }
+  ],
+  "awards": [
+    {
+      "when": "2025/06",
+      "summary": "Graduation awards and academic achievements",
+      "items": [
+        {
+          "name": "Class Valedictorian",
+          "from": "MacNeill Secondary",
+          "description": "Chosen to deliver farewell speech (GPA 96.43%).",
+          "tags": ["Academic", "Leadership"],
+          "link": "",
+          "images": [
+            {
+              "label": "I'm giving the Valedictorian speech!",
+              "path": "assets/tab-panels/valedictorian_speech.webp",
+              "face": true
+            },
+            {
+              "label": "Class Valedictorian",
+              "path": "assets/tab-panels/class_valedictorian.webp"
+            },
+            {
+              "label": "Valedictorian board",
+              "path": "assets/tab-panels/valedictorian_board.webp"
+            },
+            {
+              "label": "Valedictorian Certificate",
+              "path": "assets/tab-panels/valedictorian_certificate.webp"
+            },
+            {
+              "label": "Certificate from MP",
+              "path": "assets/tab-panels/mp_valedictorian_certificate.webp"
+            }
+          ],
+          "gold": true
+        },
+        {
+          "name": "Certificate of Distinction – CSMC",
+          "from": "CEMC, University of Waterloo",
+          "description": "Top 25% Canadian Senior Mathematics Contest.",
+          "tags": ["Math", "Contest"],
+          "link": "",
+          "images": [
+            {
+              "label": "CSMC Certificate",
+              "path": "assets/tab-panels/csmc_distinction.webp"
+            }
+          ]
+        },
+        {
+          "name": "Jean Myron Memorial Scholarship (CAD$2K)",
+          "from": "Richmond Retired Teachers' Association",
+          "description": "Scholarship for outstanding achievement 2024–25.",
+          "tags": ["Scholarship"],
+          "link": "",
+          "images": [
+            {
+              "label": "Scholarship Certificate",
+              "path": "assets/tab-panels/jean_myron.webp"
+            }
+          ]
+        },
+        {
+          "name": "Level 2 Service Award (75+ hrs)",
+          "from": "MacNeill Secondary",
+          "description": "75+ service hours (2024–25).",
+          "tags": ["Service"],
+          "link": "",
+          "images": [
+            {
+              "label": "Level 2 Service Award Certificate",
+              "path": "assets/tab-panels/level_2_g12.webp"
+            }
+          ]
+        },
+        {
+          "name": "Top Raven Award (Gr.12)",
+          "from": "MacNeill Secondary",
+          "description": "Highest award: academics, citizenship, school spirit.",
+          "tags": ["Academic", "Citizenship"],
+          "link": "",
+          "images": [
+            {
+              "label": "Top Raven Trophy",
+              "path": "assets/tab-panels/top_raven_g12_trophy.webp"
+            },
+            {
+              "label": "Top Raven Award Certificate",
+              "path": "assets/tab-panels/top_raven_g12_certificate.webp"
+            }
+          ],
+          "gold": true
+        },
+        {
+          "name": "Top Senior Science Student",
+          "from": "MacNeill Secondary",
+          "description": "Excellence & potential in senior sciences.",
+          "tags": ["Science", "Academic"],
+          "link": "",
+          "images": [
+            {
+              "label": "Top Senior Science Student Trophy",
+              "path": "assets/tab-panels/top_senior_science_trophy.webp"
+            },
+            {
+              "label": "Top Senior Science Student Certificate",
+              "path": "assets/tab-panels/top_senior_science_certificate.webp"
+            }
+          ],
+          "silver": true
+        },
+        {
+          "name": "Top Mathematics 12 Award",
+          "from": "MacNeill Secondary",
+          "description": "Top marks AP Calc AB + self‑studied BC.",
+          "tags": ["Math", "Academic"],
+          "link": "",
+          "images": [
+            {
+              "label": "Top Math 12 Certificate",
+              "path": "assets/tab-panels/top_math_12_g12.webp"
+            }
+          ],
+          "silver": true
+        },
+        {
+          "name": "Top Science 12 Award",
+          "from": "MacNeill Secondary",
+          "description": "AP Chem 97%, Chem 12 97%, Physics 12 96%.",
+          "tags": ["Science", "Academic"],
+          "link": "",
+          "images": [
+            {
+              "label": "Top Science 12 Certificate",
+              "path": "assets/tab-panels/top_science_12.webp"
+            }
+          ],
+          "silver": true
+        }
+      ]
+    },
+    {
+      "when": "2025/05",
+      "summary": "Contest distinctions in chemistry and physics",
+      "items": [
+        {
+          "name": "Distinction – Chem 13 News Exam",
+          "from": "CEMC, University of Waterloo",
+          "description": "Top 20% internationally.",
+          "tags": ["Chemistry", "Contest"],
+          "images": [
+            {
+              "label": "Chem 13 News Distinction Certificate",
+              "path": "assets/tab-panels/chem_13_news_distinction.webp"
+            }
+          ],
+          "link": ""
+        },
+        {
+          "name": "Distinction – Sir Isaac Newton Exam",
+          "from": "University of Waterloo Faculty of Science",
+          "description": "Physics contest distinction (2025).",
+          "tags": ["Physics", "Contest"],
+          "images": [
+            {
+              "label": "Sir Isaac Newton Exam Distinction Certificate",
+              "path": "assets/tab-panels/sin_certificate.webp"
+            }
+          ],
+          "link": ""
+        }
+      ]
+    },
+    {
+      "when": "2024/06",
+      "summary": "Grade 11 academic excellence and contest achievements",
+      "items": [
+        {
+          "name": "Certificate of Distinction – Fermat",
+          "from": "CEMC, University of Waterloo",
+          "description": "Top 25% Fermat contest.",
+          "tags": ["Math", "Contest"],
+          "images": [
+            {
+              "label": "Fermat Distinction Certificate",
+              "path": "assets/tab-panels/fermat_certificate.webp"
+            }
+          ],
+          "link": ""
+        },
+        {
+          "name": "CCC Junior Honour Roll",
+          "from": "CEMC, University of Waterloo",
+          "description": "Score 66/75 (Group 3).",
+          "tags": ["Programming", "Contest"],
+          "link": "https://cemc.uwaterloo.ca/sites/default/files/documents/2024/2024CCCResults.pdf"
+        },
+        {
+          "name": "Level 2 Service Award (60+ hrs)",
+          "from": "MacNeill Secondary",
+          "description": "60+ service hours (2023–24).",
+          "tags": ["Service"],
+          "images": [
+            {
+              "label": "Level 2 Service Award Certificate",
+              "path": "assets/tab-panels/level_2_g11.webp"
+            }
+          ],
+          "link": ""
+        },
+        {
+          "name": "Top Academic Award (Gr.11)",
+          "from": "MacNeill Secondary",
+          "description": "96.75% average over 8 courses.",
+          "tags": ["Academic"],
+          "images": [
+            {
+              "label": "Top Academic Award Trophy",
+              "path": "assets/tab-panels/top_academic_g11_trophy.webp"
+            },
+            {
+              "label": "Top Academic Award Certificate",
+              "path": "assets/tab-panels/top_academic_g11.webp"
+            }
+          ],
+          "link": "",
+          "gold": true
+        },
+        {
+          "name": "Top French 11 Award",
+          "from": "MacNeill Secondary",
+          "description": "Highest French 11 marks.",
+          "tags": ["Language", "Academic"],
+          "images": [
+            {
+              "label": "Top French 11 Award Certificate",
+              "path": "assets/tab-panels/top_french_g11.webp"
+            }
+          ],
+          "link": "",
+          "silver": true
+        },
+        {
+          "name": "Top Mathematics 12 (Gr.11)",
+          "from": "MacNeill Secondary",
+          "description": "Highest Pre‑Calculus 12 while in Gr.11.",
+          "tags": ["Math", "Academic"],
+          "images": [
+            {
+              "label": "Top Math 12 (Gr.11) Award Certificate",
+              "path": "assets/tab-panels/top_math_12_g11.webp"
+            }
+          ],
+          "link": "",
+          "silver": true
+        },
+        {
+          "name": "Top Science 11 Award",
+          "from": "MacNeill Secondary",
+          "description": "Chem 100%, Phys 99% (Gr.11).",
+          "tags": ["Science", "Academic"],
+          "images": [
+            {
+              "label": "Top Science 11 Award Certificate",
+              "path": "assets/tab-panels/top_science_11.webp"
+            }
+          ],
+          "link": "",
+          "silver": true
+        }
+      ]
+    },
+    {
+      "when": "2024/05",
+      "items": [
+        {
+          "name": "Distinction – Sir Isaac Newton Exam",
+          "from": "University of Waterloo Faculty of Science",
+          "description": "282/3077 worldwide; 3rd school (Gr.11).",
+          "tags": ["Physics", "Contest"],
+          "images": [
+            {
+              "label": "Sir Isaac Newton Exam Distinction Certificate",
+              "path": "assets/tab-panels/sin_certificate_g11.webp"
+            }
+          ],
+          "link": ""
+        }
+      ]
+    },
+    {
+      "when": "2024/04",
+      "items": [
+        {
+          "name": "Ingenious+ Regional Grant (CAD$1K)",
+          "from": "Ingenious+",
+          "description": "Funding for JARVIS project.",
+          "tags": ["Grant", "AI"],
+          "images": [
+            {
+              "label": "Photo with Lieutenant Governor of BC",
+              "path": "assets/tab-panels/ingenious_plus_photo.webp",
+              "face": true
+            },
+            {
+              "label": "Ingenious+ Regional Award Certificate",
+              "path": "assets/tab-panels/ingenious_plus.webp"
+            }
+          ],
+          "link": [
+            {
+              "label": "[project] JARVIS for the Visually Impaired",
+              "url": "#projects/jarvis-for-the-visually-impaired"
+            },
+            {
+              "label": "Ingenious+ 2024 Regional Winners",
+              "url": "https://ingeniousplus.ca/celebrating-the-ingenious-2024-innovation-challenge-regional-winners/#:~:text=JARVIS%20for%20the,about%20their%20surroundings."
+            }
+          ],
+          "gold": true
+        }
+      ]
+    },
+    {
+      "when": "2023/06",
+      "summary": "Grade 10 academic excellence and achievements",
+      "items": [
+        {
+          "name": "Exceptional Service Award (80+ hrs)",
+          "from": "MacNeill Secondary",
+          "description": "80+ service hours (2022–23).",
+          "tags": ["Service"],
+          "images": [
+            {
+              "label": "Exceptional Service Award Certificate",
+              "path": "assets/tab-panels/exceptional_service_g10.webp"
+            }
+          ],
+          "link": ""
+        },
+        {
+          "name": "Top Academic Award (Gr.10)",
+          "from": "MacNeill Secondary",
+          "description": "95.5% average over 8 courses.",
+          "tags": ["Academic"],
+          "images": [
+            {
+              "label": "Top Academic Award Trophy",
+              "path": "assets/tab-panels/top_academic_g10_trophy.webp"
+            },
+            {
+              "label": "Top Academic Award Certificate",
+              "path": "assets/tab-panels/top_academic_g10.webp"
+            }
+          ],
+          "link": "",
+          "gold": true
+        },
+        {
+          "name": "Top French 10 Award",
+          "from": "MacNeill Secondary",
+          "description": "Highest French 10 marks.",
+          "tags": ["Language", "Academic"],
+          "images": [
+            {
+              "label": "Top French 10 Award Certificate",
+              "path": "assets/tab-panels/top_french_g10.webp"
+            }
+          ],
+          "link": "",
+          "silver": true
+        },
+        {
+          "name": "Top Math 11 (Gr.10)",
+          "from": "MacNeill Secondary",
+          "description": "Highest Grade 11 math while in Gr.10.",
+          "tags": ["Math", "Academic"],
+          "images": [
+            {
+              "label": "Top Math 11 (Gr.10) Award Certificate",
+              "path": "assets/tab-panels/top_math_11_g10.webp"
+            }
+          ],
+          "link": "",
+          "gold": true
+        },
+        {
+          "name": "Top Raven Award (Gr.10)",
+          "from": "MacNeill Secondary",
+          "description": "Highest award: academics & contribution.",
+          "tags": ["Academic", "Citizenship"],
+          "images": [
+            {
+              "label": "Top Raven Trophy",
+              "path": "assets/tab-panels/top_raven_g10_trophy.webp"
+            },
+            {
+              "label": "Top Raven Award Certificate",
+              "path": "assets/tab-panels/top_raven_g10_certificate.webp"
+            }
+          ],
+          "link": "",
+          "gold": true
+        },
+        {
+          "name": "Top Science 10 Award",
+          "from": "MacNeill Secondary",
+          "description": "Highest Grade 10 science marks.",
+          "tags": ["Science", "Academic"],
+          "images": [
+            {
+              "label": "Top Science 10 Award Certificate",
+              "path": "assets/tab-panels/top_science_10.webp"
+            }
+          ],
+          "link": "",
+          "silver": true
+        },
+        {
+          "name": "Distinction – Cayley Contest",
+          "from": "CEMC, University of Waterloo",
+          "description": "Top 25% Cayley math contest.",
+          "tags": ["Math", "Contest"],
+          "images": [
+            {
+              "label": "Cayley Distinction Certificate",
+              "path": "assets/tab-panels/cayley_certificate.webp"
+            }
+          ],
+          "link": ""
+        }
+      ]
+    },
+    {
+      "when": "2022/06",
+      "summary": "Grade 9 academic achievements",
+      "items": [
+        {
+          "name": "School Champion – Pascal Contest (Champion)",
+          "from": "CEMC, University of Waterloo",
+          "description": "Top 25% & school champion Pascal.",
+          "tags": ["Math", "Contest"],
+          "images": [
+            {
+              "label": "Pascal School Champion Medal",
+              "path": "assets/tab-panels/pascal_champion.webp"
+            },
+            {
+              "label": "Pascal Distinction Certificate",
+              "path": "assets/tab-panels/pascal_certificate.webp"
+            }
+          ],
+          "link": "",
+          "silver": true
+        },
+        {
+          "name": "Top Social Studies 9 Award",
+          "from": "MacNeill Secondary",
+          "description": "Highest Social Studies 9 marks.",
+          "tags": ["Academic", "Social Studies"],
+          "images": [
+            {
+              "label": "Top Social Studies 9 Award Certificate",
+              "path": "assets/tab-panels/top_socials_9.webp"
+            }
+          ],
+          "link": "",
+          "silver": true
+        }
+      ]
+    }
+  ]
 }

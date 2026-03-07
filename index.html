@@ -1,64 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Prajwal Prashanth</title>
-        <meta name="description" content="Portfolio of Prajwal Prashanth – building AI + systems projects, hackathon wins, research, and leadership.">
-        <meta name="google-site-verification" content="UyF_RbsZTLDQ2maiFwjEWrgK4hh_uB81yc0mXs0y6X0">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+        <meta
+            name="description"
+            content="Portfolio of Prajwal Prashanth – building AI + systems projects, hackathon wins, research, and leadership."
+        />
+        <meta
+            name="google-site-verification"
+            content="UyF_RbsZTLDQ2maiFwjEWrgK4hh_uB81yc0mXs0y6X0"
+        />
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/apple-touch-icon.png"
+        />
         <link
             rel="icon"
             type="image/png"
             sizes="32x32"
             href="/favicon-32x32.png"
-        >
+        />
         <link
             rel="icon"
             type="image/png"
             sizes="16x16"
             href="/favicon-16x16.png"
-        >
-        <link rel="manifest" href="/site.webmanifest">
+        />
+        <link rel="manifest" href="/site.webmanifest" />
         <link
             rel="preload"
             as="style"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-            onload="this.onload=null;this.rel='stylesheet'"
-        >
+            onload="
+                this.onload = null;
+                this.rel = 'stylesheet';
+            "
+        />
         <noscript>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+            <link
+                rel="stylesheet"
+                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+            />
         </noscript>
-        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+        <link
+            rel="preload"
+            as="style"
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        />
         <!-- Open Graph / Twitter -->
-        <meta property="og:type" content="website">
-        <meta property="og:title" content="Prajwal Prashanth">
-        <meta property="og:description" content="Student developer building AI + systems projects, turning ideas into fast, thoughtful products.">
-        <meta property="og:url" content="https://prajwal.is-a.dev">
-        <meta property="og:image" content="/apple-touch-icon.png">
-        <meta name="twitter:card" content="summary">
-        <meta name="twitter:title" content="Prajwal Prashanth">
-        <meta name="twitter:description" content="Student developer building AI + systems projects, turning ideas into fast, thoughtful products.">
-        <meta name="twitter:image" content="/apple-touch-icon.png">
-        <link rel="stylesheet" href="styles.css">
-        <link rel="modulepreload" href="scripts/components/coverflow.js">
-        <link rel="modulepreload" href="scripts/components/footnotes.js">
-        <link rel="modulepreload" href="scripts/components/imageViewer.js">
-        <link rel="modulepreload" href="scripts/components/navigation.js">
-        <link rel="modulepreload" href="scripts/components/renderProjects.js">
-        <link rel="modulepreload" href="scripts/components/renderTimeline.js">
-        <link rel="modulepreload" href="scripts/components/scrollableTabs.js">
-        <link rel="modulepreload" href="scripts/components/scrollButton.js">
-        <link rel="modulepreload" href="scripts/components/tabs.js">
-        <link rel="modulepreload" href="scripts/components/tapMode.js">
-        <link rel="modulepreload" href="scripts/components/theme.js">
-        <link rel="modulepreload" href="scripts/components/tilt.js">
-        <link rel="modulepreload" href="scripts/components/visibilityPause.js">
-        <link rel="modulepreload" href="scripts/components/widgets.js">
-        <link rel="modulepreload" href="scripts/utils/data.js">
-        <link rel="modulepreload" href="scripts/components/linksPopup.js">
-        <script type="application/ld+json">{
-            "@context":"https://schema.org","@type":"Person","name":"Prajwal Prashanth","url":"https://prajwal.is-a.dev","sameAs":["https://linkedin.com/in/prajwal-prashanth","https://github.com/Toricane","https://x.com/PrajwalP028"],"jobTitle":"Student Developer","description":"Student developer building AI + systems projects and shipping fast, thoughtful products."}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Prajwal Prashanth" />
+        <meta
+            property="og:description"
+            content="Student developer building AI + systems projects, turning ideas into fast, thoughtful products."
+        />
+        <meta property="og:url" content="https://prajwal.is-a.dev" />
+        <meta property="og:image" content="/apple-touch-icon.png" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Prajwal Prashanth" />
+        <meta
+            name="twitter:description"
+            content="Student developer building AI + systems projects, turning ideas into fast, thoughtful products."
+        />
+        <meta name="twitter:image" content="/apple-touch-icon.png" />
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="modulepreload" href="scripts/components/coverflow.js" />
+        <link rel="modulepreload" href="scripts/components/footnotes.js" />
+        <link rel="modulepreload" href="scripts/components/imageViewer.js" />
+        <link rel="modulepreload" href="scripts/components/navigation.js" />
+        <link rel="modulepreload" href="scripts/components/renderProjects.js" />
+        <link rel="modulepreload" href="scripts/components/renderTimeline.js" />
+        <link rel="modulepreload" href="scripts/components/scrollableTabs.js" />
+        <link rel="modulepreload" href="scripts/components/scrollButton.js" />
+        <link rel="modulepreload" href="scripts/components/tabs.js" />
+        <link rel="modulepreload" href="scripts/components/tapMode.js" />
+        <link rel="modulepreload" href="scripts/components/theme.js" />
+        <link rel="modulepreload" href="scripts/components/tilt.js" />
+        <link
+            rel="modulepreload"
+            href="scripts/components/visibilityPause.js"
+        />
+        <link rel="modulepreload" href="scripts/components/widgets.js" />
+        <link rel="modulepreload" href="scripts/utils/data.js" />
+        <link rel="modulepreload" href="scripts/components/linksPopup.js" />
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "Person",
+                "name": "Prajwal Prashanth",
+                "url": "https://prajwal.is-a.dev",
+                "sameAs": [
+                    "https://linkedin.com/in/prajwal-prashanth",
+                    "https://github.com/Toricane",
+                    "https://x.com/PrajwalP028"
+                ],
+                "jobTitle": "Student Developer",
+                "description": "Student developer building AI + systems projects and shipping fast, thoughtful products."
+            }
         </script>
         <script
             defer
@@ -70,7 +111,11 @@
     </head>
     <body>
         <a href="#content" class="skip-link">Skip to content</a>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <button
+            id="theme-toggle"
+            class="theme-toggle"
+            aria-label="Toggle theme"
+        >
             <i class="fas fa-moon"></i>
         </button>
         <!-- HERO / ABOVE THE FOLD -->
@@ -83,13 +128,23 @@
                         <span class="last-name">Prashanth</span>
                     </h1>
                     <p class="tagline">
-                        Hello there! I'm an incoming engineering transfer student
+                        Hello there! I'm an incoming engineering transfer
+                        student
                         <span class="footnote">
                             <sup>1</sup>
-                            <span class="footnote-content">After UBC repealed their policy for international tuition exemption, I was forced to consider alternative pathways to pursue my education.</span>
+                            <span class="footnote-content"
+                                >After UBC repealed their policy for
+                                international tuition exemption, I was forced to
+                                consider alternative pathways to pursue my
+                                education.</span
+                            >
                         </span>
                         at
-                        <a href="https://langara.ca/programs-courses/engineering-transfer-certificate" target="_blank" rel="noopener noreferrer">
+                        <a
+                            href="https://langara.ca/programs-courses/engineering-transfer-certificate"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             <img
                                 class="tag-icon"
                                 src="assets/icons/langara.webp"
@@ -97,16 +152,25 @@
                                 aria-hidden="true"
                                 width="15"
                                 height="15"
-                            >
+                            />
                             Langara College,
                         </a>
                         aiming to transfer into the Engineering Physics program
                         <span class="footnote">
                             <sup>2</sup>
-                            <span class="footnote-content">It's the perfect program for me since it combines math, physics, robotics, AI, ML, computer engineering, mechatronics, and more.</span>
+                            <span class="footnote-content"
+                                >It's the perfect program for me since it
+                                combines math, physics, robotics, AI, ML,
+                                computer engineering, mechatronics, and
+                                more.</span
+                            >
                         </span>
                         at the
-                        <a href="https://www.engphys.ubc.ca/" target="_blank" rel="noopener noreferrer">
+                        <a
+                            href="https://www.engphys.ubc.ca/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             <img
                                 class="tag-icon"
                                 src="assets/icons/ubc.webp"
@@ -114,13 +178,18 @@
                                 height="15"
                                 alt=""
                                 aria-hidden="true"
-                            >
+                            />
                             University of British Columbia.
                         </a>
-                        <br>
-                        <br>
-                        I balance building projects with strong academic performance. I've showcased projects like
-                        <a href="https://www.linkedin.com/posts/bcydc_ai-innovation-tech-activity-7216507096656199680-Gqqm/" target="_blank" rel="noopener noreferrer">
+                        <br />
+                        <br />
+                        I balance building projects with strong academic
+                        performance. I've showcased projects like
+                        <a
+                            href="https://www.linkedin.com/posts/bcydc_ai-innovation-tech-activity-7216507096656199680-Gqqm/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             <img
                                 class="tag-icon"
                                 src="assets/icons/jarvis.webp"
@@ -128,11 +197,15 @@
                                 aria-hidden="true"
                                 width="15"
                                 height="15"
-                            >
+                            />
                             JARVIS
                         </a>
                         at
-                        <a href="https://vancouver.bc-ai.net/ecosystem" target="_blank" rel="noopener noreferrer">
+                        <a
+                            href="https://vancouver.bc-ai.net/ecosystem"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             <img
                                 class="tag-icon"
                                 src="assets/icons/vancouver-ai.webp"
@@ -140,16 +213,24 @@
                                 aria-hidden="true"
                                 width="15"
                                 height="15"
-                            >
+                            />
                             Vancouver AI meetups,
                         </a>
                         built projects at hackathons
                         <span class="footnote">
                             <sup>3</sup>
-                            <span class="footnote-content">Intense, time-restrictive competitions where teams collaborate to build a software or hardware project from scratch.</span>
+                            <span class="footnote-content"
+                                >Intense, time-restrictive competitions where
+                                teams collaborate to build a software or
+                                hardware project from scratch.</span
+                            >
                         </span>
                         such as
-                        <a href="https://devpost.com/software/davinci-solve" target="_blank" rel="noopener noreferrer">
+                        <a
+                            href="https://devpost.com/software/davinci-solve"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             <img
                                 class="tag-icon"
                                 src="assets/icons/hackthenorth.webp"
@@ -157,11 +238,15 @@
                                 height="15"
                                 alt=""
                                 aria-hidden="true"
-                            >
+                            />
                             Hack the North
                         </a>
                         and
-                        <a href="https://devpost.com/software/genimo" target="_blank" rel="noopener noreferrer">
+                        <a
+                            href="https://devpost.com/software/genimo"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             <img
                                 class="tag-icon"
                                 src="assets/icons/nwhacks.webp"
@@ -169,7 +254,7 @@
                                 height="15"
                                 alt=""
                                 aria-hidden="true"
-                            >
+                            />
                             nwHacks,
                         </a>
                         and am my high school's valedictorian
@@ -178,44 +263,67 @@
                             <span class="footnote-content">Serendipity.</span>
                         </span>
                         for the Class of 2025.
-                        <br>
-                        <br>
-                        My goal is to break into the AI industry by continually learning, building, and shipping ambitious projects.
+                        <br />
+                        <br />
+                        My goal is to break into the AI industry by continually
+                        learning, building, and shipping ambitious projects.
                     </p>
-                    <div class="connections" id="connections" aria-label="Where to connect">
+                    <div
+                        class="connections"
+                        id="connections"
+                        aria-label="Where to connect"
+                    >
                         <ul>
                             <li>
-                                <a href="https://linkedin.com/in/prajwal-prashanth" aria-label="LinkedIn">
+                                <a
+                                    href="https://linkedin.com/in/prajwal-prashanth"
+                                    aria-label="LinkedIn"
+                                >
                                     <i class="fab fa-linkedin"></i>
                                     <!-- <span>LinkedIn</span> -->
                                 </a>
                             </li>
                             <li>
-                                <a href="mailto:prjwl028@gmail.com" aria-label="Email">
+                                <a
+                                    href="mailto:prjwl028@gmail.com"
+                                    aria-label="Email"
+                                >
                                     <i class="fas fa-envelope"></i>
                                     <!-- <span>Email</span> -->
                                 </a>
                             </li>
                             <li>
-                                <a href="https://github.com/Toricane" aria-label="GitHub">
+                                <a
+                                    href="https://github.com/Toricane"
+                                    aria-label="GitHub"
+                                >
                                     <i class="fab fa-github"></i>
                                     <!-- <span>GitHub</span> -->
                                 </a>
                             </li>
                             <li>
-                                <a href="https://x.com/PrajwalP028" aria-label="X / Twitter">
+                                <a
+                                    href="https://x.com/PrajwalP028"
+                                    aria-label="X / Twitter"
+                                >
                                     <i class="fab fa-x-twitter"></i>
                                     <!-- <span>X</span> -->
                                 </a>
                             </li>
                             <li>
-                                <a href="https://www.youtube.com/@prajwalp" aria-label="YouTube">
+                                <a
+                                    href="https://www.youtube.com/@prajwalp"
+                                    aria-label="YouTube"
+                                >
                                     <i class="fab fa-youtube"></i>
                                     <!-- <span>YT</span> -->
                                 </a>
                             </li>
                             <li>
-                                <a href="https://www.instagram.com/prajwal.__.p/" aria-label="Instagram">
+                                <a
+                                    href="https://www.instagram.com/prajwal.__.p/"
+                                    aria-label="Instagram"
+                                >
                                     <i class="fab fa-instagram"></i>
                                     <!-- <span>IG</span> -->
                                 </a>
@@ -235,7 +343,10 @@
                             </li> -->
                             <!-- included in the newsletter update box -->
                             <li>
-                                <a href="https://prajwal-prashanth.medium.com/" aria-label="Medium">
+                                <a
+                                    href="https://prajwal-prashanth.medium.com/"
+                                    aria-label="Medium"
+                                >
                                     <i class="fab fa-medium"></i>
                                     <!-- <span>Medium</span> -->
                                 </a>
@@ -246,89 +357,17 @@
                 </div>
                 <div class="media-col">
                     <div class="coverflow-container">
-                        <div class="coverflow-cards">
-                            <div class="coverflow-group">
-                                <div class="coverflow-card">
-                                    <img
-                                        src="assets/northernlights.webp"
-                                        alt="Prajwal portrait"
-                                        loading="lazy"
-                                        width="200"
-                                        height="280"
-                                    >
-                                </div>
-                                <div class="coverflow-card">
-                                    <img
-                                        src="assets/projects_highlight.webp"
-                                        alt="Projects showcase"
-                                        loading="lazy"
-                                        width="200"
-                                        height="280"
-                                    >
-                                </div>
-                                <div class="coverflow-card">
-                                    <img
-                                        src="assets/hackathons_highlight.webp"
-                                        alt="Hackathons showcase"
-                                        loading="lazy"
-                                        width="200"
-                                        height="280"
-                                    >
-                                </div>
-                                <div class="coverflow-card">
-                                    <img
-                                        src="assets/awards_highlight.webp"
-                                        alt="Awards showcase"
-                                        loading="lazy"
-                                        width="200"
-                                        height="280"
-                                    >
-                                </div>
-                            </div>
-                            <!-- Duplicate group for seamless infinite loop -->
-                            <div aria-hidden="true" class="coverflow-group">
-                                <div class="coverflow-card">
-                                    <img
-                                        src="assets/northernlights.webp"
-                                        alt="Prajwal portrait"
-                                        loading="lazy"
-                                        width="200"
-                                        height="280"
-                                    >
-                                </div>
-                                <div class="coverflow-card">
-                                    <img
-                                        src="assets/projects_highlight.webp"
-                                        alt="Projects showcase"
-                                        loading="lazy"
-                                        width="200"
-                                        height="280"
-                                    >
-                                </div>
-                                <div class="coverflow-card">
-                                    <img
-                                        src="assets/hackathons_highlight.webp"
-                                        alt="Hackathons showcase"
-                                        loading="lazy"
-                                        width="200"
-                                        height="280"
-                                    >
-                                </div>
-                                <div class="coverflow-card">
-                                    <img
-                                        src="assets/awards_highlight.webp"
-                                        alt="Awards showcase"
-                                        loading="lazy"
-                                        width="200"
-                                        height="280"
-                                    >
-                                </div>
-                            </div>
+                        <div class="coverflow-cards" id="coverflowCards">
+                            <!-- Dynamically populated from data.json face-tagged images -->
                         </div>
                     </div>
                 </div>
             </div>
-            <button id="scrollMore" class="scroll-more" aria-label="Scroll to content">
+            <button
+                id="scrollMore"
+                class="scroll-more"
+                aria-label="Scroll to content"
+            >
                 <i class="fas fa-chevron-down"></i>
             </button>
         </header>
@@ -343,21 +382,27 @@
                             aria-selected="true"
                             data-tab="projects"
                             data-image-alt="Highlighted project image"
-                        >Projects</button>
+                        >
+                            Projects
+                        </button>
                         <button
                             class="tab"
                             role="tab"
                             aria-selected="false"
                             data-tab="hackathons"
                             data-image-alt="Highlighted hackathon image"
-                        >Hackathons</button>
+                        >
+                            Hackathons
+                        </button>
                         <button
                             class="tab"
                             role="tab"
                             aria-selected="false"
                             data-tab="awards"
                             data-image-alt="Highlighted award image"
-                        >Awards</button>
+                        >
+                            Awards
+                        </button>
                     </div>
                 </div>
                 <div class="tab-layout">
@@ -368,7 +413,9 @@
                             role="tabpanel"
                             aria-label="Projects"
                         >
-                            <p style="font-size:.8rem;color:#6f8696">Loading projects… (enable JavaScript)</p>
+                            <p style="font-size: 0.8rem; color: #6f8696">
+                                Loading projects… (enable JavaScript)
+                            </p>
                         </div>
                         <div
                             class="tab-panel"
@@ -376,7 +423,9 @@
                             role="tabpanel"
                             aria-label="Hackathons"
                         >
-                            <p style="font-size:.8rem;color:#6f8696">Loading hackathons…</p>
+                            <p style="font-size: 0.8rem; color: #6f8696">
+                                Loading hackathons…
+                            </p>
                         </div>
                         <div
                             class="tab-panel"
@@ -384,7 +433,9 @@
                             role="tabpanel"
                             aria-label="Awards"
                         >
-                            <p style="font-size:.8rem;color:#6f8696">Loading awards…</p>
+                            <p style="font-size: 0.8rem; color: #6f8696">
+                                Loading awards…
+                            </p>
                         </div>
                     </div>
                     <aside class="tab-highlight" aria-hidden="true">
@@ -394,7 +445,7 @@
                                 src=""
                                 alt=""
                                 loading="lazy"
-                            >
+                            />
                         </figure>
                     </aside>
                 </div>
@@ -405,7 +456,12 @@
                 ©
                 <span id="year"></span>
                 Prajwal Prashanth. Inspired by
-                <a href="https://www.kevinjosethomas.com/" target="_blank" rel="noopener noreferrer">kevinjosethomas.com</a>
+                <a
+                    href="https://www.kevinjosethomas.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >kevinjosethomas.com</a
+                >
                 <a
                     href="https://github.com/kevinjosethomas/kevinjosethomas"
                     target="_blank"
