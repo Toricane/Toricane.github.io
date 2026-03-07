@@ -38,6 +38,14 @@ let loadedSet = new Set();
  * Extracts a dominant, saturated color from an image using a hidden canvas.
  */
 function getDominantRGB(imgEl) {
+  const src = imgEl.src;
+  if (!src) return '77, 181, 255';
+
+  if (!getDominantRGB.cache) getDominantRGB.cache = new Map();
+  if (getDominantRGB.cache.has(src)) {
+    return getDominantRGB.cache.get(src);
+  }
+
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   canvas.width = 64;
@@ -68,7 +76,9 @@ function getDominantRGB(imgEl) {
     }
     
     if (weightSum > 0) {
-      return `${Math.floor(rSum / weightSum)}, ${Math.floor(gSum / weightSum)}, ${Math.floor(bSum / weightSum)}`;
+      const result = `${Math.floor(rSum / weightSum)}, ${Math.floor(gSum / weightSum)}, ${Math.floor(bSum / weightSum)}`;
+      getDominantRGB.cache.set(src, result);
+      return result;
     }
   } catch(e) {
     // Ignore CORS or broken images
@@ -245,8 +255,13 @@ function renderCards(images) {
         card.classList.remove("portrait");
       }
       
-      const dominantRgb = getDominantRGB(imgEl);
-      card.style.setProperty('--card-glow-rgb', dominantRgb);
+      // Skip heavy canvas pixel extraction for the placeholder SVG
+      if (imgEl.src.startsWith('data:image/svg+xml')) {
+        card.style.setProperty('--card-glow-rgb', '31, 44, 53'); // Default dark glow
+      } else {
+        const dominantRgb = getDominantRGB(imgEl);
+        card.style.setProperty('--card-glow-rgb', dominantRgb);
+      }
 
       requestBaseMetrics();
     });
