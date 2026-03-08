@@ -32,7 +32,7 @@ let baseSetWidth = 0;
 let baseSetImageCount = 0;
 let totalCards = 0;
 
-let loadedSet = new Set();
+let imageObserver = null;
 
 
 
@@ -119,41 +119,31 @@ function checkInfiniteWrap() {
   }
 }
 
-function loadVisibleImages() {
-  if (!cardsEl || !containerEl) return;
-  const cw = containerEl.clientWidth;
-  
-  // Lookahead: current scroll window + 2 viewports
-  const loadStart = cardsEl.scrollLeft - cw;
-  const loadEnd = cardsEl.scrollLeft + cw * 2;
-
-  const cards = cardsEl.querySelectorAll(".coverflow-card");
-
-  cards.forEach((card, i) => {
-    if (loadedSet.has(i)) return;
-    // scroll offset is calculated vs bounding parent, but left is static
-    // Just use left relative offset vs scroll property
-    // We adjust for the centering padding on the parent.
-    const paddingLeft = parseInt(window.getComputedStyle(cardsEl).paddingLeft) || 0;
-    // card.offsetLeft is relative to the offsetParent (cardsEl), includes padding
-    const cardLeft = card.offsetLeft - paddingLeft;
-    const cardRight = cardLeft + card.offsetWidth;
-
-    if (cardRight >= loadStart && cardLeft <= loadEnd) {
-      const img = card.querySelector("img[data-src]");
-      if (img) {
-        img.src = img.dataset.src;
-        img.removeAttribute("data-src");
-        loadedSet.add(i);
+function setupImageObserver() {
+  if (imageObserver) {
+    imageObserver.disconnect();
+  }
+  imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target.querySelector("img[data-src]");
+        if (img) {
+          img.src = img.dataset.src;
+          img.removeAttribute("data-src");
+        }
+        observer.unobserve(entry.target);
       }
-    }
+    });
+  }, {
+    root: cardsEl,
+    rootMargin: "0px 2000px 0px 2000px" // lookahead ~2 viewports horizontally
   });
 }
 
 function renderCards(images, colors = {}) {
   if (!cardsEl) return;
   cardsEl.innerHTML = "";
-  loadedSet = new Set();
+  setupImageObserver();
 
   let baseList = [...images];
   const minCards = 12;
@@ -176,6 +166,8 @@ function renderCards(images, colors = {}) {
   const placeholderSvg =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='3'%3E%3Crect fill='%230c151b' width='4' height='3'/%3E%3C/svg%3E";
 
+  const fragment = document.createDocumentFragment();
+
   renderList.forEach((img, i) => {
     const card = document.createElement("div");
     card.className = "coverflow-card";
@@ -183,19 +175,21 @@ function renderCards(images, colors = {}) {
     const imgEl = document.createElement("img");
     imgEl.className = "coverflow-main";
     imgEl.alt = img.label || "Photo";
-    imgEl.loading = "lazy";
     imgEl.crossOrigin = "Anonymous";
+    imgEl.decoding = "async"; // Decode off the main thread to reduce TBT
 
     // Eagerly load the 'middle' set initially instead of the first
     // We will start our scroll positioned at the middle set.
     const middleStartIndex = Math.floor(NUM_SETS / 2) * baseSetImageCount;
-    // Eager load everything in the middle set
-    if (i >= middleStartIndex && i < middleStartIndex + baseSetImageCount) {
+    // Eager load everything in the middle set, plus a few buffer images on edges
+    if (i >= middleStartIndex - 3 && i < middleStartIndex + baseSetImageCount + 3) {
       imgEl.src = img.path;
-      loadedSet.add(i);
+      imgEl.loading = "eager"; // Prioritize initial view for LCP
     } else {
       imgEl.dataset.src = img.path;
       imgEl.src = placeholderSvg;
+      imgEl.loading = "lazy";
+      imageObserver.observe(card); // wait for intersect
     }
 
     imgEl.addEventListener("load", () => {
@@ -251,8 +245,10 @@ function renderCards(images, colors = {}) {
       card.appendChild(overlay);
     }
 
-    cardsEl.appendChild(card);
+    fragment.appendChild(card);
   });
+
+  cardsEl.appendChild(fragment);
 
   cardsEl.style.gap = getGap() + "px";
   applyCenteringPadding();
@@ -317,7 +313,6 @@ function handleResize() {
   cardsEl.style.gap = getGap() + "px";
   applyCenteringPadding();
   calcBaseMetrics();
-  loadVisibleImages();
 }
 
 export function initCoverFlow(images, colors = {}) {
@@ -341,7 +336,6 @@ export function initCoverFlow(images, colors = {}) {
   setTimeout(() => {
       calcBaseMetrics();
       setInitialScrollPosition();
-      loadVisibleImages();
       startAnimation();
   }, 50);
 
@@ -418,7 +412,6 @@ export function initCoverFlow(images, colors = {}) {
       if (scrollTimeoutId) clearTimeout(scrollTimeoutId);
       scrollTimeoutId = setTimeout(() => {
           checkInfiniteWrap();
-          loadVisibleImages();
       }, 150);
   });
 
