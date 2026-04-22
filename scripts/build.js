@@ -1,0 +1,246 @@
+#!/usr/bin/env node
+
+/**
+ * Build script: inject template/content and generate minified index.html
+ */
+
+import fs from 'fs';
+import { minify } from 'html-minifier-terser';
+import { JSDOM } from 'jsdom';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { generateHeroTagline } from './generate_hero_tagline.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.resolve(__dirname, '..');
+const dataPath = path.join(rootDir, 'data.json');
+const colorsPath = path.join(rootDir, 'colors.json');
+const indexPath = path.join(rootDir, 'index.html');
+const heroTemplatePath = path.join(rootDir, 'templates', 'hero-tagline.html');
+
+const readUtf8 = (filePath) => fs.readFileSync(filePath, 'utf-8');
+
+function loadJsonWithFallback(filePath, fallback = {}) {
+  try {
+    return JSON.parse(readUtf8(filePath));
+  } catch {
+    return fallback;
+  }
+}
+
+console.log('📦 Loading source files...');
+
+try {
+  const generated = generateHeroTagline();
+  console.log(`✓ Generated ${path.relative(rootDir, generated.outputPath)} from hero-tagline.md`);
+} catch (err) {
+  console.error(`✗ Failed to generate hero template from markdown: ${err.message}`);
+  process.exit(1);
+}
+
+let data;
+try {
+  data = JSON.parse(readUtf8(dataPath));
+  console.log(`✓ Loaded data.json (${Object.keys(data).length} top-level keys)`);
+} catch (err) {
+  console.error(`✗ Failed to parse data.json: ${err.message}`);
+  process.exit(1);
+}
+
+const colors = loadJsonWithFallback(colorsPath, {});
+console.log('✓ Loaded colors.json (or fallback {})');
+
+let heroTaglineTemplate = '';
+try {
+  heroTaglineTemplate = readUtf8(heroTemplatePath).trim();
+  console.log('✓ Loaded templates/hero-tagline.html');
+} catch (err) {
+  console.error(`✗ Failed to read hero template: ${err.message}`);
+  process.exit(1);
+}
+
+let indexHtml = '';
+try {
+  indexHtml = readUtf8(indexPath);
+  console.log(`✓ Loaded index.html (${indexHtml.length} bytes)`);
+} catch (err) {
+  console.error(`✗ Failed to read index.html: ${err.message}`);
+  process.exit(1);
+}
+
+console.log('\n🌐 Rendering tab content in build DOM...');
+
+const minimalHtml = `
+  <!DOCTYPE html>
+  <html>
+    <head><title>Build Temp</title></head>
+    <body>
+      <main id="content" class="content">
+        <section class="tabs">
+          <div class="tab-panels">
+            <div id="projects" class="tab-panel"></div>
+            <div id="hackathons" class="tab-panel"></div>
+            <div id="awards" class="tab-panel"></div>
+          </div>
+        </section>
+      </main>
+    </body>
+  </html>
+`;
+
+const buildDom = new JSDOM(minimalHtml, { url: 'file://' + rootDir });
+global.document = buildDom.window.document;
+global.window = buildDom.window;
+
+// Mock fetch for our render functions (they may try to fetch resources)
+global.fetch = async (url) => {
+  if (url === 'data.json') {
+    return { json: async () => data };
+  }
+  if (url === 'colors.json') {
+    return { json: async () => colors };
+  }
+  return { json: async () => ({}) };
+};
+
+console.log('✓ DOM environment ready');
+
+console.log('\n🎨 Running existing renderers...');
+
+try {
+  // Import the render functions as ES modules
+  const { renderProjects } = await import('./components/renderProjects.js');
+  const { renderTimeline } = await import('./components/renderTimeline.js');
+
+  // Call render functions
+  renderProjects(data.projects || []);
+  console.log(`✓ Rendered ${(data.projects || []).length} projects`);
+
+  renderTimeline('hackathons', data.hackathons || [], true);
+  console.log(`✓ Rendered hackathons`);
+
+  renderTimeline('awards', data.awards || [], false);
+  console.log(`✓ Rendered awards`);
+} catch (err) {
+  console.error(`✗ Rendering failed: ${err.message}`);
+  console.error(err.stack);
+  process.exit(1);
+}
+
+console.log('\n📄 Extracting generated tab HTML...');
+
+const projectsHtml = document.getElementById('projects')?.innerHTML || '';
+const hackathonsHtml = document.getElementById('hackathons')?.innerHTML || '';
+const awardsHtml = document.getElementById('awards')?.innerHTML || '';
+
+console.log(`✓ Projects: ${projectsHtml.length} bytes`);
+console.log(`✓ Hackathons: ${hackathonsHtml.length} bytes`);
+console.log(`✓ Awards: ${awardsHtml.length} bytes`);
+
+console.log('\n🔧 Injecting templates into index DOM...');
+
+const outputDom = new JSDOM(indexHtml, { url: 'file://' + rootDir });
+const outputDocument = outputDom.window.document;
+
+const setPanelHtml = (id, html) => {
+  const panel = outputDocument.getElementById(id);
+  if (!panel) {
+    throw new Error(`Missing #${id} panel in index.html`);
+  }
+  panel.innerHTML = html;
+};
+
+setPanelHtml('projects', projectsHtml);
+setPanelHtml('hackathons', hackathonsHtml);
+setPanelHtml('awards', awardsHtml);
+
+const tagline = outputDocument.querySelector('#hero .tagline');
+if (!tagline) {
+  throw new Error('Missing hero tagline element (.tagline) in index.html');
+}
+tagline.innerHTML = heroTaglineTemplate;
+console.log('✓ Injected hero tagline template');
+
+// Keep the font-awesome preload onload handler parser-safe for HTML/JS tooling.
+const fontAwesomePreload = outputDocument.querySelector(
+  'link[rel="preload"][as="style"][href*="font-awesome"]'
+);
+if (fontAwesomePreload) {
+  fontAwesomePreload.setAttribute('onload', "this.onload=null;this.rel='stylesheet';");
+}
+
+let serialized = outputDom.serialize();
+
+// Ensure previous generated comment does not accumulate across runs.
+serialized = serialized.replace(
+  /<!-- Generated by build\.js on [^>]*-->\s*/g,
+  ''
+);
+
+const now = new Date().toISOString();
+serialized = serialized.replace(
+  /<!DOCTYPE html>/i,
+  `<!doctype html>\n<!-- Generated by build.js on ${now} -->`
+);
+
+console.log('\n🗜️  Minifying index.html...');
+
+let minified = '';
+try {
+  minified = await minify(serialized, {
+    collapseWhitespace: true,
+    conservativeCollapse: true,
+    collapseInlineTagWhitespace: false,
+    removeComments: true,
+    minifyCSS: true,
+    minifyJS: false,
+    keepClosingSlash: true,
+  });
+
+  // Some toolchains parse HTML event handlers as JS and choke on encoded quotes.
+  // Normalize this known preload handler to a parser-safe form.
+  minified = minified.replace(
+    /onload="this\.onload=null,?\s*this\.rel=&quot;stylesheet&quot;"/g,
+    "onload=\"this.onload=null;this.rel='stylesheet';\""
+  );
+
+  console.log(`✓ Minified HTML (${serialized.length} -> ${minified.length} bytes)`);
+} catch (err) {
+  console.error(`✗ Minification failed: ${err.message}`);
+  process.exit(1);
+}
+
+console.log('\n💾 Writing generated index.html...');
+
+try {
+  fs.writeFileSync(indexPath, minified, 'utf-8');
+  console.log(`✓ Successfully wrote minified index.html (${minified.length} bytes)`);
+} catch (err) {
+  console.error(`✗ Failed to write index.html: ${err.message}`);
+  process.exit(1);
+}
+
+console.log('\n✅ Build complete!');
+console.log(`
+Summary:
+  • Projects: ${(data.projects || []).length} items
+  • Hackathons: ${(data.hackathons || []).length} groups
+  • Awards: ${(data.awards || []).length} groups
+  • Hero markdown source: templates/hero-tagline.md
+  • Hero tagline source: templates/hero-tagline.html
+  • Output: minified index.html generated
+
+Next steps:
+  1. Edit data.json and/or templates/hero-tagline.md
+  2. Run npm run build-html
+  3. Commit index.html plus source changes
+  4. Push to GitHub
+  5. GitHub Pages will auto-deploy
+
+To verify:
+  • Open index.html in a browser
+  • Confirm hero tagline reflects template changes
+  • Confirm tabs render with JS disabled
+`);
+
+process.exit(0);

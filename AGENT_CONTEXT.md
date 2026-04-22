@@ -4,10 +4,16 @@ This document provides architectural, stylistic, and operational context for any
 
 ## 1. Project Overview & Architecture
 *   **Tech Stack**: Pure HTML5, Vanilla CSS3 (Custom Properties / Variables), and Vanilla JavaScript (ES Modules). **NO** heavy frameworks (like React, Vue, or Tailwind) are used.
-*   **Data-Driven Content**: Portfolio content (Projects, Hackathons, Awards) is dynamically injected from `data.json`. Never hardcode content items in the HTML; always update `data.json`.
+*   **Data-Driven Content**: Portfolio content is source-driven and pre-rendered at build time.
+    *   Projects/Hackathons/Awards source: `data.json`
+    *   Hero intro source: `templates/hero-tagline.md` (compiled to `templates/hero-tagline.html`)
+    *   Generated output: `index.html` (minified + pre-rendered)
+    *   Never hardcode content items directly in generated `index.html`; update source files and rebuild.
 *   **Module Structure**:
     *   JS components are located in `scripts/components/` (e.g., `coverflow.js`, `tabs.js`, `theme.js`).
     *   `scripts/main.js` acts as the primary orchestrator, orchestrating the fetching of `data.json` and initializing components.
+    *   `scripts/generate_hero_tagline.js` compiles hero markdown-like syntax into HTML.
+    *   `scripts/build.js` runs full pre-render build (hero compile + section rendering + minification).
     *   `styles.css` handles styling monolithically but is highly structured with CSS variables at the root.
 
 ## 2. Design System & Aesthetics (CRITICAL)
@@ -27,7 +33,9 @@ This document provides architectural, stylistic, and operational context for any
     *   Always maintain this thumbnail/full-size dual setup when adding new images.
 
 ## 4. Development & Editing Rules
-1.  **Do Not Transpile**: Write ES6+ Vanilla JS. No build step required natively.
+1.  **Do Not Transpile**: Write ES6+ Vanilla JS.
+    *   Build step **is required** for generated output updates: run `npm run build-html`.
+    *   If only hero intro source changed and you want a quick compile, use `npm run build-hero`.
 2.  **CSS Edits**: Use existing CSS variables (e.g., `--bg-color`, `--text-color`, `--accent-color`). When adding new complex animations, test thoroughly to ensure no overflow/clipping.
-3.  **Local Testing**: The live server should be running at `http://127.0.0.1:5500`. Use it if needed. If that does not work and you need it, you may start it manually. Use `python -m http.server 8000` or similar to run locally. Ensure changes to `data.json` are reflected correctly without caching issues.
+3.  **Local Testing**: The live server should be running at `http://127.0.0.1:5500`. Use it if needed. If that does not work and you need it, you may start it manually. Use `python -m http.server 8000` or similar to run locally. Ensure changes to `data.json` and `templates/hero-tagline.md` are reflected correctly by rebuilding first.
 4.  **No Extraneous Dependencies**: Avoid adding external libraries unless absolutely necessary. Rely on native browser APIs where possible (Anime.js is included but native CSS transitions are preferred for simple effects).

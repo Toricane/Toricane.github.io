@@ -44,10 +44,16 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 
 ```
 ├── index.html              # Main portfolio page
+├── package.json            # Build scripts and dependencies
 ├── styles.css              # Complete monolithic styling
 ├── AGENT_CONTEXT.md        # Architectural rules and context for AI agents
 ├── scripts/                # Modular JavaScript components
 │   └── main.js             # Entry point for logic
+│   ├── build.js            # Pre-render + minify build pipeline
+│   └── generate_hero_tagline.js # Compiles hero-tagline.md into HTML
+├── templates/
+│   ├── hero-tagline.md     # Author-friendly hero intro source
+│   └── hero-tagline.html   # Generated hero intro HTML
 ├── data.json               # Content data (projects, hackathons, awards)
 ├── site.webmanifest        # PWA configuration
 ├── CNAME                   # Custom domain configuration
@@ -149,6 +155,9 @@ python -m venv .venv
 # On Mac/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 
+# Install JS dependencies for build pipeline
+npm install
+
 # Start local development server
 python -m http.server 8080
 ```
@@ -158,10 +167,20 @@ Navigate to `http://localhost:8080`
 ### Special Features
 
 -   **Animation Mode**: Add `?tap=true` to see enhanced connection pill animations
--   **Content Updates**: Simply edit `data.json` and refresh – no build step required natively.
-    -   *Exception*: If you added a new image with `"face": true` (which appears in the Coverflow), you must run `python scripts/update_colors.py` to pre-calculate its glow color into `colors.json`.
+-   **Content Updates**: Edit content sources and rebuild static output.
+    -   Primary content source: `data.json`
+    -   Hero intro source: `templates/hero-tagline.md`
+    -   Build command: `npm run build-html`
+    -   *Coverflow Exception*: If you added a new image with `"face": true` (which appears in the Coverflow), run `python scripts/update_colors.py` to pre-calculate its glow color into `colors.json`.
 -   **Image Assets**: Replace files in `/assets/` to update highlight images
 -   **Image Optimization**: Tab panel images use preview thumbnails (400px max width, WebP) for fast loading, with full-size originals shown in the viewer on click
+-   **Content Updates & Pre-rendering**:
+       1. Edit `data.json` and/or `templates/hero-tagline.md`
+       2. Run `npm run build-html` to regenerate `templates/hero-tagline.html` and pre-render all content into `index.html`
+       3. Commit source changes and updated generated files (`index.html`, optionally `templates/hero-tagline.html`)
+       4. Push to GitHub – Pages auto-deploys
+       - **Why pre-render?** Ensures crawlers, AI agents, and users with JavaScript disabled can see all content. Improves performance by embedding content at build time.
+       - **How it works**: The build script compiles `templates/hero-tagline.md` to HTML, uses jsdom to simulate the DOM, runs existing render functions, injects generated content, and minifies `index.html`.
 
 ### Browser Support
 
@@ -220,7 +239,7 @@ Main theme colors defined in CSS custom properties:
 
 ### Content Areas
 
-1. **Hero Introduction**: Edit directly in `index.html`
+1. **Hero Introduction**: Edit `templates/hero-tagline.md` (compiled into `templates/hero-tagline.html` during build)
 2. **Social Links**: Update in the `.connections` section
 3. **Portfolio Content**: Manage via `data.json`
 4. **Footnotes**: Inline expandable explanations
@@ -231,7 +250,7 @@ Tagline icons (inline emoji-sized icons)
 
 -   Path: `assets/icons/`
 -   Purpose: Small square, transparent WEBP icons inserted immediately before certain links in the tagline (they behave like inline emoji and are sized via CSS to `1em`).
--   Filenames referenced by `index.html` (default):
+-   Filenames referenced by `templates/hero-tagline.md` / generated `index.html` (default):
     -   `langara.webp`
     -   `ubc.webp`
     -   `jarvis.webp`
