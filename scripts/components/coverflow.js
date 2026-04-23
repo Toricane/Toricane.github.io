@@ -26,6 +26,7 @@ const AUTO_SCROLL_MS = 2500;
 // Internal duplicated sets: we render multiple full sets of the original array
 // so that there's always a set before and after the one we're currently viewing.
 const NUM_SETS = 5; 
+const EAGER_BUFFER_PER_SIDE = 4;
 
 // We define our core "page" metrics
 let baseSetWidth = 0; 
@@ -136,7 +137,7 @@ function setupImageObserver() {
     });
   }, {
     root: cardsEl,
-    rootMargin: "0px 2000px 0px 2000px" // lookahead ~2 viewports horizontally
+    rootMargin: "0px 800px 0px 800px" // moderate lookahead to limit offscreen fetches
   });
 }
 
@@ -181,12 +182,15 @@ function renderCards(images, colors = {}) {
     // Eagerly load the 'middle' set initially instead of the first
     // We will start our scroll positioned at the middle set.
     const middleStartIndex = Math.floor(NUM_SETS / 2) * baseSetImageCount;
-    // Eager load everything in the middle set, plus a few buffer images on edges
-    if (i >= middleStartIndex - 3 && i < middleStartIndex + baseSetImageCount + 3) {
-      imgEl.src = img.path;
+    // Eager load only the cards near the initial viewport center.
+    const middleCardIndex = middleStartIndex + Math.floor(baseSetImageCount / 2);
+    const isInitiallyVisible = Math.abs(i - middleCardIndex) <= EAGER_BUFFER_PER_SIDE;
+    const displayPath = img.path;
+    if (isInitiallyVisible) {
+      imgEl.src = displayPath;
       imgEl.loading = "eager"; // Prioritize initial view for LCP
     } else {
-      imgEl.dataset.src = img.path;
+      imgEl.dataset.src = displayPath;
       imgEl.src = placeholderSvg;
       imgEl.loading = "lazy";
       imageObserver.observe(card); // wait for intersect

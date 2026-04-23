@@ -10,6 +10,7 @@ let carouselIndex = 0;
 let carouselList = [];
 let carouselPaused = false;
 let isTransitioning = false;
+const loadedSlideUrls = new Set();
 
 const CAROUSEL_INTERVAL = 4000; // ms between slides
 const FADE_DURATION = 500; // ms for crossfade
@@ -280,11 +281,10 @@ function goToSlide(index) {
   const inactiveSlide = activeSlide === slides[0] ? slides[1] : slides[0];
 
   const imgData = carouselList[index];
+  const displaySrc = imgData.path;
 
-  // Preload the new image
-  const preloader = new Image();
-  preloader.onload = () => {
-    inactiveSlide.src = imgData.path;
+  const finishTransition = () => {
+    inactiveSlide.src = displaySrc;
     inactiveSlide.alt = imgData.label || "";
 
     // Trigger crossfade
@@ -304,14 +304,24 @@ function goToSlide(index) {
       }, FADE_DURATION);
     });
   };
-  preloader.onerror = () => {
-    isTransitioning = false;
-    // Skip to next
-    carouselIndex = index;
-    updateDots();
-    updateCounter();
-  };
-  preloader.src = imgData.path;
+
+  if (loadedSlideUrls.has(displaySrc)) {
+    finishTransition();
+  } else {
+    const preloader = new Image();
+    preloader.onload = () => {
+      loadedSlideUrls.add(displaySrc);
+      finishTransition();
+    };
+    preloader.onerror = () => {
+      isTransitioning = false;
+      // Skip to next
+      carouselIndex = index;
+      updateDots();
+      updateCounter();
+    };
+    preloader.src = displaySrc;
+  }
 
   resetCarouselTimer();
 }
@@ -331,8 +341,12 @@ function preloadNeighbors() {
   const prev = (carouselIndex - 1 + carouselList.length) % carouselList.length;
   const next = (carouselIndex + 1) % carouselList.length;
   [prev, next].forEach((i) => {
+    const neighbor = carouselList[i];
+    const src = neighbor.path;
+    if (!src || loadedSlideUrls.has(src)) return;
     const img = new Image();
-    img.src = carouselList[i].path;
+    img.onload = () => loadedSlideUrls.add(src);
+    img.src = src;
   });
 }
 
@@ -356,6 +370,7 @@ function startCarousel(id) {
   carouselList = images;
   carouselIndex = 0;
   isTransitioning = false;
+  loadedSlideUrls.clear();
 
   const wrap = buildCarouselDOM();
   if (!wrap) return;
@@ -382,11 +397,13 @@ function startCarousel(id) {
   // Set first image immediately
   const slides = wrap.querySelectorAll(".highlight-slide");
   const firstImg = images[0];
+  const firstDisplay = firstImg.path;
 
   const preloader = new Image();
   preloader.onload = () => {
+    loadedSlideUrls.add(firstDisplay);
     if (slides[0]) {
-      slides[0].src = firstImg.path;
+      slides[0].src = firstDisplay;
       slides[0].alt = firstImg.label || "";
       slides[0].classList.add("highlight-slide-active");
     }
@@ -396,7 +413,7 @@ function startCarousel(id) {
     }
     preloadNeighbors();
   };
-  preloader.src = firstImg.path;
+  preloader.src = firstDisplay;
 
   updateDots();
   updateCounter();
