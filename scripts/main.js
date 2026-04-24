@@ -142,6 +142,33 @@ function collectFaceImages(data) {
   return faceImages;
 }
 
+function scheduleCoverflowColorsFetch() {
+  const run = () => {
+    fetch("colors.json", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((colors) => {
+        updateCoverFlowColors(colors || {});
+      })
+      .catch(() => {
+        // Keep fallback coverflow glow colors when colors.json is unavailable.
+      });
+  };
+
+  const deferredRun = () => {
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(() => run(), { timeout: 2500 });
+      return;
+    }
+    setTimeout(run, 1200);
+  };
+
+  if (document.readyState === "complete") {
+    deferredRun();
+    return;
+  }
+  window.addEventListener("load", deferredRun, { once: true });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initYear();
   initThemeToggle();
@@ -168,15 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Colors are progressively enhanced after colors.json resolves.
       const faceImages = collectFaceImages(data);
       initCoverFlow(faceImages, {});
-
-      fetch("colors.json", { cache: "no-store" })
-        .then((r) => r.json())
-        .then((colors) => {
-          updateCoverFlowColors(colors || {});
-        })
-        .catch(() => {
-          // Keep fallback coverflow glow colors when colors.json is unavailable.
-        });
+      scheduleCoverflowColorsFetch();
     })
     .catch((err) => {
       console.error(err);

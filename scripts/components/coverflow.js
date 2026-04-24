@@ -208,6 +208,7 @@ function renderCards(images, colors = {}) {
           sizes: "(width <= 600px) 100vw, (width <= 1050px) 40vw, 320px",
         }
       : null;
+    const needsMetricRefresh = i === 0 || i === baseSetImageCount - 1;
 
     if (displaySources && isInitiallyVisible) {
       imgEl.srcset = displaySources.srcset;
@@ -228,13 +229,11 @@ function renderCards(images, colors = {}) {
     }
 
     imgEl.addEventListener("load", () => {
-      if (imgEl.naturalHeight > imgEl.naturalWidth) {
-        card.classList.add("portrait");
-      } else {
-        card.classList.remove("portrait");
-      }
+      const isPortrait = imgEl.naturalHeight > imgEl.naturalWidth;
+      card.classList.toggle("portrait", isPortrait);
 
-      requestBaseMetrics();
+      // Recompute base metrics only when measurement anchors may change.
+      if (needsMetricRefresh) requestBaseMetrics();
     });
 
     const dominantRgb = colors[img.path] || '77, 181, 255';

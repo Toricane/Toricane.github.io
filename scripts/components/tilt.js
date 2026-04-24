@@ -54,21 +54,16 @@ export function setupTilt(target, opts = {}) {
     let lastMoveTime = 0;
     const moveThrottle = 16;
     let cachedRect = null;
-    let rectTimestamp = 0;
-    const rectTtlMs = 250;
 
     function invalidateRect() {
         cachedRect = null;
-        rectTimestamp = 0;
     }
 
     function getRect(force = false) {
-        const now = performance.now();
-        if (!force && cachedRect && now - rectTimestamp < rectTtlMs) {
+        if (!force && cachedRect) {
             return cachedRect;
         }
         cachedRect = wrapperEl.getBoundingClientRect();
-        rectTimestamp = now;
         return cachedRect;
     }
 

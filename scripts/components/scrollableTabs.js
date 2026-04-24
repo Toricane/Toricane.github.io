@@ -12,14 +12,27 @@ export function initScrollableTabs() {
         wrap.classList.toggle("can-scroll-right", canScrollRight);
     }
 
+    let updateScheduled = false;
+    function scheduleUpdateButtons() {
+        if (updateScheduled) return;
+        updateScheduled = true;
+        if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(() => {
+                updateScheduled = false;
+                updateButtons();
+            });
+            return;
+        }
+        setTimeout(() => {
+            updateScheduled = false;
+            updateButtons();
+        }, 50);
+    }
+
     bar.addEventListener(
         "scroll",
         () => {
-            if (window.requestAnimationFrame) {
-                window.requestAnimationFrame(updateButtons);
-            } else {
-                setTimeout(updateButtons, 50);
-            }
+            scheduleUpdateButtons();
         },
         { passive: true }
     );
@@ -54,7 +67,7 @@ export function initScrollableTabs() {
             bar.releasePointerCapture && bar.releasePointerCapture(e.pointerId);
         } catch (_) {}
         bar.classList.remove("dragging");
-        setTimeout(() => updateButtons(), 10);
+        setTimeout(() => scheduleUpdateButtons(), 10);
         hasMoved = false;
     };
 
@@ -62,11 +75,11 @@ export function initScrollableTabs() {
     bar.addEventListener("pointercancel", stopPointer);
     bar.addEventListener("pointerleave", stopPointer);
 
-    window.addEventListener("resize", updateButtons);
-    window.addEventListener("load", updateButtons);
+    window.addEventListener("resize", scheduleUpdateButtons);
+    window.addEventListener("load", scheduleUpdateButtons);
 
     if ("MutationObserver" in window) {
-        const mo = new MutationObserver(() => updateButtons());
+        const mo = new MutationObserver(() => scheduleUpdateButtons());
         mo.observe(bar, { childList: true, subtree: false });
     }
 
