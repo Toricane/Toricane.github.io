@@ -5,7 +5,26 @@ export function initWidgets() {
     if (!widgetRoot) return;
     const newsletter = mkWidget("Latest Newsletter Update");
     widgetRoot.append(newsletter.el);
-    fetchSubstack("https://prajwalprashanth.substack.com/feed", newsletter);
+
+    const loadNewsletter = () =>
+        fetchSubstack("https://prajwalprashanth.substack.com/feed", newsletter);
+
+    // Keep newsletter off the initial critical chain; load as it nears view.
+    if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const entry = entries[0];
+                if (!entry || !entry.isIntersecting) return;
+                observer.disconnect();
+                loadNewsletter();
+            },
+            { root: null, rootMargin: "180px 0px" }
+        );
+        observer.observe(newsletter.el);
+        return;
+    }
+
+    loadNewsletter();
 }
 
 function mkWidget(title) {

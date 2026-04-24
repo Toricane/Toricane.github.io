@@ -1,4 +1,4 @@
-import { initCoverFlow } from "./components/coverflow.js";
+import { initCoverFlow, updateCoverFlowColors } from "./components/coverflow.js";
 import { initFootnotes } from "./components/footnotes.js";
 import { initImageViewerDelegates } from "./components/imageViewer.js";
 import { setTabActivator } from "./components/navigation.js";
@@ -155,9 +155,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   Promise.all([
     fetch("data.json", { cache: "no-store" }).then((r) => r.json()),
-    fetch("colors.json", { cache: "no-store" }).then((r) => r.json()).catch(() => ({}))
   ])
-    .then(([data, colors]) => {
+    .then(([data]) => {
       renderProjects(data.projects || []);
       renderTimeline("hackathons", data.hackathons || [], true);
       renderTimeline("awards", data.awards || [], false);
@@ -165,9 +164,19 @@ document.addEventListener("DOMContentLoaded", () => {
       // Feed section images to the tab highlight carousel
       setTabImages(data);
 
-      // Collect face-tagged images and initialise the coverflow
+      // Collect face-tagged images and initialise the coverflow immediately.
+      // Colors are progressively enhanced after colors.json resolves.
       const faceImages = collectFaceImages(data);
-      initCoverFlow(faceImages, colors);
+      initCoverFlow(faceImages, {});
+
+      fetch("colors.json", { cache: "no-store" })
+        .then((r) => r.json())
+        .then((colors) => {
+          updateCoverFlowColors(colors || {});
+        })
+        .catch(() => {
+          // Keep fallback coverflow glow colors when colors.json is unavailable.
+        });
     })
     .catch((err) => {
       console.error(err);

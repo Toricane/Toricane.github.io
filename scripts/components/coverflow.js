@@ -13,12 +13,18 @@ let isInteracting = false;
 let scrollTimeoutId = null;
 let autoScrollIntervalId = null;
 let metricsTimeoutId = null;
+let metricsLastRunTs = 0;
+let resizeRafId = null;
+let centeringPaddingPx = 0;
 
 function requestBaseMetrics() {
   if (metricsTimeoutId) clearTimeout(metricsTimeoutId);
+  const now = performance.now();
+  const minDelay = 90;
+  const delay = Math.max(0, minDelay - (now - metricsLastRunTs));
   metricsTimeoutId = setTimeout(() => {
     calcBaseMetrics();
-  }, 50);
+  }, delay);
 }
 
 // How often auto-scroll jumps to the next page
@@ -32,6 +38,7 @@ const EAGER_BUFFER_PER_SIDE = 4;
 let baseSetWidth = 0; 
 let baseSetImageCount = 0;
 let totalCards = 0;
+let wrapMaxScroll = 0;
 
 let imageObserver = null;
 
@@ -61,6 +68,7 @@ function getGap() {
 function applyCenteringPadding() {
   if (!cardsEl || !containerEl) return;
   const half = Math.floor(containerEl.clientWidth / 2);
+  centeringPaddingPx = half;
   cardsEl.style.paddingLeft = half + "px";
   cardsEl.style.paddingRight = half + "px";
 }
@@ -83,6 +91,8 @@ function calcBaseMetrics() {
     const gap = getGap();
     // width includes the gap after the last card to the next set
     baseSetWidth = (endRight - startLeft) + gap; 
+    wrapMaxScroll = Math.max(0, cardsEl.scrollWidth - baseSetWidth - cardsEl.clientWidth);
+    metricsLastRunTs = performance.now();
   }
 }
 
@@ -100,7 +110,7 @@ function checkInfiniteWrap() {
   // If we scroll into the very last set, jump backwards by baseSetWidth
   
   const minScroll = baseSetWidth; 
-  const maxScroll = cardsEl.scrollWidth - baseSetWidth - cardsEl.clientWidth;
+  const maxScroll = wrapMaxScroll;
 
   if (currentScroll < minScroll) {
     // Jump forward by one or more sets
@@ -178,6 +188,7 @@ function renderCards(images, colors = {}) {
   renderList.forEach((img, i) => {
     const card = document.createElement("div");
     card.className = "coverflow-card";
+    card.dataset.path = img.path || "";
 
     const imgEl = document.createElement("img");
     imgEl.className = "coverflow-main";
@@ -276,7 +287,7 @@ function renderCards(images, colors = {}) {
 
   cardsEl.style.gap = getGap() + "px";
   applyCenteringPadding();
-  calcBaseMetrics();
+  requestBaseMetrics();
 }
 
 /**
@@ -294,11 +305,11 @@ function setInitialScrollPosition() {
     // We want to center 'targetCard' in the container.
     // Native scroll-snap will keep it aligned if we just scroll the card into view.
     // However, calculating exactly:
-    const paddingLeft = parseInt(window.getComputedStyle(cardsEl).paddingLeft) || 0;
     const cw = containerEl.clientWidth;
     // The exact scroll left to center this targetCard:
-    const cardCenterPos = targetCard.offsetLeft - paddingLeft + (targetCard.offsetWidth / 2);
+    const cardCenterPos = targetCard.offsetLeft - centeringPaddingPx + (targetCard.offsetWidth / 2);
     cardsEl.scrollLeft = cardCenterPos - (cw / 2);
+    wrapMaxScroll = Math.max(0, cardsEl.scrollWidth - baseSetWidth - cardsEl.clientWidth);
 
     requestAnimationFrame(() => {
         cardsEl.style.scrollBehavior = 'smooth';
@@ -334,9 +345,24 @@ function stopAnimation() {
 }
 
 function handleResize() {
-  cardsEl.style.gap = getGap() + "px";
-  applyCenteringPadding();
-  calcBaseMetrics();
+  if (resizeRafId) cancelAnimationFrame(resizeRafId);
+  resizeRafId = requestAnimationFrame(() => {
+    cardsEl.style.gap = getGap() + "px";
+    applyCenteringPadding();
+    calcBaseMetrics();
+    wrapMaxScroll = Math.max(0, cardsEl.scrollWidth - baseSetWidth - cardsEl.clientWidth);
+  });
+}
+
+export function updateCoverFlowColors(colors = {}) {
+  if (!cardsEl || !colors || typeof colors !== "object") return;
+  const cards = cardsEl.querySelectorAll(".coverflow-card");
+  cards.forEach((card) => {
+    const path = card.dataset.path;
+    if (!path) return;
+    const rgb = colors[path];
+    if (rgb) card.style.setProperty("--card-glow-rgb", rgb);
+  });
 }
 
 export function initCoverFlow(images, colors = {}) {

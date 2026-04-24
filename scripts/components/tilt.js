@@ -53,13 +53,31 @@ export function setupTilt(target, opts = {}) {
 
     let lastMoveTime = 0;
     const moveThrottle = 16;
+    let cachedRect = null;
+    let rectTimestamp = 0;
+    const rectTtlMs = 250;
+
+    function invalidateRect() {
+        cachedRect = null;
+        rectTimestamp = 0;
+    }
+
+    function getRect(force = false) {
+        const now = performance.now();
+        if (!force && cachedRect && now - rectTimestamp < rectTtlMs) {
+            return cachedRect;
+        }
+        cachedRect = wrapperEl.getBoundingClientRect();
+        rectTimestamp = now;
+        return cachedRect;
+    }
 
     function handleMove(e) {
         const currentTime = Date.now();
         if (currentTime - lastMoveTime < moveThrottle) return;
         lastMoveTime = currentTime;
         if (!hovering) return;
-        const rect = wrapperEl.getBoundingClientRect();
+        const rect = getRect();
         const x = (e.clientX - rect.left) / rect.width;
         const y = (e.clientY - rect.top) / rect.height;
         targetState.ry = lerp(-cfg.max, cfg.max, x);
@@ -71,6 +89,7 @@ export function setupTilt(target, opts = {}) {
 
     function enter() {
         hovering = true;
+        getRect(true);
         targetState.scale = cfg.scale;
         targetState.tz = 12;
         ensureLoop();
@@ -90,4 +109,6 @@ export function setupTilt(target, opts = {}) {
     wrapperEl.addEventListener("pointerleave", leave);
     wrapperEl.addEventListener("touchstart", (e) => enter(e));
     wrapperEl.addEventListener("touchend", leave);
+    window.addEventListener("resize", invalidateRect, { passive: true });
+    window.addEventListener("scroll", invalidateRect, { passive: true });
 }
