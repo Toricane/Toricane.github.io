@@ -4,6 +4,7 @@
  * Build script: inject template/content and generate minified index.html
  */
 
+import { build as esbuild } from 'esbuild';
 import fs from 'fs';
 import { minify } from 'html-minifier-terser';
 import { JSDOM } from 'jsdom';
@@ -17,6 +18,8 @@ const dataPath = path.join(rootDir, 'data.json');
 const colorsPath = path.join(rootDir, 'colors.json');
 const indexPath = path.join(rootDir, 'index.html');
 const heroTemplatePath = path.join(rootDir, 'templates', 'hero-tagline.html');
+const bundledCssPath = path.join(rootDir, 'styles.min.css');
+const bundledJsPath = path.join(rootDir, 'scripts', 'main.min.js');
 
 const readUtf8 = (filePath) => fs.readFileSync(filePath, 'utf-8');
 
@@ -25,6 +28,38 @@ function loadJsonWithFallback(filePath, fallback = {}) {
     return JSON.parse(readUtf8(filePath));
   } catch {
     return fallback;
+  }
+}
+
+async function bundleClientAssets() {
+  console.log('\n⚙️  Bundling client assets...');
+
+  try {
+    await Promise.all([
+      esbuild({
+        entryPoints: [path.join(rootDir, 'scripts', 'main.js')],
+        bundle: true,
+        minify: true,
+        format: 'iife',
+        platform: 'browser',
+        target: ['es2017'],
+        outfile: bundledJsPath,
+        legalComments: 'none',
+      }),
+      esbuild({
+        entryPoints: [path.join(rootDir, 'styles.css')],
+        bundle: true,
+        minify: true,
+        outfile: bundledCssPath,
+        legalComments: 'none',
+      }),
+    ]);
+
+    console.log('✓ Bundled scripts/main.js -> scripts/main.min.js');
+    console.log('✓ Minified styles.css -> styles.min.css');
+  } catch (err) {
+    console.error(`✗ Asset bundling failed: ${err.message}`);
+    process.exit(1);
   }
 }
 
@@ -67,6 +102,8 @@ try {
   console.error(`✗ Failed to read index.html: ${err.message}`);
   process.exit(1);
 }
+
+await bundleClientAssets();
 
 console.log('\n🌐 Rendering tab content in build DOM...');
 
@@ -161,6 +198,26 @@ if (!tagline) {
 tagline.innerHTML = heroTaglineTemplate;
 console.log('✓ Injected hero tagline template');
 
+const stylesheetPreload = outputDocument.querySelector('link[rel="preload"][as="style"][href="styles.css"]');
+if (stylesheetPreload) {
+  stylesheetPreload.setAttribute('href', 'styles.min.css');
+}
+
+const stylesheetLink = outputDocument.querySelector('link[rel="stylesheet"][href="styles.css"]');
+if (stylesheetLink) {
+  stylesheetLink.setAttribute('href', 'styles.min.css');
+}
+
+const scriptTag = outputDocument.querySelector('script[src="scripts/main.js"]');
+if (scriptTag) {
+  scriptTag.setAttribute('src', 'scripts/main.min.js');
+  scriptTag.removeAttribute('type');
+}
+
+for (const modulePreload of outputDocument.querySelectorAll('link[rel="modulepreload"]')) {
+  modulePreload.remove();
+}
+
 // Keep the font-awesome preload onload handler parser-safe for HTML/JS tooling.
 const fontAwesomePreload = outputDocument.querySelector(
   'link[rel="preload"][as="style"][href*="font-awesome"]'
@@ -228,6 +285,8 @@ Summary:
   • Awards: ${(data.awards || []).length} groups
   • Hero markdown source: templates/hero-tagline.md
   • Hero tagline source: templates/hero-tagline.html
+  • JS output: scripts/main.min.js
+  • CSS output: styles.min.css
   • Output: minified index.html generated
 
 Next steps:

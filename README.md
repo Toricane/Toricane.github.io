@@ -46,10 +46,12 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 ├── index.html              # Main portfolio page
 ├── package.json            # Build scripts and dependencies
 ├── styles.css              # Complete monolithic styling
+├── styles.min.css          # Generated minified stylesheet (build output)
 ├── AGENT_CONTEXT.md        # Architectural rules and context for AI agents
 ├── scripts/                # Modular JavaScript components
 │   └── main.js             # Entry point for logic
-│   ├── build.js            # Pre-render + minify build pipeline
+│   └── main.min.js         # Generated bundled/minified JS (build output)
+│   ├── build.js            # Hero compile + asset bundle/minify + pre-render build pipeline
 │   └── generate_hero_tagline.js # Compiles hero-tagline.md into HTML
 ├── templates/
 │   ├── hero-tagline.md     # Author-friendly hero intro source
@@ -176,11 +178,11 @@ Navigate to `http://localhost:8080`
 -   **Image Optimization**: Tab panel images use preview thumbnails (400px max width, WebP) for fast loading, with full-size originals shown in the viewer on click
 -   **Content Updates & Pre-rendering**:
        1. Edit `data.json` and/or `templates/hero-tagline.md`
-       2. Run `npm run build-html` to regenerate `templates/hero-tagline.html` and pre-render all content into `index.html`
-       3. Commit source changes and updated generated files (`index.html`, optionally `templates/hero-tagline.html`)
+    2. Run `npm run build-html` to regenerate `templates/hero-tagline.html`, bundle/minify client assets (`scripts/main.min.js`, `styles.min.css`), and pre-render all content into `index.html`
+    3. Commit source changes and updated generated files (`index.html`, `styles.min.css`, `scripts/main.min.js`, optionally `templates/hero-tagline.html`)
        4. Push to GitHub – Pages auto-deploys
        - **Why pre-render?** Ensures crawlers, AI agents, and users with JavaScript disabled can see all content. Improves performance by embedding content at build time.
-       - **How it works**: The build script compiles `templates/hero-tagline.md` to HTML, uses jsdom to simulate the DOM, runs existing render functions, injects generated content, and minifies `index.html`.
+    - **How it works**: The build script compiles `templates/hero-tagline.md` to HTML, bundles/minifies JS and CSS with esbuild, uses jsdom to simulate the DOM, runs existing render functions, injects generated content, and minifies `index.html`.
 
 ### Browser Support
 
