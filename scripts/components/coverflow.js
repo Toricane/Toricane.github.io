@@ -129,8 +129,14 @@ function setupImageObserver() {
       if (entry.isIntersecting) {
         const img = entry.target.querySelector("img[data-src]");
         if (img) {
+          const srcset = img.dataset.srcset;
+          const sizes = img.dataset.sizes;
+          if (srcset) img.srcset = srcset;
+          if (sizes) img.sizes = sizes;
           img.src = img.dataset.src;
           img.removeAttribute("data-src");
+          img.removeAttribute("data-srcset");
+          img.removeAttribute("data-sizes");
         }
         observer.unobserve(entry.target);
       }
@@ -178,14 +184,28 @@ function renderCards(images, colors = {}) {
     imgEl.alt = img.label || "Photo";
     imgEl.crossOrigin = "Anonymous";
     imgEl.decoding = "async"; // Decode off the main thread to reduce TBT
-
+    const displayPath = img.path;
     // Eagerly load the 'middle' set initially instead of the first
     // We will start our scroll positioned at the middle set.
     const middleStartIndex = Math.floor(NUM_SETS / 2) * baseSetImageCount;
     // Eager load only the cards near the initial viewport center.
     const middleCardIndex = middleStartIndex + Math.floor(baseSetImageCount / 2);
     const isInitiallyVisible = Math.abs(i - middleCardIndex) <= EAGER_BUFFER_PER_SIDE;
-    const displayPath = img.path;
+    const displaySources = displayPath.includes("tab-panels/")
+      ? {
+          srcset: `${displayPath.replace("tab-panels/", "tab-panels/small/")} 800w, ${displayPath} 1600w`,
+          sizes: "(width <= 600px) 100vw, (width <= 1050px) 40vw, 320px",
+        }
+      : null;
+
+    if (displaySources && isInitiallyVisible) {
+      imgEl.srcset = displaySources.srcset;
+      imgEl.sizes = displaySources.sizes;
+    } else if (displaySources) {
+      imgEl.dataset.srcset = displaySources.srcset;
+      imgEl.dataset.sizes = displaySources.sizes;
+    }
+
     if (isInitiallyVisible) {
       imgEl.src = displayPath;
       imgEl.loading = "eager"; // Prioritize initial view for LCP

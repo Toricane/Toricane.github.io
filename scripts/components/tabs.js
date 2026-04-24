@@ -1,7 +1,10 @@
 // Tab switching + auto-advancing highlight carousel
 // Replaces the old static highlightMap with a slideshow of all section images
 
-import { normalizeImages } from "../utils/data.js";
+import {
+    getResponsiveImageSources,
+    normalizeImages,
+} from "../utils/data.js";
 
 let sectionImages = {}; // { projects: [...], hackathons: [...], awards: [...] }
 let activeTab = null;
@@ -282,9 +285,17 @@ function goToSlide(index) {
 
   const imgData = carouselList[index];
   const displaySrc = imgData.path;
+  const displaySources = getResponsiveImageSources(displaySrc);
 
   const finishTransition = () => {
     inactiveSlide.src = displaySrc;
+    if (displaySources.srcset) {
+      inactiveSlide.srcset = displaySources.srcset;
+      inactiveSlide.sizes = displaySources.sizes;
+    } else {
+      inactiveSlide.removeAttribute("srcset");
+      inactiveSlide.removeAttribute("sizes");
+    }
     inactiveSlide.alt = imgData.label || "";
 
     // Trigger crossfade
@@ -381,11 +392,15 @@ function startCarousel(id) {
     const src = fallbackMap[id] || "";
     if (slides[0]) {
       slides[0].src = src;
+      slides[0].removeAttribute("srcset");
+      slides[0].removeAttribute("sizes");
       slides[0].alt = id + " highlight";
       slides[0].classList.add("highlight-slide-active");
     }
     if (slides[1]) {
       slides[1].src = "";
+      slides[1].removeAttribute("srcset");
+      slides[1].removeAttribute("sizes");
       slides[1].classList.remove("highlight-slide-active");
     }
     updateDots();
@@ -398,17 +413,27 @@ function startCarousel(id) {
   const slides = wrap.querySelectorAll(".highlight-slide");
   const firstImg = images[0];
   const firstDisplay = firstImg.path;
+  const firstSources = getResponsiveImageSources(firstDisplay);
 
   const preloader = new Image();
   preloader.onload = () => {
     loadedSlideUrls.add(firstDisplay);
     if (slides[0]) {
       slides[0].src = firstDisplay;
+      if (firstSources.srcset) {
+        slides[0].srcset = firstSources.srcset;
+        slides[0].sizes = firstSources.sizes;
+      } else {
+        slides[0].removeAttribute("srcset");
+        slides[0].removeAttribute("sizes");
+      }
       slides[0].alt = firstImg.label || "";
       slides[0].classList.add("highlight-slide-active");
     }
     if (slides[1]) {
       slides[1].src = "";
+      slides[1].removeAttribute("srcset");
+      slides[1].removeAttribute("sizes");
       slides[1].classList.remove("highlight-slide-active");
     }
     preloadNeighbors();

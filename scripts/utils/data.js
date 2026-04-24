@@ -193,3 +193,19 @@ export function getPreviewPath(originalPath) {
     }
     return originalPath;
 }
+
+export function getResponsiveImageSources(originalPath) {
+    if (!originalPath) return { src: "", srcset: "", sizes: "" };
+
+    if (!originalPath.includes("tab-panels/")) {
+        return { src: originalPath, srcset: "", sizes: "" };
+    }
+
+    const smallPath = originalPath.replace("tab-panels/", "tab-panels/small/");
+
+    return {
+        src: originalPath,
+        srcset: `${smallPath} 800w, ${originalPath} 1600w`,
+        sizes: "(width <= 600px) 100vw, (width <= 1200px) 50vw, 500px",
+    };
+}
