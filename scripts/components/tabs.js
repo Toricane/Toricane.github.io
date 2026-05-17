@@ -2,7 +2,7 @@
 // Replaces the old static highlightMap with a slideshow of all section images
 
 import {
-    getPreviewPath,
+    getHighlightCarouselSources,
     normalizeImages,
 } from "../utils/data.js";
 import { refreshLazyThumbs } from "./lazyThumbs.js";
@@ -75,8 +75,20 @@ export function setTabImages(data) {
   }
 }
 
-function getCarouselDisplaySrc(path) {
-  return getPreviewPath(path) || path;
+function applySlideSources(imgEl, path) {
+  const { src, srcset, sizes } = getHighlightCarouselSources(path);
+  imgEl.src = src;
+  if (srcset) {
+    imgEl.srcset = srcset;
+    imgEl.sizes = sizes;
+  } else {
+    imgEl.removeAttribute("srcset");
+    imgEl.removeAttribute("sizes");
+  }
+}
+
+function getCarouselPreloadSrc(path) {
+  return getHighlightCarouselSources(path).src || path;
 }
 
 function queueCarouselStart(id) {
@@ -332,12 +344,10 @@ function goToSlide(index) {
   const inactiveSlide = activeSlide === slides[0] ? slides[1] : slides[0];
 
   const imgData = carouselList[index];
-  const displaySrc = getCarouselDisplaySrc(imgData.path);
+  const preloadSrc = getCarouselPreloadSrc(imgData.path);
 
   const finishTransition = () => {
-    inactiveSlide.src = displaySrc;
-    inactiveSlide.removeAttribute("srcset");
-    inactiveSlide.removeAttribute("sizes");
+    applySlideSources(inactiveSlide, imgData.path);
     inactiveSlide.alt = imgData.label || "";
     inactiveSlide.classList.add("ready");
 
@@ -359,12 +369,12 @@ function goToSlide(index) {
     });
   };
 
-  if (loadedSlideUrls.has(displaySrc)) {
+  if (loadedSlideUrls.has(imgData.path)) {
     finishTransition();
   } else {
     const preloader = new Image();
     preloader.onload = () => {
-      loadedSlideUrls.add(displaySrc);
+      loadedSlideUrls.add(imgData.path);
       finishTransition();
     };
     preloader.onerror = () => {
@@ -374,7 +384,7 @@ function goToSlide(index) {
       updateDots();
       updateCounter();
     };
-    preloader.src = displaySrc;
+    preloader.src = preloadSrc;
   }
 
   resetCarouselTimer();
@@ -396,11 +406,11 @@ function preloadNeighbors() {
   const next = (carouselIndex + 1) % carouselList.length;
   [prev, next].forEach((i) => {
     const neighbor = carouselList[i];
-    const src = getCarouselDisplaySrc(neighbor.path);
-    if (!src || loadedSlideUrls.has(src)) return;
+    const path = neighbor.path;
+    if (!path || loadedSlideUrls.has(path)) return;
     const img = new Image();
-    img.onload = () => loadedSlideUrls.add(src);
-    img.src = src;
+    img.onload = () => loadedSlideUrls.add(path);
+    img.src = getCarouselPreloadSrc(path);
   });
 }
 
@@ -454,15 +464,12 @@ function startCarousel(id) {
 
   const slides = wrap.querySelectorAll(".highlight-slide");
   const firstImg = images[0];
-  const firstDisplay = getCarouselDisplaySrc(firstImg.path);
 
   const preloader = new Image();
   preloader.onload = () => {
-    loadedSlideUrls.add(firstDisplay);
+    loadedSlideUrls.add(firstImg.path);
     if (slides[0]) {
-      slides[0].src = firstDisplay;
-      slides[0].removeAttribute("srcset");
-      slides[0].removeAttribute("sizes");
+      applySlideSources(slides[0], firstImg.path);
       slides[0].alt = firstImg.label || "";
       slides[0].classList.add("highlight-slide-active", "ready");
     }
@@ -474,7 +481,7 @@ function startCarousel(id) {
     }
     preloadNeighbors();
   };
-  preloader.src = firstDisplay;
+  preloader.src = getCarouselPreloadSrc(firstImg.path);
 
   updateDots();
   updateCounter();

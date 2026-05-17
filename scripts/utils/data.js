@@ -209,3 +209,20 @@ export function getResponsiveImageSources(originalPath) {
         sizes: "(width <= 600px) 100vw, (width <= 1200px) 50vw, 500px",
     };
 }
+
+/** Tab sidebar carousel: 800w default, full size via srcset on retina. */
+export function getHighlightCarouselSources(originalPath) {
+    if (!originalPath) return { src: "", srcset: "", sizes: "" };
+
+    if (!originalPath.includes("tab-panels/")) {
+        return { src: originalPath, srcset: "", sizes: "" };
+    }
+
+    const smallPath = originalPath.replace("tab-panels/", "tab-panels/small/");
+
+    return {
+        src: smallPath,
+        srcset: `${smallPath} 800w, ${originalPath} 1600w`,
+        sizes: "(max-width: 860px) 100vw, min(380px, 30vw)",
+    };
+}
