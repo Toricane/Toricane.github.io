@@ -9,6 +9,124 @@ import { refreshLazyThumbs } from "./lazyThumbs.js";
 import { openLinksPopup } from "./linksPopup.js";
 import { openExternalOrInternal } from "./navigation.js";
 
+function attachTimelineClickable(el, links, title) {
+    if (!links.length) return;
+    el.style.cursor = "pointer";
+    el.tabIndex = 0;
+    el.addEventListener("click", (e) => {
+        if (
+            e.target?.closest?.(
+                "button.card-thumb, button.timeline-thumb"
+            )
+        )
+            return;
+        e.stopPropagation();
+        if (links.length === 1) {
+            openExternalOrInternal(links[0].url, e);
+        } else {
+            openLinksPopup(e, links, title);
+        }
+    });
+    el.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            el.click();
+        }
+    });
+}
+
+function attachTimelineSummary(summaryEl) {
+    const expandId = summaryEl.getAttribute("data-target");
+    if (!expandId) return;
+    summaryEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const target = document.getElementById(expandId);
+        if (!target) return;
+        const toggleBtn = summaryEl.querySelector(".timeline-toggle i");
+        const isExpanded = target.style.display !== "none";
+        target.style.display = isExpanded ? "none" : "block";
+        summaryEl.setAttribute("aria-expanded", !isExpanded);
+        if (toggleBtn) {
+            toggleBtn.style.transform = isExpanded
+                ? "rotate(0deg)"
+                : "rotate(180deg)";
+        }
+        if (!isExpanded) {
+            refreshLazyThumbs(target);
+        }
+    });
+}
+
+function wireTimelineDataLinkItems(root) {
+    root.querySelectorAll(".timeline-item[data-links]").forEach((el) => {
+        try {
+            const links = JSON.parse(el.getAttribute("data-links"));
+            if (!Array.isArray(links) || !links.length) return;
+            if (el.dataset.wired === "1") return;
+            el.dataset.wired = "1";
+            attachTimelineClickable(
+                el,
+                links,
+                el.querySelector("h5")?.textContent || ""
+            );
+        } catch (_) {
+            /* ignore malformed data */
+        }
+    });
+}
+
+function wireTimelineSummary(summaryEl) {
+    if (summaryEl.dataset.wired === "1") return;
+    summaryEl.dataset.wired = "1";
+    attachTimelineSummary(summaryEl);
+}
+
+function sortTimelineGroups(items) {
+    return [...items].sort((a, b) => {
+        const [yearA, monthA] = a.when.split("/").map(Number);
+        const [yearB, monthB] = b.when.split("/").map(Number);
+        if (yearA !== yearB) return yearB - yearA;
+        return monthB - monthA;
+    });
+}
+
+function itemsForTimelineGroup(id, group) {
+    return id === "awards" && Array.isArray(group.items)
+        ? [...group.items].sort((a, b) => {
+              const rank = (it) => (it?.gold ? 0 : it?.silver ? 1 : 2);
+              const ra = rank(a);
+              const rb = rank(b);
+              if (ra !== rb) return ra - rb;
+              const na = (a?.name || "").toLowerCase();
+              const nb = (b?.name || "").toLowerCase();
+              return na.localeCompare(nb);
+          })
+        : group.items || [];
+}
+
+/** Attach click/expand handlers to build-time prerendered timeline markup. */
+export function wireTimeline(id, items, showBadges) {
+    const root = document.getElementById(id);
+    if (!root || !items.length) return;
+
+    root.querySelectorAll(".timeline-summary").forEach(wireTimelineSummary);
+    wireTimelineDataLinkItems(root);
+
+    sortTimelineGroups(items).forEach((group) => {
+        const groupItems = itemsForTimelineGroup(id, group);
+        if (groupItems.length !== 1) return;
+        const item = groupItems[0];
+        const singleSlug = slugify(item.name || "");
+        if (!singleSlug) return;
+        const li = root.querySelector(
+            `li[data-slug="${CSS.escape(singleSlug)}"]`
+        );
+        if (!li || li.dataset.wired === "1") return;
+        li.dataset.wired = "1";
+        attachTimelineClickable(li, normalizeLinks(item.link), item.name || "");
+    });
+}
+
 export function renderTimeline(id, items, showBadges) {
     const root = document.getElementById(id);
     if (!root) return;
@@ -17,30 +135,14 @@ export function renderTimeline(id, items, showBadges) {
         return;
     }
 
-    const sortedItems = [...items].sort((a, b) => {
-        const [yearA, monthA] = a.when.split("/").map(Number);
-        const [yearB, monthB] = b.when.split("/").map(Number);
-        if (yearA !== yearB) return yearB - yearA;
-        return monthB - monthA;
-    });
+    const sortedItems = sortTimelineGroups(items);
 
     const ol = document.createElement("ol");
     ol.className = "timeline";
 
     sortedItems.forEach((group) => {
         const [year, month] = group.when.split("/");
-        const itemsForGroup =
-            id === "awards" && Array.isArray(group.items)
-                ? [...group.items].sort((a, b) => {
-                      const rank = (it) => (it?.gold ? 0 : it?.silver ? 1 : 2);
-                      const ra = rank(a);
-                      const rb = rank(b);
-                      if (ra !== rb) return ra - rb;
-                      const na = (a?.name || "").toLowerCase();
-                      const nb = (b?.name || "").toLowerCase();
-                      return na.localeCompare(nb);
-                  })
-                : group.items || [];
+        const itemsForGroup = itemsForTimelineGroup(id, group);
 
         const monthNames = {
             "01": "Jan",
@@ -64,31 +166,11 @@ export function renderTimeline(id, items, showBadges) {
             const singleSlug = slugify(item.name || "");
             if (singleSlug) li.setAttribute("data-slug", singleSlug);
 
-            const itemLinks = normalizeLinks(item.link);
-            if (itemLinks.length) {
-                li.style.cursor = "pointer";
-                li.tabIndex = 0;
-                li.addEventListener("click", (e) => {
-                    if (
-                        e.target?.closest?.(
-                            "button.card-thumb, button.timeline-thumb"
-                        )
-                    )
-                        return;
-                    e.stopPropagation();
-                    if (itemLinks.length === 1) {
-                        openExternalOrInternal(itemLinks[0].url, e);
-                    } else {
-                        openLinksPopup(e, itemLinks, item.name || "");
-                    }
-                });
-                li.addEventListener("keydown", (ev) => {
-                    if (ev.key === "Enter" || ev.key === " ") {
-                        ev.preventDefault();
-                        li.click();
-                    }
-                });
-            }
+            attachTimelineClickable(
+                li,
+                normalizeLinks(item.link),
+                item.name || ""
+            );
 
             const badgeItems = (
                 showBadges && item.badges ? item.badges : []
@@ -265,67 +347,12 @@ export function renderTimeline(id, items, showBadges) {
                     </div>
                 `;
 
-            setTimeout(() => {
-                const container = li.querySelector("#" + expandId);
-                if (container) {
-                    const itemsEls = container.querySelectorAll(
-                        ".timeline-item[data-links]"
-                    );
-                    itemsEls.forEach((el) => {
-                        try {
-                            const links = JSON.parse(
-                                el.getAttribute("data-links")
-                            );
-                            if (!Array.isArray(links) || !links.length) return;
-                            el.style.cursor = "pointer";
-                            el.tabIndex = 0;
-                            el.addEventListener("click", (e) => {
-                                if (
-                                    e.target?.closest?.(
-                                        "button.card-thumb, button.timeline-thumb"
-                                    )
-                                )
-                                    return;
-                                e.stopPropagation();
-                                if (links.length === 1) {
-                                    openExternalOrInternal(links[0].url, e);
-                                } else {
-                                    openLinksPopup(
-                                        e,
-                                        links,
-                                        el.querySelector("h5")?.textContent ||
-                                            ""
-                                    );
-                                }
-                            });
-                            el.addEventListener("keydown", (ev) => {
-                                if (ev.key === "Enter" || ev.key === " ") {
-                                    ev.preventDefault();
-                                    el.click();
-                                }
-                            });
-                        } catch (e) {
-                            /* ignore malformed data */
-                        }
-                    });
-                }
-            }, 0);
-
             const summaryEl = li.querySelector(".timeline-summary");
-            summaryEl.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const target = document.getElementById(expandId);
-                const toggleBtn = summaryEl.querySelector(".timeline-toggle i");
-                const isExpanded = target.style.display !== "none";
-                target.style.display = isExpanded ? "none" : "block";
-                summaryEl.setAttribute("aria-expanded", !isExpanded);
-                toggleBtn.style.transform = isExpanded
-                    ? "rotate(0deg)"
-                    : "rotate(180deg)";
-                if (!isExpanded) {
-                    refreshLazyThumbs(target);
-                }
-            });
+            attachTimelineSummary(summaryEl);
+            const container = li.querySelector("#" + expandId);
+            if (container) {
+                wireTimelineDataLinkItems(container);
+            }
 
             ol.appendChild(li);
         }

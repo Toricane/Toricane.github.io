@@ -10,6 +10,61 @@ import {
 import { openLinksPopup } from "./linksPopup.js";
 import { openExternalOrInternal } from "./navigation.js";
 
+function attachProjectCardListeners(li, links, title) {
+    if (!links.length) return;
+    li.style.cursor = "pointer";
+    li.tabIndex = 0;
+    li.addEventListener("click", (e) => {
+        if (
+            e.target?.closest?.(
+                "button.card-thumb, button.timeline-thumb"
+            )
+        )
+            return;
+        e.stopPropagation();
+        if (links.length === 1) {
+            openExternalOrInternal(links[0].url, e);
+        } else {
+            openLinksPopup(e, links, title);
+        }
+    });
+    li.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            li.click();
+        }
+    });
+}
+
+function sortProjects(list) {
+    return [...list].sort((a, b) => {
+        const ta = projectEndTimestamp(a);
+        const tb = projectEndTimestamp(b);
+        if (ta === tb) return 0;
+        if (ta === Infinity) return -1;
+        if (tb === Infinity) return 1;
+        return tb - ta;
+    });
+}
+
+/** Attach click handlers to build-time prerendered project cards. */
+export function wireProjects(list) {
+    const root = document.getElementById("projects");
+    if (!root || !list.length) return;
+
+    sortProjects(list).forEach((p) => {
+        const projSlug = slugify(p.title || "");
+        if (!projSlug) return;
+        const li = root.querySelector(
+            `[data-slug="${CSS.escape(projSlug)}"]`
+        );
+        if (!li) return;
+        if (li.dataset.wired === "1") return;
+        li.dataset.wired = "1";
+        attachProjectCardListeners(li, normalizeLinks(p.link), p.title || "");
+    });
+}
+
 export function renderProjects(list) {
     const root = document.getElementById("projects");
     if (!root) return;
@@ -18,14 +73,7 @@ export function renderProjects(list) {
         return;
     }
 
-    const sorted = [...list].sort((a, b) => {
-        const ta = projectEndTimestamp(a);
-        const tb = projectEndTimestamp(b);
-        if (ta === tb) return 0;
-        if (ta === Infinity) return -1;
-        if (tb === Infinity) return 1;
-        return tb - ta;
-    });
+    const sorted = sortProjects(list);
 
     const ul = document.createElement("ul");
     ul.className = "cards";
@@ -40,31 +88,7 @@ export function renderProjects(list) {
         const projSlug = slugify(p.title || "");
         if (projSlug) li.setAttribute("data-slug", projSlug);
 
-        const links = normalizeLinks(p.link);
-        if (links.length) {
-            li.style.cursor = "pointer";
-            li.tabIndex = 0;
-            li.addEventListener("click", (e) => {
-                if (
-                    e.target?.closest?.(
-                        "button.card-thumb, button.timeline-thumb"
-                    )
-                )
-                    return;
-                e.stopPropagation();
-                if (links.length === 1) {
-                    openExternalOrInternal(links[0].url, e);
-                } else {
-                    openLinksPopup(e, links, p.title || "");
-                }
-            });
-            li.addEventListener("keydown", (ev) => {
-                if (ev.key === "Enter" || ev.key === " ") {
-                    ev.preventDefault();
-                    li.click();
-                }
-            });
-        }
+        attachProjectCardListeners(li, normalizeLinks(p.link), p.title || "");
 
         const fromLine = p.from ? `<p class="from-line">${p.from}</p>` : "";
         const dateLine = (() => {

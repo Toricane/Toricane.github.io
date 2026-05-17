@@ -7,8 +7,8 @@ import {
   initHashNavigation,
   setTabActivator,
 } from "./components/navigation.js";
-import { renderProjects } from "./components/renderProjects.js";
-import { renderTimeline } from "./components/renderTimeline.js";
+import { renderProjects, wireProjects } from "./components/renderProjects.js";
+import { renderTimeline, wireTimeline } from "./components/renderTimeline.js";
 import { initScrollableTabs } from "./components/scrollableTabs.js";
 import { initScrollButton } from "./components/scrollButton.js";
 import { initTabs, setTabImages } from "./components/tabs.js";
@@ -196,6 +196,10 @@ function hydrateFromData(data) {
     renderProjects(data.projects || []);
     renderTimeline("hackathons", data.hackathons || [], true);
     renderTimeline("awards", data.awards || [], false);
+  } else {
+    wireProjects(data.projects || []);
+    wireTimeline("hackathons", data.hackathons || [], true);
+    wireTimeline("awards", data.awards || [], false);
   }
 
   initLazyThumbs();

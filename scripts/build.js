@@ -268,9 +268,20 @@ try {
 
 console.log('\n📄 Extracting generated tab HTML...');
 
-const projectsHtml = document.getElementById('projects')?.innerHTML || '';
-const hackathonsHtml = document.getElementById('hackathons')?.innerHTML || '';
-const awardsHtml = document.getElementById('awards')?.innerHTML || '';
+/** JSDOM render attaches listeners and sets data-wired; strip before serializing HTML. */
+function stripRuntimePanelAttrs(html) {
+  return html.replace(/\s*data-wired="1"/g, '');
+}
+
+const projectsHtml = stripRuntimePanelAttrs(
+  document.getElementById('projects')?.innerHTML || '',
+);
+const hackathonsHtml = stripRuntimePanelAttrs(
+  document.getElementById('hackathons')?.innerHTML || '',
+);
+const awardsHtml = stripRuntimePanelAttrs(
+  document.getElementById('awards')?.innerHTML || '',
+);
 
 console.log(`✓ Projects: ${projectsHtml.length} bytes`);
 console.log(`✓ Hackathons: ${hackathonsHtml.length} bytes`);
