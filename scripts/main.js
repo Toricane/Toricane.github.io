@@ -1,7 +1,11 @@
 import { initCoverFlow, updateCoverFlowColors } from "./components/coverflow.js";
 import { initFootnotes } from "./components/footnotes.js";
 import { initImageViewerDelegates } from "./components/imageViewer.js";
-import { setTabActivator } from "./components/navigation.js";
+import {
+  applyHashFromLocation,
+  initHashNavigation,
+  setTabActivator,
+} from "./components/navigation.js";
 import { renderProjects } from "./components/renderProjects.js";
 import { renderTimeline } from "./components/renderTimeline.js";
 import { initScrollableTabs } from "./components/scrollableTabs.js";
@@ -176,6 +180,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const { activate } = initTabs();
   setTabActivator(activate);
+  initHashNavigation();
+  applyHashFromLocation();
 
   initWidgets();
   initTapMode();
@@ -187,6 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
       renderProjects(data.projects || []);
       renderTimeline("hackathons", data.hackathons || [], true);
       renderTimeline("awards", data.awards || [], false);
+
+      applyHashFromLocation();
 
       // Feed section images to the tab highlight carousel
       setTabImages(data);

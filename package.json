@@ -6,7 +6,8 @@
   "main": "scripts/main.js",
   "scripts": {
     "build-hero": "node scripts/generate_hero_tagline.js",
-    "build-html": "node scripts/build.js"
+    "build-html": "node scripts/build.js",
+    "build-sitemap": "node scripts/generate-sitemap.js"
   },
   "keywords": ["portfolio", "projects"],
   "author": "Prajwal Prashanth",

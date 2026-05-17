@@ -1,0 +1,23 @@
+{
+  "siteUrl": "https://prajwal.is-a.dev",
+  "siteName": "Prajwal Prashanth",
+  "title": "Prajwal Prashanth",
+  "description": "Portfolio of Prajwal Prashanth – building AI + systems projects, hackathon wins, research, and leadership.",
+  "person": {
+    "name": "Prajwal Prashanth",
+    "jobTitle": "Student Developer",
+    "description": "Student developer building AI + systems projects and shipping fast, thoughtful products.",
+    "image": "https://prajwal.is-a.dev/apple-touch-icon.png",
+    "sameAs": [
+      "https://linkedin.com/in/prajwal-prashanth",
+      "https://github.com/Toricane",
+      "https://x.com/PrajwalP028"
+    ]
+  },
+  "sitemap": {
+    "urls": [
+      { "loc": "/", "priority": "1.0", "changefreq": "weekly" },
+      { "loc": "/connect4/", "priority": "0.5", "changefreq": "monthly" }
+    ]
+  }
+}

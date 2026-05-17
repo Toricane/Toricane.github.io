@@ -17,31 +17,10 @@ export function initTapMode(
     const doAnime = () => {
         if (!window.anime) return setTimeout(doAnime, 60);
 
-        window.anime
-            .timeline({ easing: "easeOutQuad" })
-            .add({
-                targets: links,
-                opacity: [0, 1],
-                translateY: [4, 0],
-                scale: [0.95, 1],
-                delay: window.anime.stagger(70),
-            })
-            .add(
-                {
-                    targets: conn,
-                    boxShadow: [
-                        "0 0 0 0 rgba(77,181,255,.4)",
-                        "0 0 0 18px rgba(77,181,255,0)",
-                    ],
-                    duration: 1400,
-                },
-                150
-            );
-
         const isMobile = window.innerWidth <= 768;
         const sparkleDelay = isMobile ? 3000 : 1800;
         const pillGlowDelay = isMobile ? 5000 : 3000;
-        const linkedinDelay = isMobile ? 3000 : 1500;
+        const linkedinDelay = 1000;
         const scheduleAnimation = (callback) => {
             if (window.requestIdleCallback) {
                 requestIdleCallback(callback);
@@ -80,25 +59,51 @@ export function initTapMode(
             });
         }, pillGlowDelay);
 
-        const linkedinInterval = setInterval(() => {
-            scheduleAnimation(() => {
-                if (linkedinLink && document.visibilityState === "visible") {
-                    linkedinLink.classList.add("linkedin-highlight");
-                    window.anime({
-                        targets: linkedinLink,
-                        scale: [1, 1.05, 1],
-                        boxShadow: [
-                            "0 0 0 0 rgba(77,181,255,.6)",
-                            "0 0 0 8px rgba(77,181,255,0)",
-                        ],
-                        duration: 1000,
-                        easing: "easeOutQuad",
-                        complete: () =>
-                            linkedinLink.classList.remove("linkedin-highlight"),
-                    });
-                }
+        const pulseLinkedIn = () => {
+            if (!linkedinLink || document.visibilityState !== "visible") return;
+            linkedinLink.classList.add("linkedin-highlight");
+            window.anime({
+                targets: linkedinLink,
+                opacity: [null, 1],
+                scale: [1, 1.12, 1],
+                boxShadow: [
+                    "0 0 0 2px rgba(77,181,255,0.9), 0 0 20px 4px rgba(77,181,255,0.55)",
+                    "0 0 0 8px rgba(77,181,255,0.45), 0 0 32px 10px rgba(77,181,255,0.65)",
+                    "0 0 0 2px rgba(77,181,255,0.35), 0 0 14px 2px rgba(77,181,255,0.2)",
+                ],
+                duration: 500,
+                easing: "easeOutQuad",
+                complete: () =>
+                    linkedinLink.classList.remove("linkedin-highlight"),
             });
-        }, linkedinDelay);
+        };
+
+        pulseLinkedIn();
+        const linkedinInterval = setInterval(
+            () => scheduleAnimation(pulseLinkedIn),
+            linkedinDelay
+        );
+
+        window.anime
+            .timeline({ easing: "easeOutQuad" })
+            .add({
+                targets: links,
+                opacity: [0, 1],
+                translateY: [4, 0],
+                scale: [0.95, 1],
+                delay: window.anime.stagger(70),
+            })
+            .add(
+                {
+                    targets: conn,
+                    boxShadow: [
+                        "0 0 0 0 rgba(77,181,255,.4)",
+                        "0 0 0 18px rgba(77,181,255,0)",
+                    ],
+                    duration: 1400,
+                },
+                150
+            );
 
         setTimeout(() => {
             clearInterval(sparkleInterval);

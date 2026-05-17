@@ -2055,22 +2055,60 @@ img {
 @keyframes navHighlight {
     0% {
         box-shadow: 0 0 0 0 rgba(77, 181, 255, 0);
+        background-color: transparent;
     }
 
-    10% {
+    8% {
         box-shadow:
-            0 8px 28px -10px rgba(77, 181, 255, 0.45),
-            0 0 0 6px rgba(77, 181, 255, 0.12);
+            0 12px 36px -8px rgba(77, 181, 255, 0.75),
+            0 0 0 2px rgba(77, 181, 255, 0.85),
+            0 0 0 7px rgba(77, 181, 255, 0.38);
+        background-color: rgba(77, 181, 255, 0.18);
     }
 
-    60% {
+    45% {
         box-shadow:
-            0 6px 18px -12px rgba(77, 181, 255, 0.18),
-            0 0 0 2px rgba(77, 181, 255, 0.06);
+            0 8px 28px -10px rgba(77, 181, 255, 0.5),
+            0 0 0 2px rgba(77, 181, 255, 0.55),
+            0 0 0 5px rgba(77, 181, 255, 0.22);
+        background-color: rgba(77, 181, 255, 0.1);
     }
 
     100% {
         box-shadow: 0 0 0 0 rgba(77, 181, 255, 0);
+        background-color: transparent;
+    }
+}
+
+[data-theme="light"] .nav-highlight {
+    animation-name: navHighlightLight;
+}
+
+@keyframes navHighlightLight {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 120, 195, 0);
+        background-color: transparent;
+    }
+
+    8% {
+        box-shadow:
+            0 12px 36px -8px rgba(37, 120, 195, 0.45),
+            0 0 0 2px rgba(37, 120, 195, 0.7),
+            0 0 0 7px rgba(37, 120, 195, 0.25);
+        background-color: rgba(37, 120, 195, 0.14);
+    }
+
+    45% {
+        box-shadow:
+            0 8px 28px -10px rgba(37, 120, 195, 0.3),
+            0 0 0 2px rgba(37, 120, 195, 0.45),
+            0 0 0 5px rgba(37, 120, 195, 0.15);
+        background-color: rgba(37, 120, 195, 0.08);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 120, 195, 0);
+        background-color: transparent;
     }
 }
 
@@ -2082,9 +2120,12 @@ img {
 }
 
 .linkedin-highlight {
-    background: var(--dark-accent) !important;
-    border-color: #4db5ff !important;
+    background: rgba(77, 181, 255, 0.22) !important;
+    border-color: rgba(77, 181, 255, 0.9) !important;
     color: var(--text) !important;
+    box-shadow:
+        0 0 0 2px rgba(77, 181, 255, 0.75),
+        0 0 24px 4px rgba(77, 181, 255, 0.45) !important;
 }
 
 .pulse {

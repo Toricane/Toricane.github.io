@@ -10,6 +10,28 @@ const rootDir = path.resolve(__dirname, "..");
 const defaultInputPath = path.join(rootDir, "templates", "hero-tagline.md");
 const defaultOutputPath = path.join(rootDir, "templates", "hero-tagline.html");
 
+const ICON_ALT = {
+  langara: "Langara College logo",
+  ubc: "UBC logo",
+  "vancouver-ai": "BC + AI Ecosystem logo",
+  jarvis: "JARVIS project icon",
+  "handy-andy": "Handy Andy project icon",
+  hackthenorth: "Hack the North logo",
+  nwhacks: "nwHacks logo",
+};
+
+const INTERNAL_HOSTS = new Set(["prajwal.is-a.dev", "www.prajwal.is-a.dev"]);
+
+function isInternalHref(href) {
+  if (!href || href.startsWith("/") || href.startsWith("#")) return true;
+  try {
+    const { hostname } = new URL(href);
+    return INTERNAL_HOSTS.has(hostname);
+  } catch {
+    return false;
+  }
+}
+
 function escapeHtml(value = "") {
   return String(value).replace(/[&<>"']/g, (c) => {
     if (c === "&") return "&amp;";
@@ -44,9 +66,11 @@ function parseInline(input, state) {
           const label = input.slice(i + 1, closeBracket);
           const href = input.slice(closeBracket + 2, closeParen).trim();
           const labelHtml = parseInline(label, state);
-          output += `<a href="${escapeAttr(
-            href
-          )}" target="_blank" rel="noopener noreferrer">${labelHtml}</a>`;
+          const internal = isInternalHref(href);
+          const linkAttrs = internal
+            ? ""
+            : ' target="_blank" rel="noopener noreferrer"';
+          output += `<a href="${escapeAttr(href)}"${linkAttrs}>${labelHtml}</a>`;
           i = closeParen;
           continue;
         }
@@ -58,9 +82,10 @@ function parseInline(input, state) {
       if (closeBrace !== -1) {
         const iconName = input.slice(i + 1, closeBrace).trim();
         if (/^[a-zA-Z0-9_-]+$/.test(iconName)) {
+          const altText = ICON_ALT[iconName] || `${iconName} icon`;
           output += `<img class="tag-icon" src="assets/icons/${escapeAttr(
             iconName
-          )}.webp" alt="" aria-hidden="true" width="15" height="15" />`;
+          )}.webp" alt="${escapeAttr(altText)}" aria-hidden="true" width="15" height="15" />`;
           i = closeBrace;
           continue;
         }
