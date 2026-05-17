@@ -1,4 +1,30 @@
 // Optional tap mode that animates connection pills when ?tap=true
+
+const ANIME_URL =
+    "https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js";
+const ANIME_INTEGRITY =
+    "sha512-z4OUqw38qNLpn1libAN9BsoDx6nbNFio5lA6CuTp9NlK83b89hgyCVq+N5FdBJptINztxn1Z3SaKSKUS5UP60Q==";
+
+let animeLoadPromise = null;
+
+function loadAnime() {
+    if (window.anime) return Promise.resolve(window.anime);
+    if (animeLoadPromise) return animeLoadPromise;
+
+    animeLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = ANIME_URL;
+        script.integrity = ANIME_INTEGRITY;
+        script.crossOrigin = "anonymous";
+        script.referrerPolicy = "no-referrer";
+        script.onload = () => resolve(window.anime);
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+
+    return animeLoadPromise;
+}
+
 export function initTapMode(
     searchParams = new URLSearchParams(location.search)
 ) {
@@ -14,9 +40,7 @@ export function initTapMode(
         a.style.transform = "translateY(4px) scale(.95)";
     });
 
-    const doAnime = () => {
-        if (!window.anime) return setTimeout(doAnime, 60);
-
+    const runAnimations = () => {
         const isMobile = window.innerWidth <= 768;
         const sparkleDelay = isMobile ? 3000 : 1800;
         const pillGlowDelay = isMobile ? 5000 : 3000;
@@ -115,5 +139,12 @@ export function initTapMode(
         }, 15000);
     };
 
-    doAnime();
+    loadAnime()
+        .then(runAnimations)
+        .catch(() => {
+            links.forEach((a) => {
+                a.style.opacity = 1;
+                a.style.transform = "";
+            });
+        });
 }

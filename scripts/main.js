@@ -16,15 +16,7 @@ import { initTapMode } from "./components/tapMode.js";
 import { initThemeToggle, initYear } from "./components/theme.js";
 import { setupTilt } from "./components/tilt.js";
 import { initVisibilityPause } from "./components/visibilityPause.js";
-import { initWidgets } from "./components/widgets.js";
-import { normalizeImages } from "./utils/data.js";
-
-const dataReady = fetch("data.json")
-  .then((r) => r.json())
-  .catch((err) => {
-    console.error(err);
-    return null;
-  });
+import { collectFaceImages } from "./utils/siteData.js";
 
 let coverflowColorsRequested = false;
 
@@ -71,145 +63,77 @@ function runWhenIdle(fn, timeout = 2500) {
   }
 }
 
-/**
- * Collect every image with `"face": true` from all sections of data.json,
- * plus any standalone entries in the top-level `coverflowImages` array.
- */
-function firstLink(field) {
-  if (!field) return "";
-  if (typeof field === "string") return field;
-  if (Array.isArray(field)) {
-    for (const entry of field) {
-      if (entry && entry.url) return entry.url;
-    }
+function loadSiteData() {
+  if (window.__SITE_RUNTIME__) {
+    return Promise.resolve(window.__SITE_RUNTIME__);
   }
-  return "";
+  return fetch("data.json")
+    .then((r) => r.json())
+    .then((data) => ({
+      faceImages: collectFaceImages(data),
+      sectionImages: null,
+      projectLinks: null,
+      timelineLinks: null,
+      _full: data,
+    }))
+    .catch((err) => {
+      console.error(err);
+      return null;
+    });
 }
 
-function formatShortDate(raw) {
-  if (!raw) return "";
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const parts = String(raw)
-    .split(/[-\/]/)
-    .map((p) => parseInt(p, 10));
-  if (!parts.length || parts.some(isNaN)) return "";
-  const [y, m] = parts;
-  if (m >= 1 && m <= 12) return `${months[m - 1]} ${y}`;
-  return String(y);
+function timelineWireGroups(runtime, section) {
+  return (runtime.timelineLinks || [])
+    .filter((entry) => entry.section === section)
+    .map((entry) => ({
+      when: "",
+      items: [{ name: entry.title, link: entry.links }],
+    }));
 }
 
-function collectFaceImages(data) {
-  const faceImages = [];
-  const seen = new Set();
-
-  const add = (img, meta) => {
-    if (!img || !img.path) return;
-    if (seen.has(img.path)) return;
-    seen.add(img.path);
-    faceImages.push({
-      label: img.label || "",
-      path: img.path,
-      date: meta.date || "",
-      title: meta.title || "",
-      link: meta.link || "",
-    });
-  };
-
-  if (Array.isArray(data.coverflowImages)) {
-    data.coverflowImages.forEach((entry) => {
-      if (entry.face) {
-        add(entry, {});
-      }
-    });
-  }
-
-  if (Array.isArray(data.projects)) {
-    data.projects.forEach((proj) => {
-      const imgs = normalizeImages(proj.images, proj.title);
-      const date = formatShortDate(
-        proj["end-date"] || proj["start-date"] || "",
-      );
-      const link = firstLink(proj.link);
-      imgs.forEach((img, i) => {
-        const raw = Array.isArray(proj.images) ? proj.images[i] : null;
-        if (raw && raw.face) {
-          add(img, { date, title: proj.title || "", link });
-        }
-      });
-    });
-  }
-
-  if (Array.isArray(data.hackathons)) {
-    data.hackathons.forEach((group) => {
-      const groupDate = formatShortDate(group.when || "");
-      (group.items || []).forEach((item) => {
-        const imgs = normalizeImages(item.images, item.name);
-        const link = firstLink(item.link);
-        imgs.forEach((img, i) => {
-          const raw = Array.isArray(item.images) ? item.images[i] : null;
-          if (raw && raw.face) {
-            add(img, { date: groupDate, title: item.name || "", link });
-          }
-        });
-      });
-    });
-  }
-
-  if (Array.isArray(data.awards)) {
-    data.awards.forEach((group) => {
-      const groupDate = formatShortDate(group.when || "");
-      (group.items || []).forEach((item) => {
-        const imgs = normalizeImages(item.images, item.name);
-        const link =
-          typeof item.link === "string" && item.link ? item.link : "";
-        imgs.forEach((img, i) => {
-          const raw = Array.isArray(item.images) ? item.images[i] : null;
-          if (raw && raw.face) {
-            add(img, { date: groupDate, title: item.name || "", link });
-          }
-        });
-      });
-    });
-  }
-
-  return faceImages;
-}
-
-function hydrateFromData(data) {
-  const faceImages = collectFaceImages(data);
+function hydrateFromRuntime(runtime) {
+  const faceImages =
+    runtime.faceImages || (runtime._full ? collectFaceImages(runtime._full) : []);
   initCoverFlow(faceImages, {});
 
+  const full = runtime._full;
+
   if (!panelsArePrerendered()) {
-    renderProjects(data.projects || []);
-    renderTimeline("hackathons", data.hackathons || [], true);
-    renderTimeline("awards", data.awards || [], false);
-  } else {
-    wireProjects(data.projects || []);
-    wireTimeline("hackathons", data.hackathons || [], true);
-    wireTimeline("awards", data.awards || [], false);
+    if (full) {
+      renderProjects(full.projects || []);
+      renderTimeline("hackathons", full.hackathons || [], true);
+      renderTimeline("awards", full.awards || [], false);
+    }
+  } else if (full) {
+    wireProjects(full.projects || []);
+    wireTimeline("hackathons", full.hackathons || [], true);
+    wireTimeline("awards", full.awards || [], false);
+  } else if (runtime.projectLinks) {
+    wireProjects(
+      runtime.projectLinks.map((p) => ({
+        title: p.title,
+        link: p.links,
+      })),
+    );
+    wireTimeline("hackathons", timelineWireGroups(runtime, "hackathons"), true);
+    wireTimeline("awards", timelineWireGroups(runtime, "awards"), false);
   }
 
   initLazyThumbs();
   applyHashFromLocation();
-  setTabImages(data);
+
+  if (runtime.sectionImages) {
+    setTabImages({ sectionImages: runtime.sectionImages });
+  } else if (full) {
+    setTabImages(full);
+  }
 }
 
-dataReady.then((data) => {
+const dataReady = loadSiteData();
+
+dataReady.then((runtime) => {
   whenDomReady(() => {
-    if (!data) {
+    if (!runtime) {
       const fail = (msg) =>
         `<p style="font-size:.8rem;color:#aa6464">${msg}</p>`;
       const projects = document.getElementById("projects");
@@ -219,7 +143,7 @@ dataReady.then((data) => {
       initCoverFlow([], {});
       return;
     }
-    hydrateFromData(data);
+    hydrateFromRuntime(runtime);
   });
 });
 
@@ -235,7 +159,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initFootnotes();
   initImageViewerDelegates();
 
-  runWhenIdle(() => {
+  runWhenIdle(async () => {
+    const { initWidgets } = await import("./components/widgets.js");
     initWidgets();
     initTapMode();
     initVisibilityPause();

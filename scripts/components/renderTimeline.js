@@ -1,3 +1,4 @@
+import { iconHtml } from "../icons.js";
 import {
     escapeHtml,
     getPreviewPath,
@@ -249,7 +250,7 @@ export function renderTimeline(id, items, showBadges) {
                     <div class="entry">
                         <h4 class="timeline-summary" data-target="${expandId}" aria-expanded="false">
                             <button class="timeline-toggle">
-                                <i class="fas fa-chevron-down"></i>
+                                <span class="svg-icon">${iconHtml("chevronDown")}</span>
                             </button>
                             <span>${summaryText}</span>
                         </h4>

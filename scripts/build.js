@@ -12,7 +12,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { generateHeroTagline } from './generate_hero_tagline.js';
 import { generateSitemap } from './generate-sitemap.js';
+import { applySvgIcons, replaceFaIcons } from './icons.js';
 import { applySeoToDocument } from './seo.js';
+import { generateRuntimePayload } from './utils/siteData.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -23,83 +25,87 @@ const seoPath = path.join(rootDir, 'seo.json');
 const heroTemplatePath = path.join(rootDir, 'templates', 'hero-tagline.html');
 const bundledCssPath = path.join(rootDir, 'styles.min.css');
 const bundledJsPath = path.join(rootDir, 'scripts', 'main.min.js');
-
 const readUtf8 = (filePath) => fs.readFileSync(filePath, 'utf-8');
 
-const LCP_IMAGE_PATH = 'assets/northernlights.webp';
-const POPPINS_STYLESHEET_URL =
-  'https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap';
-
-function applyPerformanceHead(document, siteData) {
+function cleanupLegacyHead(document) {
   const head = document.head;
   if (!head) return;
+
+  const removeSelector = [
+    'link[rel="preload"][href="data.json"]',
+    'link[rel="preload"][href*="northernlights"]',
+    'link[rel="preload"][as="fetch"]',
+    'link[rel="preload"][href*="styles"]',
+    'link[href*="fonts.googleapis"]',
+    'link[href*="font-awesome"]',
+    'link[rel="preconnect"][href="https://fonts.gstatic.com"]',
+    'link[rel="preconnect"][href="https://cdnjs.cloudflare.com"]',
+    'script[src*="animejs"]',
+    'script[src*="anime.min.js"]',
+    '#site-runtime',
+    'style#critical',
+    'link[data-deferred-styles]',
+  ];
+
+  for (const sel of removeSelector) {
+    head.querySelectorAll(sel).forEach((el) => el.remove());
+  }
 
   head
     .querySelectorAll('link[rel="preconnect"][href="https://api.rss2json.com"]')
     .forEach((el) => el.remove());
 
-  if (!head.querySelector('link[rel="preconnect"][href="https://fonts.gstatic.com"]')) {
-    const gstatic = document.createElement('link');
-    gstatic.rel = 'preconnect';
-    gstatic.href = 'https://fonts.gstatic.com';
-    gstatic.crossOrigin = 'anonymous';
-    const manifest = head.querySelector('link[rel="manifest"]');
-    if (manifest?.nextSibling) {
-      head.insertBefore(gstatic, manifest.nextSibling);
+  head.querySelectorAll('link[rel="stylesheet"][href*="styles"]').forEach((el) => {
+    el.remove();
+  });
+
+  head.querySelectorAll('noscript:empty').forEach((el) => el.remove());
+}
+
+function injectStylesheet(document) {
+  const head = document.head;
+  if (!head) return;
+
+  head.querySelectorAll('style#critical').forEach((el) => el.remove());
+
+  let link = head.querySelector('link[rel="stylesheet"][href="styles.min.css"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'styles.min.css';
+    const canonical = head.querySelector('link[rel="canonical"]');
+    if (canonical) {
+      head.insertBefore(link, canonical);
     } else {
-      head.appendChild(gstatic);
+      head.appendChild(link);
     }
   }
 
-  const lcpPath =
-    siteData?.coverflowImages?.find((entry) => entry?.path)?.path ||
-    LCP_IMAGE_PATH;
-
-  if (!head.querySelector(`link[rel="preload"][href="${lcpPath}"]`)) {
-    const lcpPreload = document.createElement('link');
-    lcpPreload.rel = 'preload';
-    lcpPreload.as = 'image';
-    lcpPreload.href = lcpPath;
-    lcpPreload.setAttribute('fetchpriority', 'high');
-    if (head.firstChild) {
-      head.insertBefore(lcpPreload, head.firstChild);
-    } else {
-      head.appendChild(lcpPreload);
-    }
+  let preload = head.querySelector('link[rel="preload"][href="styles.min.css"]');
+  if (!preload) {
+    preload = document.createElement('link');
+    preload.rel = 'preload';
+    preload.href = 'styles.min.css';
+    head.insertBefore(preload, link);
   }
+  preload.setAttribute('as', 'style');
+}
 
-  for (const link of head.querySelectorAll(
-    'link[href*="fonts.googleapis.com/css2?family=Poppins"]',
-  )) {
-    link.setAttribute('href', POPPINS_STYLESHEET_URL);
-    link.removeAttribute('onload');
-  }
+function injectRuntimeScript(document, runtimePayload) {
+  const existing = document.getElementById('site-runtime');
+  if (existing) existing.remove();
 
-  const fontsPreload = head.querySelector(
-    'link[rel="preload"][as="style"][href*="fonts.googleapis"]',
-  );
-  if (fontsPreload) {
-    fontsPreload.setAttribute('href', POPPINS_STYLESHEET_URL);
-    const hasStylesheet = head.querySelector(
-      `link[rel="stylesheet"][href="${POPPINS_STYLESHEET_URL}"]`,
-    );
+  const script = document.createElement('script');
+  script.id = 'site-runtime';
+  script.textContent = `window.__SITE_RUNTIME__=${JSON.stringify(runtimePayload)};`;
 
-    if (!hasStylesheet) {
-      const fontsStylesheet = document.createElement('link');
-      fontsStylesheet.rel = 'stylesheet';
-      fontsStylesheet.href = POPPINS_STYLESHEET_URL;
-      fontsPreload.insertAdjacentElement('afterend', fontsStylesheet);
-    }
+  const mainScript =
+    document.querySelector('script[src="scripts/main.js"]') ||
+    document.querySelector('script[src="scripts/main.min.js"]');
+  if (mainScript?.parentNode) {
+    mainScript.parentNode.insertBefore(script, mainScript);
   } else {
-    const fontsStylesheet = document.createElement('link');
-    fontsStylesheet.rel = 'stylesheet';
-    fontsStylesheet.href = POPPINS_STYLESHEET_URL;
-    const styles = head.querySelector('link[rel="stylesheet"][href*="styles"]');
-    if (styles) {
-      head.insertBefore(fontsStylesheet, styles);
-    } else {
-      head.appendChild(fontsStylesheet);
-    }
+    document.body.appendChild(script);
   }
 }
 
@@ -314,18 +320,19 @@ console.log('✓ Injected hero tagline template');
 applySeoToDocument(outputDocument, seo, dateModified);
 console.log('✓ Applied canonical URL and JSON-LD structured data');
 
-applyPerformanceHead(outputDocument, data);
-console.log('✓ Applied performance head hints (LCP preload, preconnect cleanup)');
+replaceFaIcons(outputDocument);
+applySvgIcons(outputDocument);
+console.log('✓ Applied inline SVG icons');
 
-const stylesheetPreload = outputDocument.querySelector('link[rel="preload"][as="style"][href="styles.css"]');
-if (stylesheetPreload) {
-  stylesheetPreload.setAttribute('href', 'styles.min.css');
-}
+const runtimePayload = generateRuntimePayload(data);
+injectRuntimeScript(outputDocument, runtimePayload);
+console.log(
+  `✓ Injected site runtime payload (${JSON.stringify(runtimePayload).length} bytes)`,
+);
 
-const stylesheetLink = outputDocument.querySelector('link[rel="stylesheet"][href="styles.css"]');
-if (stylesheetLink) {
-  stylesheetLink.setAttribute('href', 'styles.min.css');
-}
+cleanupLegacyHead(outputDocument);
+injectStylesheet(outputDocument);
+console.log('✓ Linked blocking styles.min.css (preload hint)');
 
 const scriptTag =
   outputDocument.querySelector('script[src="scripts/main.js"]') ||
@@ -338,14 +345,6 @@ if (scriptTag) {
 
 for (const modulePreload of outputDocument.querySelectorAll('link[rel="modulepreload"]')) {
   modulePreload.remove();
-}
-
-// Keep the font-awesome preload onload handler parser-safe for HTML/JS tooling.
-const fontAwesomePreload = outputDocument.querySelector(
-  'link[rel="preload"][as="style"][href*="font-awesome"]'
-);
-if (fontAwesomePreload) {
-  fontAwesomePreload.setAttribute('onload', "this.onload=null;this.rel='stylesheet';");
 }
 
 let serialized = outputDom.serialize();

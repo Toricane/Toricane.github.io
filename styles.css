@@ -1,19 +1,3 @@
-@font-face {
-    font-family: "Font Awesome 6 Free";
-    font-style: normal;
-    font-weight: 900;
-    font-display: swap;
-    src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "Font Awesome 6 Brands";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-brands-400.woff2") format("woff2");
-}
-
 /* --- Variables --- */
 :root {
     --bg: #060809;
@@ -174,9 +158,10 @@ img {
 /* --- Typography --- */
 .site-title {
     font-family:
-        "Poppins",
         system-ui,
         -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
         sans-serif;
     font-size: clamp(1.8rem, 4.5vw, 3.5rem);
     line-height: 1.05;
@@ -342,6 +327,34 @@ body:not(.page-ready) .site-title {
 /* --- Components --- */
 
 /* Theme Toggle */
+.svg-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+}
+
+.svg-icon .icon {
+    width: 1em;
+    height: 1em;
+    display: block;
+}
+
+.theme-toggle .svg-icon .icon {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.scroll-more .svg-icon .icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.timeline-toggle .svg-icon .icon {
+    width: 0.75rem;
+    height: 0.75rem;
+}
+
 .theme-toggle {
     position: fixed;
     top: 1rem;
@@ -999,6 +1012,11 @@ body.page-ready .widget-ring-active {
 .tab-panel {
     display: none;
     animation: fade 0.4s ease forwards;
+}
+
+.tab-panel:not(.active) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
 }
 
 .tab-panel.active {
@@ -2287,7 +2305,7 @@ body.page-ready .widget-ring-active {
         padding: 0.75rem;
     }
 
-    .connections a span {
+    .connections a span:not(.svg-icon) {
         display: none;
     }
 

@@ -60,15 +60,21 @@ function collectSectionImages(id, rawData) {
  * Call after data.json is fetched to register section image lists.
  */
 export function setTabImages(data) {
-  sectionImages.projects = collectSectionImages(
-    "projects",
-    data.projects || [],
-  );
-  sectionImages.hackathons = collectSectionImages(
-    "hackathons",
-    data.hackathons || [],
-  );
-  sectionImages.awards = collectSectionImages("awards", data.awards || []);
+  if (data?.sectionImages) {
+    sectionImages.projects = data.sectionImages.projects || [];
+    sectionImages.hackathons = data.sectionImages.hackathons || [];
+    sectionImages.awards = data.sectionImages.awards || [];
+  } else {
+    sectionImages.projects = collectSectionImages(
+      "projects",
+      data.projects || [],
+    );
+    sectionImages.hackathons = collectSectionImages(
+      "hackathons",
+      data.hackathons || [],
+    );
+    sectionImages.awards = collectSectionImages("awards", data.awards || []);
+  }
 
   if (activeTab && sectionImages[activeTab]?.length) {
     queueCarouselStart(activeTab);

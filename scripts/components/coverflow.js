@@ -33,7 +33,6 @@ const AUTO_SCROLL_MS = 2500;
 // so that there's always a set before and after the one we're currently viewing.
 const NUM_SETS = 5; 
 const EAGER_BUFFER_PER_SIDE = 0;
-const LCP_IMAGE_PATH = "assets/northernlights.webp";
 
 // We define our core "page" metrics
 let baseSetWidth = 0; 
@@ -132,11 +131,65 @@ function checkInfiniteWrap() {
   }
 }
 
-function getCoverflowDisplayPath(path) {
-  if (path && path.includes("tab-panels/")) {
-    return path.replace("tab-panels/", "tab-panels/small/");
+/** Coverflow cards are large — use full tab-panel assets, not 400px previews. */
+const COVERFLOW_SIZES = "(width <= 600px) 90vw, 480px";
+
+function getCoverflowImageSources(originalPath) {
+  if (!originalPath) {
+    return { src: "", srcset: "", sizes: "" };
   }
-  return path;
+
+  if (originalPath === "assets/northernlights.webp") {
+    return {
+      src: "assets/northernlights-960.webp",
+      srcset:
+        "assets/northernlights-640.webp 640w, assets/northernlights-960.webp 960w, assets/northernlights.webp 1600w",
+      sizes: COVERFLOW_SIZES,
+    };
+  }
+
+  if (originalPath.includes("tab-panels/")) {
+    const base = originalPath.replace(/\/preview\//, "/").replace(/\/small\//, "/");
+    const smallPath = base.replace("tab-panels/", "tab-panels/small/");
+    return {
+      src: base,
+      srcset: `${smallPath} 800w, ${base} 1600w`,
+      sizes: COVERFLOW_SIZES,
+    };
+  }
+
+  return { src: originalPath, srcset: "", sizes: "" };
+}
+
+function attachCoverflowFallback(imgEl, sources) {
+  const { src, srcset } = sources;
+  if (!srcset) return;
+  imgEl.addEventListener(
+    "error",
+    () => {
+      if (imgEl.dataset.fallbackApplied === "1") return;
+      imgEl.dataset.fallbackApplied = "1";
+      imgEl.removeAttribute("srcset");
+      imgEl.removeAttribute("data-srcset");
+      if (imgEl.dataset.src) {
+        imgEl.dataset.src = src;
+      }
+      imgEl.src = src;
+    },
+    { once: true },
+  );
+}
+
+function applyCoverflowImageSources(imgEl, sources) {
+  const { src, srcset, sizes } = sources;
+  if (srcset) {
+    imgEl.srcset = srcset;
+    imgEl.sizes = sizes;
+  } else {
+    imgEl.removeAttribute("srcset");
+    imgEl.removeAttribute("sizes");
+  }
+  imgEl.src = src;
 }
 
 function markCoverflowLoaded(img) {
@@ -155,16 +208,6 @@ function preloadCoverflowLcp(href) {
   document.head.appendChild(lcpPreloadLink);
 }
 
-function placeLcpImageAtCenter(baseList) {
-  const idx = baseList.findIndex((img) => img.path === LCP_IMAGE_PATH);
-  if (idx < 0) return baseList;
-  const center = Math.floor(baseList.length / 2);
-  if (idx === center) return baseList;
-  const next = [...baseList];
-  [next[center], next[idx]] = [next[idx], next[center]];
-  return next;
-}
-
 function setupImageObserver() {
   if (imageObserver) {
     imageObserver.disconnect();
@@ -174,11 +217,11 @@ function setupImageObserver() {
       if (entry.isIntersecting) {
         const img = entry.target.querySelector("img[data-src]");
         if (img) {
-          const srcset = img.dataset.srcset;
-          const sizes = img.dataset.sizes;
-          if (srcset) img.srcset = srcset;
-          if (sizes) img.sizes = sizes;
-          img.src = img.dataset.src;
+          applyCoverflowImageSources(img, {
+            src: img.dataset.src || "",
+            srcset: img.dataset.srcset || "",
+            sizes: img.dataset.sizes || "",
+          });
           img.removeAttribute("data-src");
           img.removeAttribute("data-srcset");
           img.removeAttribute("data-sizes");
@@ -212,13 +255,11 @@ function renderCards(images, colors = {}) {
     baseList = baseList.concat(shuffle(images));
   }
 
-  baseList = placeLcpImageAtCenter(baseList);
-
   baseSetImageCount = baseList.length;
-  const lcpPath = getCoverflowDisplayPath(
+  const centerSources = getCoverflowImageSources(
     baseList[Math.floor(baseList.length / 2)]?.path,
   );
-  preloadCoverflowLcp(lcpPath);
+  preloadCoverflowLcp(centerSources.src);
 
   // Create NUM_SETS exact duplicates of our baseList
   let renderList = [];
@@ -242,37 +283,32 @@ function renderCards(images, colors = {}) {
     imgEl.className = "coverflow-main";
     imgEl.alt = img.label || "Photo";
     imgEl.crossOrigin = "Anonymous";
-    const displayPath = img.path;
-    const smallPath = getCoverflowDisplayPath(displayPath);
+    const sources = getCoverflowImageSources(img.path);
     const middleStartIndex = Math.floor(NUM_SETS / 2) * baseSetImageCount;
     const middleCardIndex = middleStartIndex + Math.floor(baseSetImageCount / 2);
     const isCenterCard = i === middleCardIndex;
     const isInitiallyVisible =
       Math.abs(i - middleCardIndex) <= EAGER_BUFFER_PER_SIDE;
-    const coverflowSizes =
-      "(width <= 600px) 100vw, (width <= 1050px) 40vw, 320px";
     const needsMetricRefresh = i === 0 || i === baseSetImageCount - 1;
+
+    attachCoverflowFallback(imgEl, sources);
 
     if (isCenterCard) {
       imgEl.decoding = "sync";
-      imgEl.src = smallPath;
       imgEl.loading = "eager";
       imgEl.fetchPriority = "high";
-      if (displayPath.includes("tab-panels/")) {
-        imgEl.srcset = `${smallPath} 800w`;
-        imgEl.sizes = coverflowSizes;
-      }
+      applyCoverflowImageSources(imgEl, sources);
     } else {
       card.classList.add("coverflow-loading");
       imgEl.decoding = "async";
-      imgEl.dataset.src = smallPath;
+      imgEl.dataset.src = sources.src;
+      if (sources.srcset) {
+        imgEl.dataset.srcset = sources.srcset;
+        imgEl.dataset.sizes = sources.sizes;
+      }
       imgEl.src = placeholderSvg;
       imgEl.loading = "lazy";
       imgEl.fetchPriority = "low";
-      if (displayPath.includes("tab-panels/")) {
-        imgEl.dataset.srcset = `${smallPath} 800w`;
-        imgEl.dataset.sizes = coverflowSizes;
-      }
       if (!isInitiallyVisible) {
         imageObserver.observe(card);
       }
