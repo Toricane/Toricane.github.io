@@ -19,13 +19,61 @@ import { initVisibilityPause } from "./components/visibilityPause.js";
 import { initWidgets } from "./components/widgets.js";
 import { normalizeImages } from "./utils/data.js";
 
+const dataReady = fetch("data.json")
+  .then((r) => r.json())
+  .catch((err) => {
+    console.error(err);
+    return null;
+  });
+
+let coverflowColorsRequested = false;
+
+function requestCoverflowColors() {
+  if (coverflowColorsRequested) return;
+  coverflowColorsRequested = true;
+  fetch("colors.json")
+    .then((r) => r.json())
+    .then((colors) => {
+      updateCoverFlowColors(colors || {});
+    })
+    .catch(() => {
+      // Keep fallback coverflow glow colors when colors.json is unavailable.
+    });
+}
+
+function scheduleCoverflowColorsFetch() {
+  const run = () => requestCoverflowColors();
+
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(run, { timeout: 8000 });
+    return;
+  }
+  setTimeout(run, 3000);
+}
+
+function panelsArePrerendered() {
+  return document.getElementById("projects")?.querySelector(".card") != null;
+}
+
+function whenDomReady(fn) {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", fn, { once: true });
+  } else {
+    fn();
+  }
+}
+
+function runWhenIdle(fn, timeout = 2500) {
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(fn, { timeout });
+  } else {
+    setTimeout(fn, 200);
+  }
+}
+
 /**
  * Collect every image with `"face": true` from all sections of data.json,
  * plus any standalone entries in the top-level `coverflowImages` array.
- */
-/**
- * Extract the first usable URL from an item's link field.
- * link can be a string, an array of {url} objects, or falsy.
  */
 function firstLink(field) {
   if (!field) return "";
@@ -38,9 +86,6 @@ function firstLink(field) {
   return "";
 }
 
-/**
- * Format a date string like "2025/06" or "2024/01/01" into "Jun 2025" etc.
- */
 function formatShortDate(raw) {
   if (!raw) return "";
   const months = [
@@ -83,7 +128,6 @@ function collectFaceImages(data) {
     });
   };
 
-  // Top-level standalone coverflow images (no parent item)
   if (Array.isArray(data.coverflowImages)) {
     data.coverflowImages.forEach((entry) => {
       if (entry.face) {
@@ -92,7 +136,6 @@ function collectFaceImages(data) {
     });
   }
 
-  // Projects
   if (Array.isArray(data.projects)) {
     data.projects.forEach((proj) => {
       const imgs = normalizeImages(proj.images, proj.title);
@@ -109,7 +152,6 @@ function collectFaceImages(data) {
     });
   }
 
-  // Hackathons
   if (Array.isArray(data.hackathons)) {
     data.hackathons.forEach((group) => {
       const groupDate = formatShortDate(group.when || "");
@@ -126,7 +168,6 @@ function collectFaceImages(data) {
     });
   }
 
-  // Awards
   if (Array.isArray(data.awards)) {
     data.awards.forEach((group) => {
       const groupDate = formatShortDate(group.when || "");
@@ -147,32 +188,36 @@ function collectFaceImages(data) {
   return faceImages;
 }
 
-function scheduleCoverflowColorsFetch() {
-  const run = () => {
-    fetch("colors.json", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((colors) => {
-        updateCoverFlowColors(colors || {});
-      })
-      .catch(() => {
-        // Keep fallback coverflow glow colors when colors.json is unavailable.
-      });
-  };
+function hydrateFromData(data) {
+  const faceImages = collectFaceImages(data);
+  initCoverFlow(faceImages, {});
 
-  const deferredRun = () => {
-    if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(() => run(), { timeout: 2500 });
+  if (!panelsArePrerendered()) {
+    renderProjects(data.projects || []);
+    renderTimeline("hackathons", data.hackathons || [], true);
+    renderTimeline("awards", data.awards || [], false);
+  }
+
+  initLazyThumbs();
+  applyHashFromLocation();
+  setTabImages(data);
+}
+
+dataReady.then((data) => {
+  whenDomReady(() => {
+    if (!data) {
+      const fail = (msg) =>
+        `<p style="font-size:.8rem;color:#aa6464">${msg}</p>`;
+      const projects = document.getElementById("projects");
+      if (projects) {
+        projects.innerHTML = fail("Failed to load projects.");
+      }
+      initCoverFlow([], {});
       return;
     }
-    setTimeout(run, 1200);
-  };
-
-  if (document.readyState === "complete") {
-    deferredRun();
-    return;
-  }
-  window.addEventListener("load", deferredRun, { once: true });
-}
+    hydrateFromData(data);
+  });
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   initYear();
@@ -182,60 +227,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const { activate } = initTabs();
   setTabActivator(activate);
   initHashNavigation();
-  applyHashFromLocation();
-
-  initWidgets();
-  initTapMode();
-
-  Promise.all([
-    fetch("data.json", { cache: "no-store" }).then((r) => r.json()),
-  ])
-    .then(([data]) => {
-      renderProjects(data.projects || []);
-      renderTimeline("hackathons", data.hackathons || [], true);
-      renderTimeline("awards", data.awards || [], false);
-      initLazyThumbs();
-
-      applyHashFromLocation();
-
-      // Feed section images to the tab highlight carousel
-      setTabImages(data);
-
-      // Defer coverflow until idle so thumbs and text win on slow networks.
-      const runCoverFlow = () => {
-        const faceImages = collectFaceImages(data);
-        initCoverFlow(faceImages, {});
-        scheduleCoverflowColorsFetch();
-      };
-      if ("requestIdleCallback" in window) {
-        requestIdleCallback(runCoverFlow, { timeout: 1500 });
-      } else {
-        setTimeout(runCoverFlow, 100);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      const fail = (msg) =>
-        `<p style="font-size:.8rem;color:#aa6464">${msg}</p>`;
-      const projects = document.getElementById("projects");
-      if (projects) {
-        projects.innerHTML = fail("Failed to load projects.");
-      }
-      // Still initialise coverflow with empty array so the container is clean
-      initCoverFlow([], {});
-    });
-
-  const reduceMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)",
-  ).matches;
-  if (!reduceMotion) {
-    const highlightFigureEl = document.querySelector(".tab-highlight-figure");
-    const tiltTarget = highlightFigureEl;
-    setupTilt(tiltTarget, { max: 12, scale: 1.02 });
-  }
 
   initFootnotes();
   initImageViewerDelegates();
-  initVisibilityPause();
-  initScrollableTabs();
+
+  runWhenIdle(() => {
+    initWidgets();
+    initTapMode();
+    initVisibilityPause();
+    initScrollableTabs();
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (!reduceMotion) {
+      const highlightFigureEl = document.querySelector(".tab-highlight-figure");
+      setupTilt(highlightFigureEl, { max: 12, scale: 1.02 });
+    }
+  });
+
+  applyHashFromLocation();
 });
+
+window.addEventListener(
+  "load",
+  () => {
+    document.body.classList.add("page-ready");
+    scheduleCoverflowColorsFetch();
+  },
+  { once: true },
+);

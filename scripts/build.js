@@ -26,6 +26,83 @@ const bundledJsPath = path.join(rootDir, 'scripts', 'main.min.js');
 
 const readUtf8 = (filePath) => fs.readFileSync(filePath, 'utf-8');
 
+const LCP_IMAGE_PATH = 'assets/northernlights.webp';
+const POPPINS_STYLESHEET_URL =
+  'https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap';
+
+function applyPerformanceHead(document, siteData) {
+  const head = document.head;
+  if (!head) return;
+
+  head
+    .querySelectorAll('link[rel="preconnect"][href="https://api.rss2json.com"]')
+    .forEach((el) => el.remove());
+
+  if (!head.querySelector('link[rel="preconnect"][href="https://fonts.gstatic.com"]')) {
+    const gstatic = document.createElement('link');
+    gstatic.rel = 'preconnect';
+    gstatic.href = 'https://fonts.gstatic.com';
+    gstatic.crossOrigin = 'anonymous';
+    const manifest = head.querySelector('link[rel="manifest"]');
+    if (manifest?.nextSibling) {
+      head.insertBefore(gstatic, manifest.nextSibling);
+    } else {
+      head.appendChild(gstatic);
+    }
+  }
+
+  const lcpPath =
+    siteData?.coverflowImages?.find((entry) => entry?.path)?.path ||
+    LCP_IMAGE_PATH;
+
+  if (!head.querySelector(`link[rel="preload"][href="${lcpPath}"]`)) {
+    const lcpPreload = document.createElement('link');
+    lcpPreload.rel = 'preload';
+    lcpPreload.as = 'image';
+    lcpPreload.href = lcpPath;
+    lcpPreload.setAttribute('fetchpriority', 'high');
+    if (head.firstChild) {
+      head.insertBefore(lcpPreload, head.firstChild);
+    } else {
+      head.appendChild(lcpPreload);
+    }
+  }
+
+  for (const link of head.querySelectorAll(
+    'link[href*="fonts.googleapis.com/css2?family=Poppins"]',
+  )) {
+    link.setAttribute('href', POPPINS_STYLESHEET_URL);
+    link.removeAttribute('onload');
+  }
+
+  const fontsPreload = head.querySelector(
+    'link[rel="preload"][as="style"][href*="fonts.googleapis"]',
+  );
+  if (fontsPreload) {
+    fontsPreload.setAttribute('href', POPPINS_STYLESHEET_URL);
+    const hasStylesheet = head.querySelector(
+      `link[rel="stylesheet"][href="${POPPINS_STYLESHEET_URL}"]`,
+    );
+
+    if (!hasStylesheet) {
+      const fontsStylesheet = document.createElement('link');
+      fontsStylesheet.rel = 'stylesheet';
+      fontsStylesheet.href = POPPINS_STYLESHEET_URL;
+      fontsPreload.insertAdjacentElement('afterend', fontsStylesheet);
+    }
+  } else {
+    const fontsStylesheet = document.createElement('link');
+    fontsStylesheet.rel = 'stylesheet';
+    fontsStylesheet.href = POPPINS_STYLESHEET_URL;
+    const styles = head.querySelector('link[rel="stylesheet"][href*="styles"]');
+    if (styles) {
+      head.insertBefore(fontsStylesheet, styles);
+    } else {
+      head.appendChild(fontsStylesheet);
+    }
+  }
+}
+
 function loadJsonWithFallback(filePath, fallback = {}) {
   try {
     return JSON.parse(readUtf8(filePath));
@@ -226,6 +303,9 @@ console.log('✓ Injected hero tagline template');
 applySeoToDocument(outputDocument, seo, dateModified);
 console.log('✓ Applied canonical URL and JSON-LD structured data');
 
+applyPerformanceHead(outputDocument, data);
+console.log('✓ Applied performance head hints (LCP preload, preconnect cleanup)');
+
 const stylesheetPreload = outputDocument.querySelector('link[rel="preload"][as="style"][href="styles.css"]');
 if (stylesheetPreload) {
   stylesheetPreload.setAttribute('href', 'styles.min.css');
@@ -236,9 +316,12 @@ if (stylesheetLink) {
   stylesheetLink.setAttribute('href', 'styles.min.css');
 }
 
-const scriptTag = outputDocument.querySelector('script[src="scripts/main.js"]');
+const scriptTag =
+  outputDocument.querySelector('script[src="scripts/main.js"]') ||
+  outputDocument.querySelector('script[src="scripts/main.min.js"]');
 if (scriptTag) {
   scriptTag.setAttribute('src', 'scripts/main.min.js');
+  scriptTag.setAttribute('defer', '');
   scriptTag.removeAttribute('type');
 }
 

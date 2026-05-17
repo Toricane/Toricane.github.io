@@ -33,6 +33,7 @@ const AUTO_SCROLL_MS = 2500;
 // so that there's always a set before and after the one we're currently viewing.
 const NUM_SETS = 5; 
 const EAGER_BUFFER_PER_SIDE = 0;
+const LCP_IMAGE_PATH = "assets/northernlights.webp";
 
 // We define our core "page" metrics
 let baseSetWidth = 0; 
@@ -41,6 +42,7 @@ let totalCards = 0;
 let wrapMaxScroll = 0;
 
 let imageObserver = null;
+let lcpPreloadLink = null;
 
 
 
@@ -140,7 +142,27 @@ function getCoverflowDisplayPath(path) {
 function markCoverflowLoaded(img) {
   img.classList.add("is-loaded");
   const card = img.closest(".coverflow-card");
-  if (card) card.style.animation = "none";
+  if (card) card.classList.remove("coverflow-loading");
+}
+
+function preloadCoverflowLcp(href) {
+  if (!href || lcpPreloadLink) return;
+  if (document.querySelector(`link[rel="preload"][href="${href}"]`)) return;
+  lcpPreloadLink = document.createElement("link");
+  lcpPreloadLink.rel = "preload";
+  lcpPreloadLink.as = "image";
+  lcpPreloadLink.href = href;
+  document.head.appendChild(lcpPreloadLink);
+}
+
+function placeLcpImageAtCenter(baseList) {
+  const idx = baseList.findIndex((img) => img.path === LCP_IMAGE_PATH);
+  if (idx < 0) return baseList;
+  const center = Math.floor(baseList.length / 2);
+  if (idx === center) return baseList;
+  const next = [...baseList];
+  [next[center], next[idx]] = [next[idx], next[center]];
+  return next;
 }
 
 function setupImageObserver() {
@@ -189,8 +211,14 @@ function renderCards(images, colors = {}) {
   while (baseList.length < minCards && images.length > 0) {
     baseList = baseList.concat(shuffle(images));
   }
-  
+
+  baseList = placeLcpImageAtCenter(baseList);
+
   baseSetImageCount = baseList.length;
+  const lcpPath = getCoverflowDisplayPath(
+    baseList[Math.floor(baseList.length / 2)]?.path,
+  );
+  preloadCoverflowLcp(lcpPath);
 
   // Create NUM_SETS exact duplicates of our baseList
   let renderList = [];
@@ -214,7 +242,6 @@ function renderCards(images, colors = {}) {
     imgEl.className = "coverflow-main";
     imgEl.alt = img.label || "Photo";
     imgEl.crossOrigin = "Anonymous";
-    imgEl.decoding = "async"; // Decode off the main thread to reduce TBT
     const displayPath = img.path;
     const smallPath = getCoverflowDisplayPath(displayPath);
     const middleStartIndex = Math.floor(NUM_SETS / 2) * baseSetImageCount;
@@ -227,6 +254,7 @@ function renderCards(images, colors = {}) {
     const needsMetricRefresh = i === 0 || i === baseSetImageCount - 1;
 
     if (isCenterCard) {
+      imgEl.decoding = "sync";
       imgEl.src = smallPath;
       imgEl.loading = "eager";
       imgEl.fetchPriority = "high";
@@ -235,6 +263,8 @@ function renderCards(images, colors = {}) {
         imgEl.sizes = coverflowSizes;
       }
     } else {
+      card.classList.add("coverflow-loading");
+      imgEl.decoding = "async";
       imgEl.dataset.src = smallPath;
       imgEl.src = placeholderSvg;
       imgEl.loading = "lazy";
@@ -255,6 +285,10 @@ function renderCards(images, colors = {}) {
 
       if (needsMetricRefresh) requestBaseMetrics();
     });
+
+    if (isCenterCard && imgEl.complete) {
+      markCoverflowLoaded(imgEl);
+    }
 
     const dominantRgb = colors[img.path] || '77, 181, 255';
     card.style.setProperty('--card-glow-rgb', dominantRgb);

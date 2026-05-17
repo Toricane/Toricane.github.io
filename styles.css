@@ -88,9 +88,10 @@ html {
 body {
     margin: 0;
     font-family:
-        "Poppins",
         system-ui,
         -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
         sans-serif;
     background: var(--bg);
     color: var(--text);
@@ -172,6 +173,11 @@ img {
 
 /* --- Typography --- */
 .site-title {
+    font-family:
+        "Poppins",
+        system-ui,
+        -apple-system,
+        sans-serif;
     font-size: clamp(1.8rem, 4.5vw, 3.5rem);
     line-height: 1.05;
     margin: 0;
@@ -194,6 +200,11 @@ img {
     color: transparent;
     -webkit-text-fill-color: transparent;
     animation: titleGradient 10s ease-in-out infinite;
+}
+
+body:not(.page-ready) .site-title {
+    animation: none;
+    background-position: 100% 50%;
 }
 
 .last-name {
@@ -418,21 +429,6 @@ img {
     background-image: none;
 }
 
-@keyframes thumb-shimmer {
-    0%,
-    100% {
-        opacity: 0.55;
-    }
-    50% {
-        opacity: 0.9;
-    }
-}
-
-.card-thumb.thumb-pending,
-.timeline-thumb.thumb-pending {
-    animation: thumb-shimmer 1.4s ease-in-out infinite;
-}
-
 .card-thumb:focus {
     outline: 2px solid var(--border-accent);
 }
@@ -594,16 +590,15 @@ img {
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
     backface-visibility: hidden;
+}
+
+.coverflow-card.coverflow-loading img.coverflow-main {
     opacity: 0;
     transition: opacity 0.35s ease;
 }
 
-.coverflow-card img.coverflow-main.is-loaded {
+.coverflow-card.coverflow-loading img.coverflow-main.is-loaded {
     opacity: 1;
-}
-
-.coverflow-card:not(:has(.coverflow-main.is-loaded)) {
-    animation: thumb-shimmer 1.4s ease-in-out infinite;
 }
 
 /* ---- Coverflow Overlay (date + title) ---- */
@@ -803,7 +798,10 @@ img {
     flex-direction: column;
     gap: 0.5rem;
     position: relative;
-    transition: all 0.3s ease;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
     overflow: hidden;
 }
 
@@ -829,6 +827,9 @@ img {
     box-shadow:
         0 0 0 2px rgba(77, 181, 255, 0.3),
         0 8px 25px rgba(77, 181, 255, 0.15) !important;
+}
+
+body.page-ready .widget-ring-active {
     animation: widget-ring-pulse 2s ease-in-out infinite;
 }
 
@@ -983,6 +984,11 @@ img {
 
 .tab:not(.active):hover {
     color: var(--text);
+}
+
+#content.content {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1200px;
 }
 
 .tab-panels {
