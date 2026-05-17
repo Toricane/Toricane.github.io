@@ -310,6 +310,31 @@ setPanelHtml('projects', projectsHtml);
 setPanelHtml('hackathons', hackathonsHtml);
 setPanelHtml('awards', awardsHtml);
 
+function injectWorkHeading(document) {
+  const content = document.getElementById('content');
+  const tabs = content?.querySelector('.tabs');
+  if (!content || !tabs) return;
+  if (content.querySelector('#work-heading')) return;
+  const h2 = document.createElement('h2');
+  h2.id = 'work-heading';
+  h2.className = 'visually-hidden';
+  h2.textContent = 'Work';
+  content.insertBefore(h2, tabs);
+}
+
+function setTabPanelVisibility(document) {
+  for (const id of ['projects', 'hackathons', 'awards']) {
+    const panel = document.getElementById(id);
+    if (!panel) continue;
+    const isActive = id === 'projects';
+    panel.classList.toggle('active', isActive);
+    panel.toggleAttribute('hidden', !isActive);
+  }
+}
+
+injectWorkHeading(outputDocument);
+setTabPanelVisibility(outputDocument);
+
 const tagline = outputDocument.querySelector('#hero .tagline');
 if (!tagline) {
   throw new Error('Missing hero tagline element (.tagline) in index.html');

@@ -28,7 +28,7 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 ### 🔧 Technical Excellence
 
 -   **Framework-Free**: Pure HTML, CSS, and vanilla JavaScript
--   **Performance Optimized**: Preloaded fonts, lazy loading, efficient rendering
+-   **Performance Optimized**: Blocking minified CSS/JS, inlined runtime payload, lazy images, `content-visibility` on inactive panels
 -   **SEO / AEO Enhanced**: Open Graph, Twitter Cards, canonical URLs, JSON-LD `@graph`, `robots.txt`, `sitemap.xml`, and `llms.txt`
 -   **Content Management**: JSON-driven content system for easy updates
 
@@ -57,9 +57,12 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 │   ├── main.js             # Entry point for client logic
 │   ├── main.min.js         # Generated bundled/minified JS (build output)
 │   ├── build.js            # Full build: hero, SEO head, sitemap, pre-render, minify
+│   ├── icons.js            # Inline FA 6.5.2 SVGs + build-time icon injection
 │   ├── seo.js              # Canonical + JSON-LD injection helpers
 │   ├── generate-sitemap.js # Writes sitemap.xml from seo.json + data.json dates
 │   ├── generate_hero_tagline.js # Compiles hero-tagline.md into HTML
+│   ├── generate_coverflow_images.py # Responsive WebP variants for coverflow LCP
+│   ├── utils/siteData.js   # Runtime payload generator for production
 │   └── components/         # Feature modules (tabs, coverflow, navigation, tapMode, …)
 ├── templates/
 │   ├── hero-tagline.md     # Author-friendly hero intro source
@@ -68,7 +71,8 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 ├── site.webmanifest        # PWA configuration
 ├── CNAME                   # Custom domain configuration
 ├── assets/                 # Images and media
-│   ├── northernlights.jpg     # Hero portrait image
+│   ├── northernlights.webp    # Hero portrait (coverflow face image)
+│   ├── northernlights-{480,640,960}.webp  # Responsive coverflow variants (optional)
 │   ├── projects_highlight.jpg # Projects tab highlight
 │   ├── hackathons_highlight.jpg # Hackathons tab highlight
 │   ├── awards_highlight.jpg   # Awards tab highlight
@@ -183,7 +187,9 @@ Navigate to `http://localhost:8080`
     -   Build command: `npm run build-html`
     -   *Coverflow Exception*: If you added a new image with `"face": true` (which appears in the Coverflow), run `python scripts/update_colors.py` to pre-calculate its glow color into `colors.json`.
 -   **Image Assets**: Replace files in `/assets/` to update highlight images
--   **Image Optimization**: Tab panel images use preview thumbnails (400px max width, WebP) for fast loading, with full-size originals shown in the viewer on click
+-   **Image Optimization**: Tab panel thumbnails use `assets/tab-panels/preview/` (400px WebP); coverflow uses full `tab-panels/` images with responsive `srcset`
+-   **Rebuild after asset/CSS/JS changes**: `npm run build-html` regenerates `index.html`, `styles.min.css`, and `scripts/main.min.js`
+-   **Coverflow hero variants** (optional): `python scripts/generate_coverflow_images.py` when face images change
 -   **Content Updates & Pre-rendering**:
        1. Edit `data.json` and/or `templates/hero-tagline.md`
     2. Run `npm run build-html` to regenerate `templates/hero-tagline.html`, `sitemap.xml`, bundle/minify client assets (`scripts/main.min.js`, `styles.min.css`), inject SEO head tags, and pre-render all content into `index.html`
@@ -226,11 +232,14 @@ This site is configured for GitHub Pages deployment:
 
 ## 📊 Performance Features
 
--   **Lazy Loading**: Images load only when needed
--   **Font Optimization**: Preloaded Google Fonts with `font-display: swap`
--   **Efficient Scripts**: Anime.js loaded on-demand
--   **Minimal Dependencies**: Only essential external resources
--   **Mobile Optimized**: Touch-friendly interactions and viewport handling
+-   **Blocking bundles**: `styles.min.css` and deferred `scripts/main.min.js` (esbuild)
+-   **Inlined runtime**: `window.__SITE_RUNTIME__` at build (~12KB) — no production `data.json` fetch
+-   **System UI typography**: No Google Fonts or Font Awesome CDN
+-   **Inline SVG icons**: [scripts/icons.js](scripts/icons.js) — FA 6.5.2 paths, injected at build
+-   **Lazy loading**: Tab thumbs, coverflow off-screen cards, highlight carousel deferred until visible
+-   **Conditional anime.js**: Loaded only when `?tap=true`
+-   **Dynamic widgets**: Newsletter module imported after idle / intersection
+-   **Coverflow LCP**: Preload set in JS for the actual center card after shuffle (not a static head preload)
 
 ## 🎨 Customization
 
@@ -251,7 +260,7 @@ Main theme colors defined in CSS custom properties:
 ### Content Areas
 
 1. **Hero Introduction**: Edit `templates/hero-tagline.md` (compiled into `templates/hero-tagline.html` during build)
-2. **Social Links**: Update in the `.connections` section
+2. **Social Links**: Update hrefs/labels in the `.connections` section (icons are inline SVGs from [scripts/icons.js](scripts/icons.js))
 3. **Portfolio Content**: Manage via `data.json`
 4. **Footnotes**: Inline expandable explanations
 
@@ -277,13 +286,13 @@ Tagline icons (inline emoji-sized icons)
         src="assets/icons/langara.webp"
         srcset="assets/icons/langara.webp 1x, assets/icons/langara@2x.webp 2x"
         alt=""
-        aria-hidden="true"
     />
     ```
 
 -   Notes:
     -   The CSS forces the icon to render at `1em` (roughly 16px on most browsers). Supplying a 128px source makes the icon crisp on Retina / high-DPR displays.
-    -   Icons get short descriptive `alt` text from `scripts/generate_hero_tagline.js` (e.g. `Langara College logo`) and remain `aria-hidden="true"` because the link text is the accessible name.
+    -   Tagline icons use `alt=""` (decorative) because the surrounding link text is the accessible name. Generated by [scripts/generate_hero_tagline.js](scripts/generate_hero_tagline.js).
+    -   **Mobile connections**: CSS hides label spans only (`.connections a span:not(.svg-icon)`), not `.svg-icon` wrappers.
     -   If you prefer vector graphics, replace WEBP with SVG and update the `src` attributes accordingly.
 
 ### Tab Highlight Images
@@ -311,6 +320,8 @@ Images displayed in the Projects, Hackathons, and Awards sections support an opt
 -   **Fallback**: If preview doesn't exist, falls back to the original image
 
 This system reduces initial page load time while maintaining image quality in the viewer.
+
+The **coverflow carousel** loads full-resolution `assets/tab-panels/` images (with responsive `srcset` for hero variants), not the `preview/` thumbnails.
 
 ## 🔍 SEO, AEO & Discoverability
 

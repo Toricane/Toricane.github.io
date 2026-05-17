@@ -480,8 +480,10 @@ export function initCoverFlow(images, colors = {}) {
 
   // Click on a card image opens the image viewer at that index
   let hiddenGallery = document.createElement("div");
-  hiddenGallery.className = "card-images";
+  hiddenGallery.className = "card-images coverflow-gallery-hidden";
   hiddenGallery.style.display = "none";
+  hiddenGallery.setAttribute("aria-hidden", "true");
+  hiddenGallery.inert = true;
   document.body.appendChild(hiddenGallery);
 
   containerEl.addEventListener("click", (e) => {

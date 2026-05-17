@@ -50,9 +50,12 @@ function expandTimelineAncestor(targetEl) {
         );
 
     if (summaryEl) {
-        summaryEl.setAttribute("aria-expanded", "true");
-        const toggleIcon = summaryEl.querySelector(".timeline-toggle i");
-        if (toggleIcon) toggleIcon.style.transform = "rotate(180deg)";
+        const toggleBtn = summaryEl.querySelector(".timeline-toggle");
+        if (toggleBtn) {
+            toggleBtn.setAttribute("aria-expanded", "true");
+            const toggleIcon = toggleBtn.querySelector(".icon, svg");
+            if (toggleIcon) toggleIcon.style.transform = "rotate(180deg)";
+        }
     }
 
     return true;

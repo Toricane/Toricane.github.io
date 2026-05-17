@@ -49,6 +49,9 @@ function openImageViewer(list, startIndex = 0) {
         viewer = document.createElement("div");
         viewer.id = "_img_viewer";
         viewer.className = "_img_viewer";
+        viewer.setAttribute("role", "dialog");
+        viewer.setAttribute("aria-modal", "true");
+        viewer.setAttribute("aria-label", "Image viewer");
         viewer.innerHTML = `
                 <button class="viewer-nav viewer-prev" aria-label="Previous image">‹</button>
                 <div class="viewer-inner">
@@ -57,7 +60,7 @@ function openImageViewer(list, startIndex = 0) {
                         <img id="_img_viewer_img" src="" alt="" />
                     </div>
                     <div id="_img_viewer_caption" class="viewer-caption"></div>
-                    <div id="_img_viewer_pos" class="viewer-pos" aria-hidden="true"></div>
+                    <div id="_img_viewer_pos" class="viewer-pos" aria-live="polite"></div>
                 </div>
                 <button class="viewer-nav viewer-next" aria-label="Next image">›</button>
             `;
@@ -125,6 +128,8 @@ function openImageViewer(list, startIndex = 0) {
         };
         document.addEventListener("keydown", viewerKeyHandler);
     }
+
+    viewer.querySelector(".viewer-prev")?.focus();
 }
 
 function closeViewer() {

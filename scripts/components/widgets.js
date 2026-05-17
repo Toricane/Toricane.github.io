@@ -30,7 +30,7 @@ export function initWidgets() {
 function mkWidget(title) {
     const el = document.createElement("article");
     el.className = "widget";
-    el.innerHTML = `<h4>${title}</h4><p class="loading">Loading…</p>`;
+    el.innerHTML = `<h2>${title}</h2><p class="loading">Loading…</p>`;
     return {
         el,
         set(html) {

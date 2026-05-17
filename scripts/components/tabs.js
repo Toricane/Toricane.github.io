@@ -262,6 +262,8 @@ function openHighlightInViewer() {
     gallery.id = "_highlight_gallery_hidden";
     gallery.className = "highlight-gallery-hidden card-images";
     gallery.style.display = "none";
+    gallery.setAttribute("aria-hidden", "true");
+    gallery.inert = true;
     document.body.appendChild(gallery);
   }
 
@@ -512,7 +514,11 @@ export function initTabs() {
       t.classList.toggle("active", isActive);
       t.setAttribute("aria-selected", isActive);
     });
-    panels.forEach((p) => p.classList.toggle("active", p.id === id));
+    panels.forEach((p) => {
+      const isActive = p.id === id;
+      p.classList.toggle("active", isActive);
+      p.toggleAttribute("hidden", !isActive);
+    });
 
     const panel = document.getElementById(id);
     if (panel) refreshLazyThumbs(panel);

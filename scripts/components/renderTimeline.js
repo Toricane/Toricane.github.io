@@ -43,14 +43,17 @@ function attachTimelineSummary(summaryEl) {
         e.stopPropagation();
         const target = document.getElementById(expandId);
         if (!target) return;
-        const toggleBtn = summaryEl.querySelector(".timeline-toggle i");
+        const toggleBtn = summaryEl.querySelector(".timeline-toggle");
         const isExpanded = target.style.display !== "none";
         target.style.display = isExpanded ? "none" : "block";
-        summaryEl.setAttribute("aria-expanded", !isExpanded);
         if (toggleBtn) {
-            toggleBtn.style.transform = isExpanded
-                ? "rotate(0deg)"
-                : "rotate(180deg)";
+            toggleBtn.setAttribute("aria-expanded", String(!isExpanded));
+            const icon = toggleBtn.querySelector(".icon, svg");
+            if (icon) {
+                icon.style.transform = isExpanded
+                    ? "rotate(0deg)"
+                    : "rotate(180deg)";
+            }
         }
         if (!isExpanded) {
             refreshLazyThumbs(target);
@@ -68,7 +71,7 @@ function wireTimelineDataLinkItems(root) {
             attachTimelineClickable(
                 el,
                 links,
-                el.querySelector("h5")?.textContent || ""
+                el.querySelector(".timeline-item-title")?.textContent || ""
             );
         } catch (_) {
             /* ignore malformed data */
@@ -216,7 +219,7 @@ export function renderTimeline(id, items, showBadges) {
                 : item.silver
                 ? " silver-highlight"
                 : "";
-            li.innerHTML = `<div class="time">${timeDisplay}</div><div class="entry${highlightClass}"><h4>${item.name}</h4>${fromLine}<p>${item.description}</p>${imagesBlock}${badgesBlock}</div>`;
+            li.innerHTML = `<div class="time">${timeDisplay}</div><div class="entry${highlightClass}"><h3>${item.name}</h3>${fromLine}<p>${item.description}</p>${imagesBlock}${badgesBlock}</div>`;
             ol.appendChild(li);
         } else {
             const li = document.createElement("li");
@@ -248,12 +251,12 @@ export function renderTimeline(id, items, showBadges) {
             li.innerHTML = `
                     <div class="time">${timeDisplay}</div>
                     <div class="entry">
-                        <h4 class="timeline-summary" data-target="${expandId}" aria-expanded="false">
-                            <button class="timeline-toggle">
+                        <div class="timeline-summary" data-target="${expandId}">
+                            <button type="button" class="timeline-toggle" aria-expanded="false" aria-controls="${expandId}" aria-label="Expand ${escapeHtml(summaryText)}">
                                 <span class="svg-icon">${iconHtml("chevronDown")}</span>
                             </button>
-                            <span>${summaryText}</span>
-                        </h4>
+                            <h3 class="timeline-summary-title">${summaryText}</h3>
+                        </div>
                         <div class="from-line">${countText}</div>
                         <div class="timeline-items" id="${expandId}" style="display: none;">
                             ${itemsForGroup
@@ -335,7 +338,7 @@ export function renderTimeline(id, items, showBadges) {
                                         : "";
                                     return `
                                     <div class="timeline-item${itemHighlight}" ${dataAttr}${slugAttr}>
-                                        <h5>${item.name}</h5>
+                                        <h3 class="timeline-item-title">${item.name}</h3>
                                         ${fromLine}
                                         <p>${item.description}</p>
                                         ${imagesBlock}

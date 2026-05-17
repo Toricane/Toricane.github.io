@@ -85,7 +85,7 @@ function parseInline(input, state) {
           const altText = ICON_ALT[iconName] || `${iconName} icon`;
           output += `<img class="tag-icon" src="assets/icons/${escapeAttr(
             iconName
-          )}.webp" alt="${escapeAttr(altText)}" aria-hidden="true" width="15" height="15" decoding="async" />`;
+          )}.webp" alt="" width="15" height="15" decoding="async" />`;
           i = closeBrace;
           continue;
         }

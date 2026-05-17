@@ -12,11 +12,28 @@ This document provides architectural, stylistic, and operational context for any
     *   Never hardcode content items directly in generated `index.html`; update source files and rebuild.
 *   **Module Structure**:
     *   JS components are in `scripts/components/` (e.g. `coverflow.js`, `tabs.js`, `navigation.js`, `tapMode.js`, `theme.js`).
-    *   `scripts/main.js` orchestrates fetch of `data.json`, tab rendering, coverflow, hash navigation, and widgets.
+    *   `scripts/main.js` hydrates from `window.__SITE_RUNTIME__` (production) or falls back to `fetch("data.json")` (dev); coverflow, hash navigation, tabs; widgets via dynamic import.
+    *   `scripts/icons.js` — inline Font Awesome 6.5.2 SVGs; `faIcon(viewBox, path)` per icon (never duplicate `viewBox` attrs); `applySvgIcons()` runs each build.
+    *   `scripts/utils/siteData.js` — `generateRuntimePayload()` for build-time injection.
     *   `scripts/generate_hero_tagline.js` compiles hero markdown-like syntax into HTML (icons, footnotes, internal vs external links).
-    *   `scripts/build.js` runs the full build (hero compile, sitemap, SEO head, JS/CSS bundle, section pre-render, HTML minify).
+    *   `scripts/build.js` runs the full build (hero compile, sitemap, SEO head, JS/CSS bundle, section pre-render, runtime script, SVG icons, HTML minify).
     *   `scripts/seo.js` and `scripts/generate-sitemap.js` support AEO/SEO injection.
     *   `styles.css` is monolithic but structured with CSS variables at the root.
+
+## 1b. Build & Runtime (CRITICAL)
+
+| Input | Build step | Output |
+|-------|------------|--------|
+| `data.json` | `build.js` | Pre-rendered tab HTML + `window.__SITE_RUNTIME__` in `index.html` |
+| `templates/hero-tagline.md` | `generate_hero_tagline.js` | `templates/hero-tagline.html` → injected into hero |
+| `seo.json` | `seo.js` | Canonical + JSON-LD in `index.html` |
+| `scripts/icons.js` | `applySvgIcons()` | Inline SVGs in connections, theme toggle, scroll button |
+
+*   **CSS delivery**: Blocking `<link rel="stylesheet" href="styles.min.css">` only. Do **not** ship deferred-only CSS without a synchronous fallback (critical-CSS-only regression).
+*   **Runtime data**: Production uses inlined `__SITE_RUNTIME__`; do not preload or fetch `data.json` on production builds.
+*   **Coverflow LCP**: No static `northernlights` head preload; `preloadCoverflowLcp()` in `coverflow.js` runs after shuffle for the actual center card.
+*   **Mobile connections**: `.connections a span:not(.svg-icon)` — never `display: none` on all spans (hides inline SVG icons).
+*   **Anime.js**: Loaded only when `?tap=true` (`tapMode.js`).
 
 ## 2. Design System & Aesthetics (CRITICAL)
 *   **Theme**: Dark/Midnight aesthetic (glassmorphism inspired) with high-contrast, vibrant neon blue/green accents. Light theme exists via `theme.js` / `[data-theme="light"]`.
@@ -38,7 +55,9 @@ This document provides architectural, stylistic, and operational context for any
     *   Internal `#tab/slug` links in `data.json` must use slugs from `slugify()` in `scripts/utils/data.js` (match rendered `data-slug` after build).
 *   **Hero tagline (`templates/hero-tagline.md`)**: `[{icon} label](url)` syntax for icons; `(footnote)` syntax for footnotes. Internal links to `prajwal.is-a.dev` should not open in a new tab.
 *   **Tap mode (`tapMode.js`)**: Active when `?tap=true`. LinkedIn pill pulses immediately on load, then every 1s for 15s; other connection pills stagger in.
-*   **Image Management**: Full-size images in `assets/tab-panels/`, WebP previews in `assets/tab-panels/preview/`. Maintain this dual setup for new images.
+*   **Image Management**: Full-size images in `assets/tab-panels/`, WebP previews in `assets/tab-panels/preview/`. Coverflow uses full tab-panel paths + responsive srcset (not `preview/`). Optional: `python scripts/generate_coverflow_images.py` for hero WebP variants.
+*   **Icons**: Never reintroduce Font Awesome CDN. Edit `scripts/icons.js`; rebuild with `npm run build-html`.
+*   **Accessibility**: Section `h2#work-heading` (visually hidden) before tabs; timeline summary uses `button` + `h3.timeline-summary-title` (not interactive inside heading). Inactive tab panels use `hidden` attribute.
 
 ## 4. SEO / AEO Files (do not remove without intent)
 | File | Notes |
