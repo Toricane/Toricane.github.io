@@ -1,4 +1,5 @@
 import { initCoverFlow, updateCoverFlowColors } from "./components/coverflow.js";
+import { initLazyThumbs } from "./components/lazyThumbs.js";
 import { initFootnotes } from "./components/footnotes.js";
 import { initImageViewerDelegates } from "./components/imageViewer.js";
 import {
@@ -193,17 +194,24 @@ document.addEventListener("DOMContentLoaded", () => {
       renderProjects(data.projects || []);
       renderTimeline("hackathons", data.hackathons || [], true);
       renderTimeline("awards", data.awards || [], false);
+      initLazyThumbs();
 
       applyHashFromLocation();
 
       // Feed section images to the tab highlight carousel
       setTabImages(data);
 
-      // Collect face-tagged images and initialise the coverflow immediately.
-      // Colors are progressively enhanced after colors.json resolves.
-      const faceImages = collectFaceImages(data);
-      initCoverFlow(faceImages, {});
-      scheduleCoverflowColorsFetch();
+      // Defer coverflow until idle so thumbs and text win on slow networks.
+      const runCoverFlow = () => {
+        const faceImages = collectFaceImages(data);
+        initCoverFlow(faceImages, {});
+        scheduleCoverflowColorsFetch();
+      };
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(runCoverFlow, { timeout: 1500 });
+      } else {
+        setTimeout(runCoverFlow, 100);
+      }
     })
     .catch((err) => {
       console.error(err);

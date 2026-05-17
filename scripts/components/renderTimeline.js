@@ -5,6 +5,7 @@ import {
     normalizeLinks,
     slugify,
 } from "../utils/data.js";
+import { refreshLazyThumbs } from "./lazyThumbs.js";
 import { openLinksPopup } from "./linksPopup.js";
 import { openExternalOrInternal } from "./navigation.js";
 
@@ -105,15 +106,15 @@ export function renderTimeline(id, items, showBadges) {
                 ? `<div class="timeline-images">${images
                       .map(
                           (img, i) =>
-                              `<button class="timeline-thumb" data-src="${escapeHtml(
+                              `<button class="timeline-thumb thumb-pending" data-src="${escapeHtml(
                                   img.path
+                              )}" data-preview="${escapeHtml(
+                                  getPreviewPath(img.path)
                               )}" data-label="${escapeHtml(
                                   img.label || `Image ${i + 1}`
                               )}" aria-label="Open image ${escapeHtml(
                                   img.label || `Image ${i + 1}`
-                              )}" style="background-image:url('${escapeHtml(
-                                  getPreviewPath(img.path)
-                              )}')"></button>`
+                              )}"></button>`
                       )
                       .join("")}</div>`
                 : "";
@@ -217,19 +218,19 @@ export function renderTimeline(id, items, showBadges) {
                                         ? `<div class="timeline-images">${images
                                               .map(
                                                   (img, i) =>
-                                                      `<button class="timeline-thumb" data-src="${escapeHtml(
+                                                      `<button class="timeline-thumb thumb-pending" data-src="${escapeHtml(
                                                           img.path
+                                                      )}" data-preview="${escapeHtml(
+                                                          getPreviewPath(
+                                                              img.path
+                                                          )
                                                       )}" data-label="${escapeHtml(
                                                           img.label ||
                                                               `Image ${i + 1}`
                                                       )}" aria-label="Open image ${escapeHtml(
                                                           img.label ||
                                                               `Image ${i + 1}`
-                                                      )}" style="background-image:url('${escapeHtml(
-                                                          getPreviewPath(
-                                                              img.path
-                                                          )
-                                                      )}')"></button>`
+                                                      )}"></button>`
                                               )
                                               .join("")}</div>`
                                         : "";
@@ -321,6 +322,9 @@ export function renderTimeline(id, items, showBadges) {
                 toggleBtn.style.transform = isExpanded
                     ? "rotate(0deg)"
                     : "rotate(180deg)";
+                if (!isExpanded) {
+                    refreshLazyThumbs(target);
+                }
             });
 
             ol.appendChild(li);

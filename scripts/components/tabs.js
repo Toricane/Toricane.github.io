@@ -2,9 +2,10 @@
 // Replaces the old static highlightMap with a slideshow of all section images
 
 import {
-    getResponsiveImageSources,
+    getPreviewPath,
     normalizeImages,
 } from "../utils/data.js";
+import { refreshLazyThumbs } from "./lazyThumbs.js";
 
 let sectionImages = {}; // { projects: [...], hackathons: [...], awards: [...] }
 let activeTab = null;
@@ -14,6 +15,8 @@ let carouselList = [];
 let carouselPaused = false;
 let isTransitioning = false;
 const loadedSlideUrls = new Set();
+let highlightCarouselEnabled = false;
+let highlightDeferObserver = null;
 
 const CAROUSEL_INTERVAL = 4000; // ms between slides
 const FADE_DURATION = 500; // ms for crossfade
@@ -67,10 +70,51 @@ export function setTabImages(data) {
   );
   sectionImages.awards = collectSectionImages("awards", data.awards || []);
 
-  // If a tab is already active, refresh the carousel with real data
   if (activeTab && sectionImages[activeTab]?.length) {
+    queueCarouselStart(activeTab);
+  }
+}
+
+function getCarouselDisplaySrc(path) {
+  return getPreviewPath(path) || path;
+}
+
+function queueCarouselStart(id) {
+  if (highlightCarouselEnabled) {
+    startCarousel(id);
+  }
+}
+
+function enableHighlightCarousel() {
+  if (highlightCarouselEnabled) return;
+  highlightCarouselEnabled = true;
+  if (highlightDeferObserver) {
+    highlightDeferObserver.disconnect();
+    highlightDeferObserver = null;
+  }
+  if (activeTab) {
     startCarousel(activeTab);
   }
+}
+
+function setupHighlightDefer() {
+  const highlight = document.querySelector(".tab-highlight");
+  const content = document.getElementById("content");
+  if (!highlight) return;
+
+  const tryEnable = () => enableHighlightCarousel();
+
+  highlightDeferObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        tryEnable();
+      }
+    },
+    { rootMargin: "100px" },
+  );
+
+  highlightDeferObserver.observe(highlight);
+  if (content) highlightDeferObserver.observe(content);
 }
 
 /**
@@ -95,11 +139,15 @@ function buildCarouselDOM() {
   imgA.className = "highlight-slide highlight-slide-active";
   imgA.alt = "";
   imgA.loading = "lazy";
+  imgA.decoding = "async";
+  imgA.fetchPriority = "low";
 
   const imgB = document.createElement("img");
   imgB.className = "highlight-slide";
   imgB.alt = "";
   imgB.loading = "lazy";
+  imgB.decoding = "async";
+  imgB.fetchPriority = "low";
 
   // Navigation arrows
   const prevBtn = document.createElement("button");
@@ -284,19 +332,14 @@ function goToSlide(index) {
   const inactiveSlide = activeSlide === slides[0] ? slides[1] : slides[0];
 
   const imgData = carouselList[index];
-  const displaySrc = imgData.path;
-  const displaySources = getResponsiveImageSources(displaySrc);
+  const displaySrc = getCarouselDisplaySrc(imgData.path);
 
   const finishTransition = () => {
     inactiveSlide.src = displaySrc;
-    if (displaySources.srcset) {
-      inactiveSlide.srcset = displaySources.srcset;
-      inactiveSlide.sizes = displaySources.sizes;
-    } else {
-      inactiveSlide.removeAttribute("srcset");
-      inactiveSlide.removeAttribute("sizes");
-    }
+    inactiveSlide.removeAttribute("srcset");
+    inactiveSlide.removeAttribute("sizes");
     inactiveSlide.alt = imgData.label || "";
+    inactiveSlide.classList.add("ready");
 
     // Trigger crossfade
     requestAnimationFrame(() => {
@@ -353,7 +396,7 @@ function preloadNeighbors() {
   const next = (carouselIndex + 1) % carouselList.length;
   [prev, next].forEach((i) => {
     const neighbor = carouselList[i];
-    const src = neighbor.path;
+    const src = getCarouselDisplaySrc(neighbor.path);
     if (!src || loadedSlideUrls.has(src)) return;
     const img = new Image();
     img.onload = () => loadedSlideUrls.add(src);
@@ -409,32 +452,25 @@ function startCarousel(id) {
     return;
   }
 
-  // Set first image immediately
   const slides = wrap.querySelectorAll(".highlight-slide");
   const firstImg = images[0];
-  const firstDisplay = firstImg.path;
-  const firstSources = getResponsiveImageSources(firstDisplay);
+  const firstDisplay = getCarouselDisplaySrc(firstImg.path);
 
   const preloader = new Image();
   preloader.onload = () => {
     loadedSlideUrls.add(firstDisplay);
     if (slides[0]) {
       slides[0].src = firstDisplay;
-      if (firstSources.srcset) {
-        slides[0].srcset = firstSources.srcset;
-        slides[0].sizes = firstSources.sizes;
-      } else {
-        slides[0].removeAttribute("srcset");
-        slides[0].removeAttribute("sizes");
-      }
+      slides[0].removeAttribute("srcset");
+      slides[0].removeAttribute("sizes");
       slides[0].alt = firstImg.label || "";
-      slides[0].classList.add("highlight-slide-active");
+      slides[0].classList.add("highlight-slide-active", "ready");
     }
     if (slides[1]) {
       slides[1].src = "";
       slides[1].removeAttribute("srcset");
       slides[1].removeAttribute("sizes");
-      slides[1].classList.remove("highlight-slide-active");
+      slides[1].classList.remove("highlight-slide-active", "ready");
     }
     preloadNeighbors();
   };
@@ -452,8 +488,8 @@ export function initTabs() {
   const tabs = Array.from(document.querySelectorAll(".tab"));
   const panels = Array.from(document.querySelectorAll(".tab-panel"));
 
-  // Pre-build the carousel DOM
   buildCarouselDOM();
+  setupHighlightDefer();
 
   const activate = (id) => {
     activeTab = id;
@@ -465,7 +501,9 @@ export function initTabs() {
     });
     panels.forEach((p) => p.classList.toggle("active", p.id === id));
 
-    startCarousel(id);
+    const panel = document.getElementById(id);
+    if (panel) refreshLazyThumbs(panel);
+    queueCarouselStart(id);
   };
 
   tabs.forEach((t) =>

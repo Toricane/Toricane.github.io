@@ -32,7 +32,7 @@ const AUTO_SCROLL_MS = 2500;
 // Internal duplicated sets: we render multiple full sets of the original array
 // so that there's always a set before and after the one we're currently viewing.
 const NUM_SETS = 5; 
-const EAGER_BUFFER_PER_SIDE = 4;
+const EAGER_BUFFER_PER_SIDE = 0;
 
 // We define our core "page" metrics
 let baseSetWidth = 0; 
@@ -130,6 +130,19 @@ function checkInfiniteWrap() {
   }
 }
 
+function getCoverflowDisplayPath(path) {
+  if (path && path.includes("tab-panels/")) {
+    return path.replace("tab-panels/", "tab-panels/small/");
+  }
+  return path;
+}
+
+function markCoverflowLoaded(img) {
+  img.classList.add("is-loaded");
+  const card = img.closest(".coverflow-card");
+  if (card) card.style.animation = "none";
+}
+
 function setupImageObserver() {
   if (imageObserver) {
     imageObserver.disconnect();
@@ -147,6 +160,13 @@ function setupImageObserver() {
           img.removeAttribute("data-src");
           img.removeAttribute("data-srcset");
           img.removeAttribute("data-sizes");
+          if (!img.complete) {
+            img.addEventListener("load", () => markCoverflowLoaded(img), {
+              once: true,
+            });
+          } else {
+            markCoverflowLoaded(img);
+          }
         }
         observer.unobserve(entry.target);
       }
@@ -196,43 +216,43 @@ function renderCards(images, colors = {}) {
     imgEl.crossOrigin = "Anonymous";
     imgEl.decoding = "async"; // Decode off the main thread to reduce TBT
     const displayPath = img.path;
-    // Eagerly load the 'middle' set initially instead of the first
-    // We will start our scroll positioned at the middle set.
+    const smallPath = getCoverflowDisplayPath(displayPath);
     const middleStartIndex = Math.floor(NUM_SETS / 2) * baseSetImageCount;
-    // Eager load only the cards near the initial viewport center.
     const middleCardIndex = middleStartIndex + Math.floor(baseSetImageCount / 2);
-    const isInitiallyVisible = Math.abs(i - middleCardIndex) <= EAGER_BUFFER_PER_SIDE;
-    const displaySources = displayPath.includes("tab-panels/")
-      ? {
-          srcset: `${displayPath.replace("tab-panels/", "tab-panels/small/")} 800w, ${displayPath} 1600w`,
-          sizes: "(width <= 600px) 100vw, (width <= 1050px) 40vw, 320px",
-        }
-      : null;
+    const isCenterCard = i === middleCardIndex;
+    const isInitiallyVisible =
+      Math.abs(i - middleCardIndex) <= EAGER_BUFFER_PER_SIDE;
+    const coverflowSizes =
+      "(width <= 600px) 100vw, (width <= 1050px) 40vw, 320px";
     const needsMetricRefresh = i === 0 || i === baseSetImageCount - 1;
 
-    if (displaySources && isInitiallyVisible) {
-      imgEl.srcset = displaySources.srcset;
-      imgEl.sizes = displaySources.sizes;
-    } else if (displaySources) {
-      imgEl.dataset.srcset = displaySources.srcset;
-      imgEl.dataset.sizes = displaySources.sizes;
-    }
-
-    if (isInitiallyVisible) {
-      imgEl.src = displayPath;
-      imgEl.loading = "eager"; // Prioritize initial view for LCP
+    if (isCenterCard) {
+      imgEl.src = smallPath;
+      imgEl.loading = "eager";
+      imgEl.fetchPriority = "high";
+      if (displayPath.includes("tab-panels/")) {
+        imgEl.srcset = `${smallPath} 800w`;
+        imgEl.sizes = coverflowSizes;
+      }
     } else {
-      imgEl.dataset.src = displayPath;
+      imgEl.dataset.src = smallPath;
       imgEl.src = placeholderSvg;
       imgEl.loading = "lazy";
-      imageObserver.observe(card); // wait for intersect
+      imgEl.fetchPriority = "low";
+      if (displayPath.includes("tab-panels/")) {
+        imgEl.dataset.srcset = `${smallPath} 800w`;
+        imgEl.dataset.sizes = coverflowSizes;
+      }
+      if (!isInitiallyVisible) {
+        imageObserver.observe(card);
+      }
     }
 
     imgEl.addEventListener("load", () => {
+      markCoverflowLoaded(imgEl);
       const isPortrait = imgEl.naturalHeight > imgEl.naturalWidth;
       card.classList.toggle("portrait", isPortrait);
 
-      // Recompute base metrics only when measurement anchors may change.
       if (needsMetricRefresh) requestBaseMetrics();
     });
 

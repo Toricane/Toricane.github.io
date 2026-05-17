@@ -413,6 +413,26 @@ img {
     cursor: pointer;
 }
 
+.card-thumb.thumb-pending,
+.timeline-thumb.thumb-pending {
+    background-image: none;
+}
+
+@keyframes thumb-shimmer {
+    0%,
+    100% {
+        opacity: 0.55;
+    }
+    50% {
+        opacity: 0.9;
+    }
+}
+
+.card-thumb.thumb-pending,
+.timeline-thumb.thumb-pending {
+    animation: thumb-shimmer 1.4s ease-in-out infinite;
+}
+
 .card-thumb:focus {
     outline: 2px solid var(--border-accent);
 }
@@ -574,7 +594,16 @@ img {
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
     backface-visibility: hidden;
-    transition: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+.coverflow-card img.coverflow-main.is-loaded {
+    opacity: 1;
+}
+
+.coverflow-card:not(:has(.coverflow-main.is-loaded)) {
+    animation: thumb-shimmer 1.4s ease-in-out infinite;
 }
 
 /* ---- Coverflow Overlay (date + title) ---- */

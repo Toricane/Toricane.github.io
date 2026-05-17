@@ -22,13 +22,14 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 -   **Progressive Enhancement**: Works without JavaScript, enhanced with it
 -   **Smooth Animations**: Subtle transitions and scroll behaviors
 -   **Social Integration**: Newsletter widgets and social media links
--   **PWA Ready**: Web app manifest and service worker support
+-   **Deep Linking**: Hash URLs switch tabs, expand grouped timeline entries, scroll to items, and flash a highlight
+-   **PWA Ready**: Web app manifest for install shortcuts
 
 ### 🔧 Technical Excellence
 
 -   **Framework-Free**: Pure HTML, CSS, and vanilla JavaScript
 -   **Performance Optimized**: Preloaded fonts, lazy loading, efficient rendering
--   **SEO Enhanced**: Open Graph, Twitter Cards, JSON-LD structured data
+-   **SEO / AEO Enhanced**: Open Graph, Twitter Cards, canonical URLs, JSON-LD `@graph`, `robots.txt`, `sitemap.xml`, and `llms.txt`
 -   **Content Management**: JSON-driven content system for easy updates
 
 ### 🎭 Interactive Elements
@@ -37,22 +38,29 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 -   **Footnote System**: Hover/tap expandable footnotes in the introduction
 -   **Connection Pills**: Animated social media links with labels
 -   **Scroll Interactions**: Smart scroll-to-content and button hiding
--   **Animation Mode**: Special `?tap=true` query parameter for enhanced animations
+-   **Animation Mode**: `?tap=true` — connection pills animate in; LinkedIn pulses immediately, then once per second
 -   **Dynamic Year**: Auto-updating copyright year
 
 ## 📁 Project Structure
 
 ```
-├── index.html              # Main portfolio page
+├── index.html              # Main portfolio page (build output: pre-rendered + minified)
 ├── package.json            # Build scripts and dependencies
+├── seo.json                # Site URL, descriptions, sitemap entries (injected at build)
+├── robots.txt              # Crawler rules + sitemap pointer
+├── sitemap.xml             # Generated URL list (build output)
+├── llms.txt                # AI-readable site summary
 ├── styles.css              # Complete monolithic styling
 ├── styles.min.css          # Generated minified stylesheet (build output)
 ├── AGENT_CONTEXT.md        # Architectural rules and context for AI agents
-├── scripts/                # Modular JavaScript components
-│   └── main.js             # Entry point for logic
-│   └── main.min.js         # Generated bundled/minified JS (build output)
-│   ├── build.js            # Hero compile + asset bundle/minify + pre-render build pipeline
-│   └── generate_hero_tagline.js # Compiles hero-tagline.md into HTML
+├── scripts/
+│   ├── main.js             # Entry point for client logic
+│   ├── main.min.js         # Generated bundled/minified JS (build output)
+│   ├── build.js            # Full build: hero, SEO head, sitemap, pre-render, minify
+│   ├── seo.js              # Canonical + JSON-LD injection helpers
+│   ├── generate-sitemap.js # Writes sitemap.xml from seo.json + data.json dates
+│   ├── generate_hero_tagline.js # Compiles hero-tagline.md into HTML
+│   └── components/         # Feature modules (tabs, coverflow, navigation, tapMode, …)
 ├── templates/
 │   ├── hero-tagline.md     # Author-friendly hero intro source
 │   └── hero-tagline.html   # Generated hero intro HTML
@@ -168,7 +176,7 @@ Navigate to `http://localhost:8080`
 
 ### Special Features
 
--   **Animation Mode**: Add `?tap=true` to see enhanced connection pill animations
+-   **Animation Mode**: Add `?tap=true` for connection pill entrance animations and a pulsing LinkedIn highlight (immediate, then every 1s for 15s)
 -   **Content Updates**: Edit content sources and rebuild static output.
     -   Primary content source: `data.json`
     -   Hero intro source: `templates/hero-tagline.md`
@@ -178,11 +186,12 @@ Navigate to `http://localhost:8080`
 -   **Image Optimization**: Tab panel images use preview thumbnails (400px max width, WebP) for fast loading, with full-size originals shown in the viewer on click
 -   **Content Updates & Pre-rendering**:
        1. Edit `data.json` and/or `templates/hero-tagline.md`
-    2. Run `npm run build-html` to regenerate `templates/hero-tagline.html`, bundle/minify client assets (`scripts/main.min.js`, `styles.min.css`), and pre-render all content into `index.html`
-    3. Commit source changes and updated generated files (`index.html`, `styles.min.css`, `scripts/main.min.js`, optionally `templates/hero-tagline.html`)
+    2. Run `npm run build-html` to regenerate `templates/hero-tagline.html`, `sitemap.xml`, bundle/minify client assets (`scripts/main.min.js`, `styles.min.css`), inject SEO head tags, and pre-render all content into `index.html`
+    3. Commit source changes and updated generated files (`index.html`, `sitemap.xml`, `styles.min.css`, `scripts/main.min.js`, optionally `templates/hero-tagline.html`)
        4. Push to GitHub – Pages auto-deploys
        - **Why pre-render?** Ensures crawlers, AI agents, and users with JavaScript disabled can see all content. Improves performance by embedding content at build time.
-    - **How it works**: The build script compiles `templates/hero-tagline.md` to HTML, bundles/minifies JS and CSS with esbuild, uses jsdom to simulate the DOM, runs existing render functions, injects generated content, and minifies `index.html`.
+    - **How it works**: The build script compiles `templates/hero-tagline.md` to HTML, generates `sitemap.xml`, bundles/minifies JS and CSS with esbuild, uses jsdom to pre-render tab panels, injects hero + SEO head metadata from `seo.json`, and minifies `index.html`.
+    - **SEO-only tweak**: Edit [`seo.json`](seo.json) and rebuild; do not hand-edit JSON-LD in generated `index.html`.
 
 ### Browser Support
 
@@ -274,7 +283,7 @@ Tagline icons (inline emoji-sized icons)
 
 -   Notes:
     -   The CSS forces the icon to render at `1em` (roughly 16px on most browsers). Supplying a 128px source makes the icon crisp on Retina / high-DPR displays.
-    -   For accessibility the icons currently use empty `alt` and `aria-hidden="true"` because descriptive link text follows the icon; if you want the icon announced, set an appropriate `alt` value and remove `aria-hidden`.
+    -   Icons get short descriptive `alt` text from `scripts/generate_hero_tagline.js` (e.g. `Langara College logo`) and remain `aria-hidden="true"` because the link text is the accessible name.
     -   If you prefer vector graphics, replace WEBP with SVG and update the `src` attributes accordingly.
 
 ### Tab Highlight Images
@@ -288,7 +297,7 @@ assets/
 	awards_highlight.jpg
 ```
 
-Filenames are hard‑coded – adjust in `scripts.js` (`highlightMap`) if you prefer different names or formats (PNG / WebP also fine). Missing images are ignored gracefully.
+Fallback filenames are defined in `scripts/components/tabs.js` (`fallbackMap`). The highlight area also auto-cycles images from `data.json`. Missing fallbacks are ignored gracefully.
 
 **Recommended size**: For optimal quality across all screen sizes, use 1440px width (2x the maximum display width of 500px) with aspect ratio preserved.
 
@@ -303,12 +312,33 @@ Images displayed in the Projects, Hackathons, and Awards sections support an opt
 
 This system reduces initial page load time while maintaining image quality in the viewer.
 
+## 🔍 SEO, AEO & Discoverability
+
+Static files at the site root help crawlers and AI systems find and understand the site:
+
+| File | Purpose |
+|------|---------|
+| [`robots.txt`](robots.txt) | Allows major crawlers; points to the sitemap |
+| [`sitemap.xml`](sitemap.xml) | Lists `/` and `/connect4/` with `lastmod` (regenerated on build) |
+| [`llms.txt`](llms.txt) | Short site summary and key URLs for AI systems |
+| [`seo.json`](seo.json) | Canonical URL, meta copy, JSON-LD Person/WebSite/WebPage/ProfilePage |
+
+`npm run build-html` injects the canonical link and JSON-LD `@graph` into `index.html` from `seo.json`. Submit `https://prajwal.is-a.dev/sitemap.xml` in Google Search Console after deploy.
+
+### Internal links & deep URLs
+
+- **Hero tagline** ([`templates/hero-tagline.md`](templates/hero-tagline.md)): Use absolute same-origin links (`https://prajwal.is-a.dev/...`) for in-copy internal navigation; the build omits `target="_blank"` on those.
+- **Cross-references in `data.json`**: Use `#tab/slug` URLs (e.g. `#awards/ingenious-regional-grant-cad-1k`). Slugs must match `slugify()` on the item title (lowercase, non-alphanumeric → hyphens). Verify with the rendered `data-slug` attribute after build.
+- **Supported hash patterns** (handled by [`scripts/components/navigation.js`](scripts/components/navigation.js)):
+    - `#content` — scroll to the work section
+    - `#projects`, `#hackathons`, `#awards` — switch tab and scroll
+    - `#projects/jarvis-for-the-visually-impaired` — switch tab, expand grouped entries if needed, scroll, and apply `.nav-highlight`
+
 ## Roadmap Ideas
 
 -   Replace placeholder widget text with real Substack & LinkedIn content (requires proxy / API integration)
--   Add light / dark theme toggle (currently dark only)
+-   Automate Lighthouse / a11y audits in CI (GitHub Action)
 -   Add print / PDF resume link
--   Lighthouse performance & a11y audit automation (GitHub Action)
 
 ## License
 
