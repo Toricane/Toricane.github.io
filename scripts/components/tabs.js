@@ -21,6 +21,23 @@ let highlightDeferObserver = null;
 const CAROUSEL_INTERVAL = 4000; // ms between slides
 const FADE_DURATION = 500; // ms for crossfade
 
+function syncTabHighlightA11y() {
+  const highlight = document.querySelector(".tab-highlight");
+  if (!highlight) return;
+  highlight.removeAttribute("aria-hidden");
+  highlight.inert = false;
+  highlight.setAttribute("role", "region");
+  highlight.setAttribute("aria-label", "Featured portfolio images");
+
+  const wrap = highlight.querySelector(".highlight-carousel");
+  if (wrap) {
+    wrap.setAttribute("role", "group");
+    wrap.setAttribute("aria-roledescription", "carousel");
+    const counter = wrap.querySelector(".highlight-counter");
+    if (counter) counter.setAttribute("aria-live", "polite");
+  }
+}
+
 // Fallback images used before data loads (keeps the sidebar from being blank)
 const fallbackMap = {
   projects: "assets/projects_highlight.webp",
@@ -194,6 +211,7 @@ function buildCarouselDOM() {
   wrap.appendChild(counter);
 
   figure.appendChild(wrap);
+  syncTabHighlightA11y();
 
   // Events
   prevBtn.addEventListener("click", (e) => {
@@ -503,6 +521,7 @@ export function initTabs() {
   const tabs = Array.from(document.querySelectorAll(".tab"));
   const panels = Array.from(document.querySelectorAll(".tab-panel"));
 
+  syncTabHighlightA11y();
   buildCarouselDOM();
   setupHighlightDefer();
 

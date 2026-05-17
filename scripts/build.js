@@ -332,8 +332,17 @@ function setTabPanelVisibility(document) {
   }
 }
 
+function fixTabHighlightA11y(document) {
+  const highlight = document.querySelector('.tab-highlight');
+  if (!highlight) return;
+  highlight.removeAttribute('aria-hidden');
+  highlight.setAttribute('role', 'region');
+  highlight.setAttribute('aria-label', 'Featured portfolio images');
+}
+
 injectWorkHeading(outputDocument);
 setTabPanelVisibility(outputDocument);
+fixTabHighlightA11y(outputDocument);
 
 const tagline = outputDocument.querySelector('#hero .tagline');
 if (!tagline) {
