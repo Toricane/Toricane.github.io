@@ -2227,6 +2227,10 @@ body.page-ready .widget-ring-active {
 }
 
 @media (max-width: 768px) {
+    .site-title {
+        font-size: clamp(1.55rem, 5.5vw, 2.5rem);
+    }
+
     .coverflow-container {
         width: min(500px, 90vw);
         height: min(260px, 50vw);
@@ -2275,7 +2279,8 @@ body.page-ready .widget-ring-active {
     }
 
     .site-title {
-        font-size: clamp(1.6rem, 9vw, 2.8rem);
+        font-size: clamp(1.4rem, 6.8vw, 2.15rem);
+        letter-spacing: -0.5px;
     }
 
     .connections {
