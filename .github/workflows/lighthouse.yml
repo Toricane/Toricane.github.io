@@ -1,30 +1,52 @@
+# Audits the live GitHub Pages site after deployment finishes.
+# Requires the repo's "pages build and deployment" workflow (name: pages-build-deployment).
 name: Lighthouse
 
 on:
-  pull_request:
+  workflow_run:
+    workflows: [pages-build-deployment]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
+
+concurrency:
+  group: lighthouse-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  LIVE_SITE_URL: https://prajwal.is-a.dev
 
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
+    # Only audit when Pages deployment succeeded (skip failed/cancelled deploys).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
+      - name: Wait for live site to serve latest deploy
+        run: |
+          set -euo pipefail
+          url="${{ env.LIVE_SITE_URL }}/"
+          echo "Polling $url (up to ~5 min for CDN/Pages propagation)..."
+          for attempt in $(seq 1 30); do
+            if curl -fsSL -o /dev/null "$url"; then
+              echo "Live site responded (attempt $attempt)"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Timed out waiting for $url"
+          exit 1
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build site
-        run: npm run build-html
-
-      - name: Lighthouse CI
+      - name: Lighthouse CI (production)
         uses: treosh/lighthouse-ci-action@v12
         with:
+          urls: |
+            ${{ env.LIVE_SITE_URL }}/
           configPath: ./lighthouserc.json
           uploadArtifacts: true
           temporaryPublicStorage: true
