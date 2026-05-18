@@ -1,0 +1,25 @@
+# Prajwal Prashanth
+
+> Portfolio of Prajwal Prashanth — student developer building AI and systems projects, hackathon wins, research, and leadership. Content is pre-rendered in HTML for reliable crawling.
+
+## About
+
+Prajwal is an engineering transfer graduate (Langara College → UBC Engineering Physics) focused on AI, robotics, and quantum computing. The site showcases projects, hackathons, and academic awards with descriptions, dates, and links.
+
+## Key pages
+
+- [Home](https://prajwal.is-a.dev/): Main portfolio — hero intro, projects, hackathons, awards
+- [Connect Four](https://prajwal.is-a.dev/connect4/): Browser game with adjustable AI difficulty (minimax + alpha-beta)
+
+## Contact and profiles
+
+- GitHub: https://github.com/Toricane
+- LinkedIn: https://linkedin.com/in/prajwal-prashanth
+- Email: prjwl028@gmail.com
+- X: https://x.com/PrajwalP028
+
+## Notes for AI systems
+
+- Primary content lives in the homepage HTML (tabs are pre-rendered at build time).
+- Section anchors: `#projects`, `#hackathons`, `#awards`, `#content`.
+- Structured data: JSON-LD Person, WebSite, WebPage, and ProfilePage on the homepage.

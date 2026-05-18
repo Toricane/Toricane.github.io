@@ -29,7 +29,7 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 
 -   **Framework-Free**: Pure HTML, CSS, and vanilla JavaScript
 -   **Performance Optimized**: Blocking minified CSS/JS, inlined runtime payload, lazy images, `content-visibility` on inactive panels
--   **SEO / AEO Enhanced**: Open Graph, Twitter Cards, canonical URLs, JSON-LD `@graph`, `robots.txt`, `sitemap.xml`, and `llms.txt`
+-   **SEO / AEO Enhanced**: Open Graph, Twitter Cards, canonical URLs, JSON-LD `@graph`, `robots.txt`, Astro sitemap (`sitemap-index.xml`), and `llms.txt`
 -   **Content Management**: JSON-driven content system for easy updates
 
 ### 🎭 Interactive Elements
@@ -44,29 +44,20 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 ## 📁 Project Structure
 
 ```
-├── index.html              # Main portfolio page (build output: pre-rendered + minified)
+├── src/                    # Astro site (pages, components, client scripts)
+├── dist/                   # Production build output (gitignored; deployed to GitHub Pages)
 ├── package.json            # Build scripts and dependencies
-├── seo.json                # Site URL, descriptions, sitemap entries (injected at build)
-├── robots.txt              # Crawler rules + sitemap pointer
-├── sitemap.xml             # Generated URL list (build output)
+├── seo.json                # Site URL, descriptions, JSON-LD source
+├── robots.txt              # Crawler rules + sitemap pointer (copied to public/ on build)
 ├── llms.txt                # AI-readable site summary
-├── styles.css              # Complete monolithic styling
-├── styles.min.css          # Generated minified stylesheet (build output)
+├── styles.css              # Complete monolithic styling (imported by Astro)
 ├── AGENT_CONTEXT.md        # Architectural rules and context for AI agents
 ├── scripts/
-│   ├── main.js             # Entry point for client logic
-│   ├── main.min.js         # Generated bundled/minified JS (build output)
-│   ├── build.js            # Full build: hero, SEO head, sitemap, pre-render, minify
-│   ├── icons.js            # Inline FA 6.5.2 SVGs + build-time icon injection
-│   ├── seo.js              # Canonical + JSON-LD injection helpers
-│   ├── generate-sitemap.js # Writes sitemap.xml from seo.json + data.json dates
-│   ├── generate_hero_tagline.js # Compiles hero-tagline.md into HTML
+│   ├── sync-public.mjs     # Copies assets, connect4, robots.txt → public/
 │   ├── generate_coverflow_images.py # Responsive WebP variants for coverflow LCP
-│   ├── utils/siteData.js   # Runtime payload generator for production
-│   └── components/         # Feature modules (tabs, coverflow, navigation, tapMode, …)
+│   └── update_colors.py    # Regenerates colors.json from face images
 ├── templates/
-│   ├── hero-tagline.md     # Author-friendly hero intro source
-│   └── hero-tagline.html   # Generated hero intro HTML
+│   └── hero-tagline.md     # Author-friendly hero intro source
 ├── data.json               # Content data (projects, hackathons, awards)
 ├── site.webmanifest        # PWA configuration
 ├── CNAME                   # Custom domain configuration
@@ -169,14 +160,14 @@ python -m venv .venv
 # On Mac/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 
-# Install JS dependencies for build pipeline
+# Install dependencies
 npm install
 
-# Start local development server
-python -m http.server 8080
+# Astro dev server
+npm run dev
 ```
 
-Navigate to `http://localhost:8080`
+Navigate to `http://localhost:4321` (Astro). Production build: `npm run build` → output in `dist/`. Preview: `npm run preview`.
 
 ### Special Features
 
@@ -184,20 +175,17 @@ Navigate to `http://localhost:8080`
 -   **Content Updates**: Edit content sources and rebuild static output.
     -   Primary content source: `data.json`
     -   Hero intro source: `templates/hero-tagline.md`
-    -   Build command: `npm run build-html`
+    -   Build command: `npm run build`
     -   *Coverflow Exception*: If you added a new image with `"face": true` (which appears in the Coverflow), run `python scripts/update_colors.py` to pre-calculate its glow color into `colors.json`.
 -   **Image Assets**: Replace files in `/assets/` to update highlight images
 -   **Image Optimization**: Tab panel thumbnails use `assets/tab-panels/preview/` (400px WebP); coverflow uses full `tab-panels/` images with responsive `srcset`
--   **Rebuild after asset/CSS/JS changes**: `npm run build-html` regenerates `index.html`, `styles.min.css`, and `scripts/main.min.js`
+-   **Rebuild after asset/CSS/JS changes**: `npm run build` (syncs `public/`, compiles Astro → `dist/`)
 -   **Coverflow hero variants** (optional): `python scripts/generate_coverflow_images.py` when face images change
--   **Content Updates & Pre-rendering**:
+-   **Content updates**:
        1. Edit `data.json` and/or `templates/hero-tagline.md`
-    2. Run `npm run build-html` to regenerate `templates/hero-tagline.html`, `sitemap.xml`, bundle/minify client assets (`scripts/main.min.js`, `styles.min.css`), inject SEO head tags, and pre-render all content into `index.html`
-    3. Commit source changes and updated generated files (`index.html`, `sitemap.xml`, `styles.min.css`, `scripts/main.min.js`, optionally `templates/hero-tagline.html`)
-       4. Push to GitHub – Pages auto-deploys
-       - **Why pre-render?** Ensures crawlers, AI agents, and users with JavaScript disabled can see all content. Improves performance by embedding content at build time.
-    - **How it works**: The build script compiles `templates/hero-tagline.md` to HTML, generates `sitemap.xml`, bundles/minifies JS and CSS with esbuild, uses jsdom to pre-render tab panels, injects hero + SEO head metadata from `seo.json`, and minifies `index.html`.
-    - **SEO-only tweak**: Edit [`seo.json`](seo.json) and rebuild; do not hand-edit JSON-LD in generated `index.html`.
+       2. Run `npm run build` (or push to `main` — GitHub Actions runs the same build)
+       3. Commit source changes only (`dist/` is not committed)
+-   **SEO-only tweak**: Edit [`seo.json`](seo.json) and rebuild.
 
 ### Browser Support
 
@@ -232,10 +220,10 @@ This site is configured for GitHub Pages deployment:
 
 ## 📊 Performance Features
 
--   **Blocking bundles**: `styles.min.css` and deferred `scripts/main.min.js` (esbuild)
+-   **Astro static build**: Minified CSS/JS in `dist/_astro/`
 -   **Inlined runtime**: `window.__SITE_RUNTIME__` at build (~12KB) — no production `data.json` fetch
 -   **System UI typography**: No Google Fonts or Font Awesome CDN
--   **Inline SVG icons**: [scripts/icons.js](scripts/icons.js) — FA 6.5.2 paths, injected at build
+-   **Inline SVG icons**: [src/scripts/icons.js](src/scripts/icons.js) — FA 6.5.2 paths
 -   **Lazy loading**: Tab thumbs, coverflow off-screen cards, highlight carousel deferred until visible
 -   **Conditional anime.js**: Loaded only when `?tap=true`
 -   **Dynamic widgets**: Newsletter module imported after idle / intersection
@@ -329,18 +317,18 @@ Static files at the site root help crawlers and AI systems find and understand t
 
 | File | Purpose |
 |------|---------|
-| [`robots.txt`](robots.txt) | Allows major crawlers; points to the sitemap |
-| [`sitemap.xml`](sitemap.xml) | Lists `/` and `/connect4/` with `lastmod` (regenerated on build) |
+| [`robots.txt`](robots.txt) | Allows major crawlers; points to `sitemap-index.xml` |
+| `dist/sitemap-index.xml` | Sitemap index (generated by `@astrojs/sitemap` on build) |
 | [`llms.txt`](llms.txt) | Short site summary and key URLs for AI systems |
 | [`seo.json`](seo.json) | Canonical URL, meta copy, JSON-LD Person/WebSite/WebPage/ProfilePage |
 
-`npm run build-html` injects the canonical link and JSON-LD `@graph` into `index.html` from `seo.json`. Submit `https://prajwal.is-a.dev/sitemap.xml` in Google Search Console after deploy.
+`npm run build` emits SEO head tags and the sitemap under `dist/`. Submit `https://prajwal.is-a.dev/sitemap-index.xml` in Google Search Console after deploy.
 
 ### Internal links & deep URLs
 
 - **Hero tagline** ([`templates/hero-tagline.md`](templates/hero-tagline.md)): Use absolute same-origin links (`https://prajwal.is-a.dev/...`) for in-copy internal navigation; the build omits `target="_blank"` on those.
 - **Cross-references in `data.json`**: Use `#tab/slug` URLs (e.g. `#awards/ingenious-regional-grant-cad-1k`). Slugs must match `slugify()` on the item title (lowercase, non-alphanumeric → hyphens). Verify with the rendered `data-slug` attribute after build.
-- **Supported hash patterns** (handled by [`scripts/components/navigation.js`](scripts/components/navigation.js)):
+- **Supported hash patterns** (handled by [`src/scripts/components/navigation.js`](src/scripts/components/navigation.js)):
     - `#content` — scroll to the work section
     - `#projects`, `#hackathons`, `#awards` — switch tab and scroll
     - `#projects/jarvis-for-the-visually-impaired` — switch tab, expand grouped entries if needed, scroll, and apply `.nav-highlight`

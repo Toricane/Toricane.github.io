@@ -1,0 +1,26 @@
+---
+import { connections } from '../data/connections';
+import { iconHtml, iconNameForLink } from '../lib/icons';
+---
+
+<div id="connections" class="connections">
+  <ul>
+    {
+      connections.map((link) => {
+        const icon = iconNameForLink(link.href, link.label);
+        return (
+          <li>
+            <a
+              href={link.href}
+              aria-label={link.label}
+              target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+              rel={link.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+            >
+              {icon && <span class="svg-icon" set:html={iconHtml(icon)} />}
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</div>

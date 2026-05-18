@@ -1,0 +1,26 @@
+---
+import '../styles/global.css';
+import SeoHead from '../components/SeoHead.astro';
+import { seo } from '../lib/portfolio';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = seo.title, description = seo.description } = Astro.props;
+const dateModified = new Date().toISOString().slice(0, 10);
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead title={title} description={description} dateModified={dateModified} />
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

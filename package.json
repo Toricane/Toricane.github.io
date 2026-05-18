@@ -3,19 +3,23 @@
   "version": "1.0.0",
   "description": "Prajwal Prashanth's portfolio website",
   "type": "module",
-  "main": "scripts/main.js",
   "scripts": {
-    "build-hero": "node scripts/generate_hero_tagline.js",
-    "build-html": "node scripts/build.js",
-    "build-sitemap": "node scripts/generate-sitemap.js",
-    "dev": "node scripts/dev.js"
+    "predev": "node scripts/sync-public.mjs",
+    "dev": "astro dev",
+    "prebuild": "node scripts/sync-public.mjs",
+    "build": "astro build",
+    "preview": "astro preview",
+    "migrate-content": "node scripts/migrate-content.mjs"
   },
-  "keywords": ["portfolio", "projects"],
+  "keywords": [
+    "portfolio",
+    "projects"
+  ],
   "author": "Prajwal Prashanth",
   "license": "MIT",
   "devDependencies": {
-    "esbuild": "^0.25.4",
-    "html-minifier-terser": "^7.2.0",
-    "jsdom": "^24.0.0"
+    "@astrojs/sitemap": "^3.7.2",
+    "astro": "^6.3.3",
+    "zod": "^4.4.3"
   }
 }

@@ -15,6 +15,10 @@ __pycache__/
 Thumbs.db
 .vscode/
 
+# Astro
+dist/
+.astro/
+
 # Build and runtime logs
 *.log
 npm-debug.log*

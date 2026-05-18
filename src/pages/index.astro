@@ -1,0 +1,87 @@
+---
+import Base from '../layouts/Base.astro';
+import Connections from '../components/Connections.astro';
+import Coverflow from '../components/Coverflow.astro';
+import TabsSection from '../components/TabsSection.astro';
+import { iconHtml } from '../lib/icons';
+import { portfolio, coverflowColors, seo } from '../lib/portfolio';
+import { generateRuntimePayload } from '../lib/siteRuntime';
+import { compileHeroTagline } from '../lib/heroTagline';
+import { getCoverflowLcpPreload } from '../lib/coverflow';
+import heroSource from '../../templates/hero-tagline.md?raw';
+
+const heroTaglineHtml = compileHeroTagline(heroSource);
+const runtime = generateRuntimePayload(portfolio, coverflowColors);
+const lcpPreload = getCoverflowLcpPreload(runtime.faceImages);
+---
+
+<Base>
+  <Fragment slot="head">
+    {
+      lcpPreload && (
+        <link
+          rel="preload"
+          as="image"
+          href={lcpPreload.src}
+          imagesrcset={lcpPreload.srcset}
+          imagesizes={lcpPreload.sizes}
+          data-coverflow-lcp="1"
+        />
+      )
+    }
+  </Fragment>
+
+  <a href="#content" class="skip-link">Skip to content</a>
+
+  <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" type="button">
+    <span class="svg-icon" set:html={iconHtml('moon')} />
+  </button>
+
+  <header id="hero">
+    <div class="hero-inner">
+      <div class="intro-col">
+        <h1 class="site-title" aria-label="Prajwal Prashanth">
+          Prajwal <span class="last-name">Prashanth</span>
+        </h1>
+        <p class="tagline" set:html={heroTaglineHtml} />
+        <Connections />
+        <div id="widgets" class="widgets"></div>
+      </div>
+      <div class="media-col">
+        <Coverflow faceImages={runtime.faceImages} coverflowColors={coverflowColors} />
+      </div>
+    </div>
+    <button id="scrollMore" class="scroll-more" type="button" aria-label="Scroll to content">
+      <span class="svg-icon" set:html={iconHtml('chevronDown')} />
+    </button>
+  </header>
+
+  <TabsSection />
+
+  <footer class="site-footer">
+    <p>
+      © <span id="year"></span>
+      {seo.person.name}. Inspired by
+      <a href="https://www.kevinjosethomas.com/" target="_blank" rel="noopener noreferrer"
+        >kevinjosethomas.com</a
+      >
+      <a
+        href="https://github.com/kevinjosethomas/kevinjosethomas"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Source code on GitHub"
+      >
+        <span class="svg-icon" set:html={iconHtml('github')} />
+      </a>
+    </p>
+  </footer>
+
+  <script is:inline define:vars={{ runtime }}>
+    window.__SITE_RUNTIME__ = runtime;
+  </script>
+  <script>
+    import { boot } from '../scripts/boot.js';
+
+    boot(window.__SITE_RUNTIME__);
+  </script>
+</Base>

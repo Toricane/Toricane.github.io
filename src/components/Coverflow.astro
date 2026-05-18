@@ -1,0 +1,20 @@
+---
+import {
+  pickLcpFaceImage,
+  renderStaticLcpCardHtml,
+} from '../lib/coverflow';
+import type { FaceImage } from '../lib/siteRuntime';
+
+interface Props {
+  faceImages: FaceImage[];
+  coverflowColors: Record<string, string>;
+}
+
+const { faceImages, coverflowColors } = Astro.props;
+const lcp = pickLcpFaceImage(faceImages);
+const lcpHtml = lcp ? renderStaticLcpCardHtml(lcp, coverflowColors) : '';
+---
+
+<div class="coverflow-container">
+  <div id="coverflowCards" class="coverflow-cards" set:html={lcpHtml} />
+</div>

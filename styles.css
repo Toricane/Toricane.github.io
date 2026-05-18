@@ -2131,6 +2131,17 @@ body.page-ready .widget-ring-active {
     border-bottom-color: rgba(77, 181, 255, 0.5);
 }
 
+.site-footer a .svg-icon {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 0.15rem;
+}
+
+.site-footer a .svg-icon .icon {
+    width: 1.1em;
+    height: 1.1em;
+}
+
 /* --- Utilities & Animations --- */
 .nav-highlight {
     position: relative;

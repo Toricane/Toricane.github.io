@@ -1,0 +1,56 @@
+---
+import { portfolio } from '../lib/portfolio';
+import { renderProjectsHtml } from '../lib/renderProjects';
+import { renderTimelineHtml } from '../lib/renderTimeline';
+import { iconHtml } from '../lib/icons';
+
+const projectsHtml = renderProjectsHtml(portfolio.projects);
+const hackathonsHtml = renderTimelineHtml('hackathons', portfolio.hackathons, true);
+const awardsHtml = renderTimelineHtml('awards', portfolio.awards, false);
+---
+
+<main id="content" class="content">
+  <h2 id="work-heading" class="visually-hidden">Work</h2>
+  <section class="tabs" aria-label="Work sections">
+    <div class="tab-scroll-wrap">
+      <div class="tab-bar" role="tablist">
+        <button
+          class="tab active"
+          role="tab"
+          aria-selected="true"
+          data-tab="projects"
+          data-image-alt="Highlighted project image">Projects</button>
+        <button
+          class="tab"
+          role="tab"
+          aria-selected="false"
+          data-tab="hackathons"
+          data-image-alt="Highlighted hackathon image">Hackathons</button>
+        <button
+          class="tab"
+          role="tab"
+          aria-selected="false"
+          data-tab="awards"
+          data-image-alt="Highlighted award image">Awards</button>
+      </div>
+    </div>
+    <div class="tab-layout">
+      <div id="tabPanels" class="tab-panels">
+        <div id="projects" class="tab-panel active" set:html={projectsHtml} />
+        <div id="hackathons" class="tab-panel" hidden set:html={hackathonsHtml} />
+        <div id="awards" class="tab-panel" hidden set:html={awardsHtml} />
+      </div>
+      <aside class="tab-highlight" role="region" aria-label="Featured portfolio images">
+        <div class="tab-highlight-figure">
+          <img
+            id="tabHighlightImage"
+            src="/assets/projects_highlight.webp"
+            alt="Portfolio highlight"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      </aside>
+    </div>
+  </section>
+</main>

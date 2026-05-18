@@ -1,0 +1,203 @@
+html {
+    height: 100%;
+    width: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: radial-gradient(circle at center bottom, #ffdd59, #ff7b59), #ffdd59;
+    color: #333333;
+}
+
+.bubble {
+    background: radial-gradient(circle at center bottom, #ffdd59, #ff7b59), #ffdd59;
+    margin: 0.5em auto;
+    padding: 0.25em;
+    max-width: 400px;
+    min-width: 200px;
+    border-radius: 25px;
+}
+
+#board {
+    margin: 0 auto;
+    text-align: center;
+    background-color: #037cdf;
+    border-radius: 24px;
+    padding: 8px;
+}
+
+#board td {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #037cdf;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 25px;
+    background-color: #87baff;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+#board td.cell {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #87baff;
+    box-sizing: border-box;
+}
+
+.red {
+    background-color: hsl(0, 100%, 60%) !important;
+    border: 4px solid hsl(0, 100%, 40%) !important;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.yellow {
+    background-color: hsl(60, 100%, 60%) !important;
+    border: 4px solid hsl(60, 100%, 40%) !important;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.win_red {
+    background-color: hsl(0, 100%, 40%) !important;
+    border: 4px solid hsl(0, 100%, 60%) !important;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.win_yellow {
+    background-color: hsl(60, 100%, 40%) !important;
+    border: 4px solid hsl(60, 100%, 60%) !important;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.draw {
+    background-color: hsl(0, 0%, 40%) !important;
+    border: 4px solid hsl(0, 0%, 60%) !important;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+select {
+    font-size: 16px;
+    padding: 10px 16px;
+    border-radius: 32px;
+    border: 3px solid steelblue;
+    appearance: none;
+    background-color: rgb(174, 214, 241);
+    margin-right: 24px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.last {
+    margin-right: 0;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1em;
+}
+
+#start {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    background-color: steelblue;
+    color: #FFFFFF;
+    border-radius: 5px;
+    border: 1px solid steelblue;
+    cursor: pointer;
+    margin-top: 0px;
+    margin-right: 1em;
+    font-family: monospace;
+}
+
+#start:hover {
+    background-color: royalblue;
+    border: 1px solid royalblue;
+}
+
+#reset {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    background-color: steelblue;
+    color: #FFFFFF;
+    border-radius: 5px;
+    border: 1px solid steelblue;
+    cursor: pointer;
+    margin-top: 0px;
+    font-family: monospace;
+}
+
+#reset:hover {
+    background-color: royalblue;
+    border: 1px solid royalblue;
+}
+
+label {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+span {
+    font-size: 20px;
+    text-shadow: 1px 1px 2px black;
+}
+
+.span_yellow {
+    color: yellow;
+}
+
+.span_red {
+    color: red;
+}
+
+.notification {
+    animation: pulse 4s ease-in-out 0s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    10% {
+        transform: scale(1.2);
+    }
+
+    20% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1);
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: 1;
+    }
+}
