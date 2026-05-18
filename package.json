@@ -17,6 +17,9 @@
   ],
   "author": "Prajwal Prashanth",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "devDependencies": {
     "@astrojs/sitemap": "^3.7.2",
     "astro": "^6.3.3",
