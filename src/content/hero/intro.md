@@ -1,3 +1,6 @@
+---
+title: "Hero tagline"
+---
 Hello! I'm a recent engineering transfer graduate from [{langara} Langara College,](https://langara.ca/programs-courses/engineering-transfer-certificate) heading to the [{ubc} University of British Columbia](https://www.engphys.ubc.ca/) this September, awaiting a June decision on Engineering Physics. (The perfect intersection of math, physics, robotics, AI, and computer engineering. Applied, interviewed, and cautiously optimistic.)
 
 I balance ambitious projects with strong academic performance. I serve as [{vancouver-ai} Community DevOps Manager at BC + AI Ecosystem,](https://vancouver.bc-ai.net/ecosystem) have demoed projects like [{jarvis} JARVIS](https://prajwal.is-a.dev/#projects/jarvis-for-the-visually-impaired) at [{vancouver-ai} Vancouver AI meetups,](https://vancouver.bc-ai.net/ecosystem) built hardware like [{handy-andy} Handy Andy,](PLACEHOLDER_URL) competed at [hackathons](https://prajwal.is-a.dev/#hackathons) like [{hackthenorth} Hack the North](https://devpost.com/software/davinci-solve) and [{nwhacks} nwHacks,](https://devpost.com/software/genimo) and graduated as my high school's [valedictorian](https://prajwal.is-a.dev/#awards/class-valedictorian) (Serendipity.) for the Class of 2025.

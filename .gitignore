@@ -18,6 +18,12 @@ Thumbs.db
 # Astro
 dist/
 .astro/
+src/data/portfolio.json
+
+# Obsidian (keep templates; ignore local UI state)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
 
 # Build and runtime logs
 *.log

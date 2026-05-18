@@ -1,9 +1,11 @@
-import portfolioJson from '../data/portfolio.json';
 import colorsJson from '../data/colors.json';
 import seoJson from '../data/seo.json';
-import { portfolioSchema } from './schema';
+import { buildPortfolio } from './buildPortfolio';
 
-export const portfolio = portfolioSchema.parse(portfolioJson);
+export { buildPortfolio };
+
+export const portfolio = await buildPortfolio();
+
 export const coverflowColors = colorsJson as Record<string, string>;
 export const seo = seoJson as {
   siteUrl: string;

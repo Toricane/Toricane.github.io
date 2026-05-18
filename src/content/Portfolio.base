@@ -1,0 +1,176 @@
+filters:
+  and:
+    - or:
+        - file.inFolder("src/content/projects")
+        - file.inFolder("src/content/hackathons")
+        - file.inFolder("src/content/awards")
+    - not:
+        - file.inFolder("src/content/_templates")
+formulas:
+  section: if(file.folder.contains("projects"), "Projects", if(file.folder.contains("hackathons"), "Hackathons", if(file.folder.contains("awards"), "Awards", "")))
+  displayTitle: if(title, title, name)
+  endDateSort: if(endDate, if(endDate.isType("date"), endDate, if((endDate + "").lower().contains("present") || (endDate + "").lower().contains("ongoing"), date("2099-12-31"), date(endDate))), date("2099-12-31"))
+  whenText: if(!when, "", if(when.isType("date"), when.format("YYYY/MM"), when.toString()))
+  whenSort: if(formula.whenText, date(formula.whenText.split("/")[0] + "-" + formula.whenText.split("/")[1] + "-01"), "")
+  whenDisplay: if(formula.whenText, date(formula.whenText.split("/")[0] + "-" + formula.whenText.split("/")[1] + "-01").format("MMM YYYY"), "")
+  imageLine0: if(!images || images.length < 1, "", if(images[0].isType("link"), images[0].path, images[0].toString()))
+  imageLine1: if(!images || images.length < 2, "", if(images[1].isType("link"), images[1].path, images[1].toString()))
+  imageLine2: if(!images || images.length < 3, "", if(images[2].isType("link"), images[2].path, images[2].toString()))
+  imageFile0: if(formula.imageLine0, formula.imageLine0.split("*")[0].trim(), "")
+  imageFile1: if(formula.imageLine1, formula.imageLine1.split("*")[0].trim(), "")
+  imageFile2: if(formula.imageLine2, formula.imageLine2.split("*")[0].trim(), "")
+  coverPath: if(formula.imageFile0, if(formula.imageFile0.contains("/") || formula.imageFile0.contains("assets"), formula.imageFile0, "assets/tab-panels/" + formula.imageFile0), "")
+  coverPath2: if(formula.imageFile1, if(formula.imageFile1.contains("/") || formula.imageFile1.contains("assets"), formula.imageFile1, "assets/tab-panels/" + formula.imageFile1), "")
+  coverPath3: if(formula.imageFile2, if(formula.imageFile2.contains("/") || formula.imageFile2.contains("assets"), formula.imageFile2, "assets/tab-panels/" + formula.imageFile2), "")
+  cover: if(formula.coverPath, link(formula.coverPath), "")
+  thumb2: if(formula.coverPath2, link(formula.coverPath2), "")
+  thumb3: if(formula.coverPath3, link(formula.coverPath3), "")
+  dateRange: if(startDate && endDate, date(startDate).format("MMM YYYY") + " – " + date(endDate).format("MMM YYYY"), if(endDate, date(endDate).format("MMM YYYY"), if(startDate, date(startDate).format("MMM YYYY"), "")))
+  significanceLabel: if(significance == "gold", "★ gold", if(significance == "silver", "◇ silver", ""))
+  significanceRank: if(significance == "gold", 0, if(significance == "silver", 1, 2))
+  labels: if(badges && badges.length > 0, badges.join(" · "), if(tags && tags.length > 0, tags.join(" · "), ""))
+  hackathonBucket: if(groupSummary, formula.whenText + " — " + groupSummary, formula.whenText + " — " + name)
+properties:
+  formula.displayTitle:
+    displayName: Title
+  formula.cover:
+    displayName: Cover
+  formula.thumb2:
+    displayName: " "
+  formula.thumb3:
+    displayName: " "
+  formula.dateRange:
+    displayName: Dates
+  formula.whenDisplay:
+    displayName: Month
+  formula.significanceLabel:
+    displayName: Highlight
+  formula.labels:
+    displayName: Tags
+  file.name:
+    displayName: File
+views:
+  - type: cards
+    name: Projects
+    filters:
+      and:
+        - file.inFolder("src/content/projects")
+    order:
+      - formula.displayTitle
+      - from
+      - formula.dateRange
+      - formula.significanceLabel
+      - formula.thumb2
+      - formula.thumb3
+      - formula.labels
+    image: formula.cover
+    imageFit: cover
+    imageAspectRatio: 1.25
+    cardSize: 260
+  - type: table
+    name: Projects (edit)
+    filters:
+      and:
+        - file.inFolder("src/content/projects")
+    order:
+      - file.name
+      - title
+      - from
+      - startDate
+      - endDate
+      - significance
+      - tags
+      - images
+      - links
+  - type: cards
+    name: Hackathons
+    filters:
+      and:
+        - file.inFolder("src/content/hackathons")
+    groupBy:
+      property: formula.whenSort
+      direction: DESC
+    order:
+      - formula.displayTitle
+      - from
+      - formula.significanceLabel
+      - formula.thumb2
+      - formula.labels
+    image: formula.cover
+    imageFit: cover
+    imageAspectRatio: 1.2
+    cardSize: 220
+  - type: cards
+    name: Hackathons (grouped)
+    filters:
+      and:
+        - file.inFolder("src/content/hackathons")
+    groupBy:
+      property: formula.hackathonBucket
+      direction: DESC
+    order:
+      - formula.displayTitle
+      - from
+      - formula.significanceLabel
+      - formula.thumb2
+      - formula.labels
+    image: formula.cover
+    imageFit: cover
+    imageAspectRatio: 1.2
+    cardSize: 220
+  - type: table
+    name: Hackathons (edit)
+    filters:
+      and:
+        - file.inFolder("src/content/hackathons")
+    groupBy:
+      property: formula.whenText
+      direction: DESC
+    order:
+      - file.name
+      - when
+      - groupSummary
+      - name
+      - from
+      - significance
+      - badges
+      - tags
+      - images
+      - links
+  - type: cards
+    name: Awards
+    filters:
+      and:
+        - file.inFolder("src/content/awards")
+    groupBy:
+      property: formula.whenSort
+      direction: DESC
+    order:
+      - formula.displayTitle
+      - from
+      - formula.significanceLabel
+      - formula.thumb2
+      - formula.thumb3
+      - formula.labels
+    image: formula.cover
+    imageFit: cover
+    imageAspectRatio: 1.2
+    cardSize: 220
+  - type: table
+    name: Awards (edit)
+    filters:
+      and:
+        - file.inFolder("src/content/awards")
+    groupBy:
+      property: formula.whenText
+      direction: DESC
+    order:
+      - file.name
+      - when
+      - groupSummary
+      - name
+      - from
+      - significance
+      - tags
+      - images
+      - links

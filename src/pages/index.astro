@@ -8,9 +8,11 @@ import { portfolio, coverflowColors, seo } from '../lib/portfolio';
 import { generateRuntimePayload } from '../lib/siteRuntime';
 import { compileHeroTagline } from '../lib/heroTagline';
 import { getCoverflowLcpPreload } from '../lib/coverflow';
-import heroSource from '../../templates/hero-tagline.md?raw';
+import { getEntry } from 'astro:content';
 
-const heroTaglineHtml = compileHeroTagline(heroSource);
+const heroEntry = await getEntry('hero', 'intro');
+if (!heroEntry) throw new Error('Missing src/content/hero/intro.md');
+const heroTaglineHtml = compileHeroTagline(heroEntry.body);
 const runtime = generateRuntimePayload(portfolio, coverflowColors);
 const lcpPreload = getCoverflowLcpPreload(runtime.faceImages);
 ---

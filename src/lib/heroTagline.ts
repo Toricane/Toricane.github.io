@@ -111,7 +111,7 @@ export function compileHeroTagline(markdownText: string) {
 }
 
 export function loadHeroTaglineHtml(rootDir: string) {
-  const mdPath = path.join(rootDir, 'templates', 'hero-tagline.md');
+  const mdPath = path.join(rootDir, 'src', 'content', 'hero', 'intro.md');
   const source = fs.readFileSync(mdPath, 'utf-8');
   return compileHeroTagline(source);
 }

@@ -3,14 +3,15 @@
 
 from __future__ import annotations
 
-import json
 import os
+import sys
 from pathlib import Path
 
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA_PATH = ROOT / "data.json"
+sys.path.insert(0, str(ROOT / "scripts"))
+from content_paths import face_paths_from_content
 TAB_PANELS = ROOT / "assets" / "tab-panels"
 SMALL_DIR = TAB_PANELS / "small"
 PREVIEW_DIR = TAB_PANELS / "preview"
@@ -31,32 +32,6 @@ def resize_to_width(img: Image.Image, width: int) -> Image.Image:
         return img
     ratio = width / w
     return img.resize((width, max(1, int(h * ratio))), Image.Resampling.LANCZOS)
-
-
-def face_paths_from_data() -> set[str]:
-    paths: set[str] = set()
-    with DATA_PATH.open(encoding="utf-8") as f:
-        data = json.load(f)
-
-    for entry in data.get("coverflowImages") or []:
-        if entry.get("face") and entry.get("path"):
-            paths.add(entry["path"])
-
-    def walk_images(items, key_images="images"):
-        for item in items or []:
-            imgs = item.get(key_images) or []
-            if isinstance(imgs, list):
-                for raw in imgs:
-                    if isinstance(raw, dict) and raw.get("face") and raw.get("path"):
-                        paths.add(raw["path"])
-
-    for proj in data.get("projects") or []:
-        walk_images([proj])
-    for section in ("hackathons", "awards"):
-        for group in data.get(section) or []:
-            walk_images(group.get("items") or [])
-
-    return paths
 
 
 def ensure_small_variant(rel_path: str) -> None:
@@ -97,7 +72,7 @@ def ensure_small_variant(rel_path: str) -> None:
 
 def main() -> None:
     print("Generating coverflow image variants...")
-    paths = face_paths_from_data()
+    paths = face_paths_from_content()
     for rel in sorted(paths):
         ensure_small_variant(rel)
     print("Done.")

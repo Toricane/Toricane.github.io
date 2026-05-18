@@ -30,7 +30,7 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 -   **Framework-Free**: Pure HTML, CSS, and vanilla JavaScript
 -   **Performance Optimized**: Blocking minified CSS/JS, inlined runtime payload, lazy images, `content-visibility` on inactive panels
 -   **SEO / AEO Enhanced**: Open Graph, Twitter Cards, canonical URLs, JSON-LD `@graph`, `robots.txt`, Astro sitemap (`sitemap-index.xml`), and `llms.txt`
--   **Content Management**: JSON-driven content system for easy updates
+-   **Content Management**: Markdown notes in `src/content/` (Obsidian-friendly); see [CONTENT.md](CONTENT.md)
 
 ### 🎭 Interactive Elements
 
@@ -53,12 +53,13 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 ├── styles.css              # Complete monolithic styling (imported by Astro)
 ├── AGENT_CONTEXT.md        # Architectural rules and context for AI agents
 ├── scripts/
-│   ├── sync-public.mjs     # Copies assets, connect4, robots.txt → public/
+│   ├── sync-public.mjs     # Copies assets → public/; exports data.json from content
+│   ├── export-data-json.mjs # Writes root data.json from src/content/
 │   ├── generate_coverflow_images.py # Responsive WebP variants for coverflow LCP
 │   └── update_colors.py    # Regenerates colors.json from face images
-├── templates/
-│   └── hero-tagline.md     # Author-friendly hero intro source
-├── data.json               # Content data (projects, hackathons, awards)
+├── src/content/            # Portfolio Markdown (projects, hackathons, awards, hero)
+├── CONTENT.md              # How to edit content in Obsidian
+├── data.json               # Generated from src/content/ on build (mirror for tooling; site does not read it)
 ├── site.webmanifest        # PWA configuration
 ├── CNAME                   # Custom domain configuration
 ├── assets/                 # Images and media
@@ -80,7 +81,7 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 
 ## 📝 Content Management
 
-All portfolio content is managed through `data.json` with the following structure:
+Portfolio content is managed through Markdown files in `src/content/`. Each project, hackathon, and award is its own note with YAML frontmatter. See [CONTENT.md](CONTENT.md). Root `data.json` is auto-generated from those notes on build. Structure for reference:
 
 ### Projects
 
@@ -173,8 +174,8 @@ Navigate to `http://localhost:4321` (Astro). Production build: `npm run build` �
 
 -   **Animation Mode**: Add `?tap=true` for connection pill entrance animations and a pulsing LinkedIn highlight (immediate, then every 1s for 15s)
 -   **Content Updates**: Edit content sources and rebuild static output.
-    -   Primary content source: `data.json`
-    -   Hero intro source: `templates/hero-tagline.md`
+    -   Primary content: `src/content/` (see [CONTENT.md](CONTENT.md))
+    -   Hero intro: `src/content/hero/intro.md`
     -   Build command: `npm run build`
     -   *Coverflow Exception*: If you added a new image with `"face": true` (which appears in the Coverflow), run `python scripts/update_colors.py` to pre-calculate its glow color into `colors.json`.
 -   **Image Assets**: Replace files in `/assets/` to update highlight images
@@ -182,7 +183,7 @@ Navigate to `http://localhost:4321` (Astro). Production build: `npm run build` �
 -   **Rebuild after asset/CSS/JS changes**: `npm run build` (syncs `public/`, compiles Astro → `dist/`)
 -   **Coverflow hero variants** (optional): `python scripts/generate_coverflow_images.py` when face images change
 -   **Content updates**:
-       1. Edit `data.json` and/or `templates/hero-tagline.md`
+       1. Edit notes under `src/content/` and/or `src/content/hero/intro.md`
        2. Run `npm run build` (or push to `main` — GitHub Actions runs the same build)
        3. Commit source changes only (`dist/` is not committed)
 -   **SEO-only tweak**: Edit [`seo.json`](seo.json) and rebuild.
@@ -214,7 +215,7 @@ This site is configured for GitHub Pages deployment:
 
 1. Fork/clone this repository
 2. Update `CNAME` with your domain (or remove for github.io subdomain)
-3. Edit `data.json` with your content
+3. Add content under `src/content/` (see [CONTENT.md](CONTENT.md))
 4. Replace images in `/assets/` with your own
 5. Enable GitHub Pages in repository settings
 
@@ -247,9 +248,9 @@ Main theme colors defined in CSS custom properties:
 
 ### Content Areas
 
-1. **Hero Introduction**: Edit `templates/hero-tagline.md` (compiled into `templates/hero-tagline.html` during build)
-2. **Social Links**: Update hrefs/labels in the `.connections` section (icons are inline SVGs from [scripts/icons.js](scripts/icons.js))
-3. **Portfolio Content**: Manage via `data.json`
+1. **Hero Introduction**: Edit [src/content/hero/intro.md](src/content/hero/intro.md)
+2. **Social Links**: Update [src/data/connections.ts](src/data/connections.ts)
+3. **Portfolio Content**: Add/edit Markdown under [src/content/](src/content/) — see [CONTENT.md](CONTENT.md)
 4. **Footnotes**: Inline expandable explanations
 
 ### Tagline Icons
@@ -258,7 +259,7 @@ Tagline icons (inline emoji-sized icons)
 
 -   Path: `assets/icons/`
 -   Purpose: Small square, transparent WEBP icons inserted immediately before certain links in the tagline (they behave like inline emoji and are sized via CSS to `1em`).
--   Filenames referenced by `templates/hero-tagline.md` / generated `index.html` (default):
+-   Filenames referenced by `src/content/hero/intro.md` (default):
     -   `langara.webp`
     -   `ubc.webp`
     -   `jarvis.webp`
@@ -294,7 +295,7 @@ assets/
 	awards_highlight.jpg
 ```
 
-Fallback filenames are defined in `scripts/components/tabs.js` (`fallbackMap`). The highlight area also auto-cycles images from `data.json`. Missing fallbacks are ignored gracefully.
+Fallback filenames are defined in `src/scripts/components/tabs.js` (`fallbackMap`). The highlight area also auto-cycles images from content. Missing fallbacks are ignored gracefully.
 
 **Recommended size**: For optimal quality across all screen sizes, use 1440px width (2x the maximum display width of 500px) with aspect ratio preserved.
 
@@ -326,8 +327,8 @@ Static files at the site root help crawlers and AI systems find and understand t
 
 ### Internal links & deep URLs
 
-- **Hero tagline** ([`templates/hero-tagline.md`](templates/hero-tagline.md)): Use absolute same-origin links (`https://prajwal.is-a.dev/...`) for in-copy internal navigation; the build omits `target="_blank"` on those.
-- **Cross-references in `data.json`**: Use `#tab/slug` URLs (e.g. `#awards/ingenious-regional-grant-cad-1k`). Slugs must match `slugify()` on the item title (lowercase, non-alphanumeric → hyphens). Verify with the rendered `data-slug` attribute after build.
+- **Hero tagline** ([`src/content/hero/intro.md`](src/content/hero/intro.md)): Use absolute same-origin links (`https://prajwal.is-a.dev/...`) for in-copy internal navigation; the build omits `target="_blank"` on those.
+- **Cross-references in content frontmatter / hero**: Use `#tab/slug` URLs (e.g. `#awards/ingenious-regional-grant-cad-1k`). Slugs must match `slugify()` on the item title (lowercase, non-alphanumeric → hyphens). Verify with the rendered `data-slug` attribute after build.
 - **Supported hash patterns** (handled by [`src/scripts/components/navigation.js`](src/scripts/components/navigation.js)):
     - `#content` — scroll to the work section
     - `#projects`, `#hackathons`, `#awards` — switch tab and scroll

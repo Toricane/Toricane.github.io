@@ -9,7 +9,10 @@
     "prebuild": "node scripts/sync-public.mjs",
     "build": "astro build",
     "preview": "astro preview",
-    "migrate-content": "node scripts/migrate-content.mjs"
+    "validate": "astro build",
+    "new:project": "node scripts/new-project.mjs",
+    "export:data": "node scripts/export-data-json.mjs",
+    "reformat:content": "node scripts/reformat-content-notes.mjs"
   },
   "keywords": [
     "portfolio",

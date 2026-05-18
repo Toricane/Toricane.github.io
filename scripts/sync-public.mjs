@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const publicDir = path.join(root, 'public');
@@ -41,12 +42,20 @@ for (const name of [
   copyFile(path.join(root, name), path.join(publicDir, name));
 }
 
-for (const json of ['data.json', 'colors.json', 'seo.json']) {
+for (const json of ['colors.json', 'seo.json']) {
   const src = path.join(root, json);
-  const dest = path.join(root, 'src', 'data', json === 'data.json' ? 'portfolio.json' : json);
+  const dest = path.join(root, 'src', 'data', json);
   if (fs.existsSync(src)) {
     fs.copyFileSync(src, dest);
   }
+}
+
+const exportResult = spawnSync(process.execPath, ['scripts/export-data-json.mjs'], {
+  cwd: root,
+  stdio: 'inherit',
+});
+if (exportResult.status !== 0) {
+  process.exit(exportResult.status ?? 1);
 }
 
 console.log('✓ Synced static files to public/ and src/data/*.json');
