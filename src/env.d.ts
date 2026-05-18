@@ -1,5 +1,9 @@
 /// <reference types="astro/client" />
 
+interface ImportMetaEnv {
+  readonly PUBLIC_DEPLOY_SHA?: string;
+}
+
 declare module '*.md?raw' {
   const content: string;
   export default content;

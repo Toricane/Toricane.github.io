@@ -10,6 +10,7 @@ interface Props {
 
 const { title = seo.title, description = seo.description } = Astro.props;
 const dateModified = new Date().toISOString().slice(0, 10);
+const deploySha = import.meta.env.PUBLIC_DEPLOY_SHA;
 ---
 
 <!doctype html>
@@ -17,6 +18,7 @@ const dateModified = new Date().toISOString().slice(0, 10);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {deploySha && <meta name="deploy-sha" content={deploySha} />}
     <SeoHead title={title} description={description} dateModified={dateModified} />
     <slot name="head" />
   </head>

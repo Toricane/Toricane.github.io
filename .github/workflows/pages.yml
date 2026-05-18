@@ -32,6 +32,8 @@ jobs:
         run: node scripts/sync-public.mjs
 
       - name: Build Astro site
+        env:
+          PUBLIC_DEPLOY_SHA: ${{ github.sha }}
         run: npm run build
 
       - name: Upload Pages artifact
