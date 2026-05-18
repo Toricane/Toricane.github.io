@@ -37,6 +37,8 @@ jobs:
           set -euo pipefail
           url="${{ env.LIVE_SITE_URL }}/"
           sha="${DEPLOY_SHA:-}"
+          page="$(mktemp)"
+          trap 'rm -f "$page"' EXIT
 
           echo "Polling $url (up to ~5 min)..."
           if [ -n "$sha" ]; then
@@ -46,11 +48,11 @@ jobs:
           fi
 
           for attempt in $(seq 1 30); do
-            if html=$(curl -fsSL "$url" 2>/dev/null); then
+            if curl -fsSL "$url" -o "$page"; then
               if [ -z "$sha" ]; then
                 echo "Live site responded (attempt $attempt)"
                 exit 0
-              elif echo "$html" | grep -qF "name=\"deploy-sha\" content=\"${sha}\""; then
+              elif grep -q 'name="deploy-sha"' "$page" && grep -qF "$sha" "$page"; then
                 echo "Deploy $sha is live (attempt $attempt)"
                 exit 0
               else
