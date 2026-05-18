@@ -8,7 +8,7 @@ This document provides architectural, stylistic, and operational context for any
     *   Projects/Hackathons/Awards source: `data.json`
     *   Hero intro source: `templates/hero-tagline.md` (compiled to `templates/hero-tagline.html`)
     *   SEO metadata source: `seo.json` (canonical + JSON-LD injected into `index.html` at build)
-    *   Generated outputs: `index.html` (minified + pre-rendered), `sitemap.xml`, `styles.min.css`, and `scripts/main.min.js`
+    *   Generated outputs: `index.html` (minified + pre-rendered), `sitemap.xml`, hashed CSS/JS from `asset-manifest.json`, and optional `scripts/chunk-*.js`
     *   Never hardcode content items directly in generated `index.html`; update source files and rebuild.
 *   **Module Structure**:
     *   JS components are in `scripts/components/` (e.g. `coverflow.js`, `tabs.js`, `navigation.js`, `tapMode.js`, `theme.js`).
@@ -29,9 +29,10 @@ This document provides architectural, stylistic, and operational context for any
 | `seo.json` | `seo.js` | Canonical + JSON-LD in `index.html` |
 | `scripts/icons.js` | `applySvgIcons()` | Inline SVGs in connections, theme toggle, scroll button |
 
-*   **CSS delivery**: Blocking `<link rel="stylesheet" href="styles.min.css">` only. Do **not** ship deferred-only CSS without a synchronous fallback (critical-CSS-only regression).
-*   **Runtime data**: Production uses inlined `__SITE_RUNTIME__`; do not preload or fetch `data.json` on production builds.
-*   **Coverflow LCP**: No static `northernlights` head preload; `preloadCoverflowLcp()` in `coverflow.js` runs after shuffle for the actual center card.
+*   **CSS delivery**: Inline `style#critical` (hero) plus deferred full stylesheet from `asset-manifest.json` (`media="print"` + `onload` + `<noscript>` fallback). Do **not** ship deferred-only CSS without that noscript fallback.
+*   **Asset hashing**: `npm run build-html` writes `asset-manifest.json` and content-hashed `styles.*.min.css` / `scripts/main-*.js`. Inject paths from the manifest; do not hand-edit hashed filenames in `index.html`.
+*   **Coverflow LCP**: Build injects a static center card into `#coverflowCards` and `<link rel="preload" as="image">`. Runtime coverflow init is deferred (idle / intersection).
+*   **Runtime data**: Production uses inlined `__SITE_RUNTIME__` (includes `coverflowColors`); do not preload or fetch `data.json` or `colors.json` on production builds.
 *   **Mobile connections**: `.connections a span:not(.svg-icon)` — never `display: none` on all spans (hides inline SVG icons).
 *   **Anime.js**: Loaded only when `?tap=true` (`tapMode.js`).
 
@@ -74,7 +75,8 @@ Edit `seo.json` and run `npm run build-html` instead of patching JSON-LD inside 
     *   Build step **is required** for generated output: `npm run build-html`.
     *   Quick hero-only compile: `npm run build-hero`.
     *   Sitemap only: `npm run build-sitemap`.
-    *   Do not hand-edit `scripts/main.min.js`, `styles.min.css`, or SEO blocks in `index.html`.
+    *   Do not hand-edit hashed bundles, `asset-manifest.json`, or SEO blocks in `index.html`.
+    *   Local dev: `npm run dev` (watch + rebuild + serve on :8080).
 2.  **CSS Edits**: Use existing CSS variables (`--bg`, `--text`, `--accent`, etc.). Test animations for overflow/clipping.
 3.  **Local Testing**: Prefer `http://127.0.0.1:5500` or `python -m http.server 8080`. Rebuild after `data.json` or `hero-tagline.md` changes.
 4.  **No Extraneous Dependencies**: Avoid new libraries unless necessary. Anime.js is used for tap mode and some motion; prefer CSS transitions elsewhere.

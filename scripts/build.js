@@ -4,17 +4,24 @@
  * Build script: inject template/content and generate minified index.html
  */
 
-import { build as esbuild } from 'esbuild';
+import * as esbuild from 'esbuild';
+import crypto from 'crypto';
 import fs from 'fs';
 import { minify } from 'html-minifier-terser';
 import { JSDOM } from 'jsdom';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { extractCriticalCss } from './extract-critical-css.js';
 import { generateHeroTagline } from './generate_hero_tagline.js';
 import { generateSitemap } from './generate-sitemap.js';
 import { applySvgIcons, replaceFaIcons } from './icons.js';
 import { applySeoToDocument } from './seo.js';
-import { generateRuntimePayload } from './utils/siteData.js';
+import {
+  getCoverflowImageSources,
+  pickLcpFaceImage,
+  renderStaticLcpCardHtml,
+} from './utils/coverflowShared.js';
+import { collectFaceImages, generateRuntimePayload } from './utils/siteData.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -23,9 +30,41 @@ const colorsPath = path.join(rootDir, 'colors.json');
 const indexPath = path.join(rootDir, 'index.html');
 const seoPath = path.join(rootDir, 'seo.json');
 const heroTemplatePath = path.join(rootDir, 'templates', 'hero-tagline.html');
-const bundledCssPath = path.join(rootDir, 'styles.min.css');
-const bundledJsPath = path.join(rootDir, 'scripts', 'main.min.js');
+const manifestPath = path.join(rootDir, 'asset-manifest.json');
+const stylesSourcePath = path.join(rootDir, 'styles.css');
 const readUtf8 = (filePath) => fs.readFileSync(filePath, 'utf-8');
+
+function hashContent(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 10);
+}
+
+function loadAssetManifest() {
+  try {
+    return JSON.parse(readUtf8(manifestPath));
+  } catch {
+    return null;
+  }
+}
+
+function pruneHashedAssets(keepRelativePaths) {
+  const keep = new Set(keepRelativePaths.map((p) => p.replace(/\\/g, '/')));
+  const scanDirs = [rootDir, path.join(rootDir, 'scripts')];
+  const patterns = [
+    /^styles\.[a-f0-9]+\.min\.css$/,
+    /^main-[A-Za-z0-9]+\.js$/,
+    /^chunk-[A-Za-z0-9]+\.js$/,
+  ];
+
+  for (const dir of scanDirs) {
+    if (!fs.existsSync(dir)) continue;
+    for (const name of fs.readdirSync(dir)) {
+      if (!patterns.some((re) => re.test(name))) continue;
+      const rel = path.relative(rootDir, path.join(dir, name)).replace(/\\/g, '/');
+      if (keep.has(rel)) continue;
+      fs.unlinkSync(path.join(dir, name));
+    }
+  }
+}
 
 function cleanupLegacyHead(document) {
   const head = document.head;
@@ -62,33 +101,101 @@ function cleanupLegacyHead(document) {
   head.querySelectorAll('noscript:empty').forEach((el) => el.remove());
 }
 
-function injectStylesheet(document) {
+function injectStylesheet(document, { cssHref, criticalCss }) {
   const head = document.head;
-  if (!head) return;
+  if (!head || !cssHref) return;
 
   head.querySelectorAll('style#critical').forEach((el) => el.remove());
+  head.querySelectorAll('link[data-deferred-styles]').forEach((el) => el.remove());
+  head.querySelectorAll('noscript[data-styles-fallback]').forEach((el) => el.remove());
 
-  let link = head.querySelector('link[rel="stylesheet"][href="styles.min.css"]');
-  if (!link) {
-    link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'styles.min.css';
+  if (criticalCss) {
+    const style = document.createElement('style');
+    style.id = 'critical';
+    style.textContent = criticalCss;
     const canonical = head.querySelector('link[rel="canonical"]');
     if (canonical) {
-      head.insertBefore(link, canonical);
+      head.insertBefore(style, canonical);
     } else {
-      head.appendChild(link);
+      head.appendChild(style);
     }
   }
 
-  let preload = head.querySelector('link[rel="preload"][href="styles.min.css"]');
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = cssHref;
+  link.media = 'print';
+  link.setAttribute('data-deferred-styles', '1');
+  link.setAttribute(
+    'onload',
+    "this.onload=null;this.media='all';",
+  );
+
+  const canonical = head.querySelector('link[rel="canonical"]');
+  if (canonical) {
+    head.insertBefore(link, canonical);
+  } else {
+    head.appendChild(link);
+  }
+
+  const noscript = document.createElement('noscript');
+  noscript.setAttribute('data-styles-fallback', '1');
+  const fallbackLink = document.createElement('link');
+  fallbackLink.rel = 'stylesheet';
+  fallbackLink.href = cssHref;
+  noscript.appendChild(fallbackLink);
+  head.appendChild(noscript);
+}
+
+/** Remove stray escaped <link> text nodes left by older builds (JSDOM + innerHTML). */
+function cleanupBodyStylesheetArtifacts(document) {
+  const body = document.body;
+  if (!body) return;
+
+  for (const node of [...body.childNodes]) {
+    if (node.nodeType !== 3) continue;
+    const text = node.textContent || '';
+    if (/&lt;link\s+rel=["']?stylesheet/i.test(text) || /^<link\s+rel=["']?stylesheet/i.test(text)) {
+      node.remove();
+    }
+  }
+}
+
+function injectCoverflowLcp(document, faceImages, colors) {
+  const lcpImage = pickLcpFaceImage(faceImages);
+  const cardsEl = document.getElementById('coverflowCards');
+  if (!lcpImage || !cardsEl) return;
+
+  cardsEl.innerHTML = renderStaticLcpCardHtml(lcpImage, colors);
+
+  const sources = getCoverflowImageSources(lcpImage.path);
+  if (!sources.src) return;
+
+  const head = document.head;
+  if (!head) return;
+
+  let preload = head.querySelector('link[data-coverflow-lcp]');
   if (!preload) {
     preload = document.createElement('link');
     preload.rel = 'preload';
-    preload.href = 'styles.min.css';
-    head.insertBefore(preload, link);
+    preload.as = 'image';
+    preload.setAttribute('data-coverflow-lcp', '1');
+    const anchor = head.querySelector('style#critical') || head.querySelector('link[rel="canonical"]');
+    if (anchor) {
+      head.insertBefore(preload, anchor);
+    } else {
+      head.appendChild(preload);
+    }
   }
-  preload.setAttribute('as', 'style');
+
+  preload.href = sources.src;
+  if (sources.srcset) {
+    preload.setAttribute('imagesrcset', sources.srcset);
+    preload.setAttribute('imagesizes', sources.sizes);
+  } else {
+    preload.removeAttribute('imagesrcset');
+    preload.removeAttribute('imagesizes');
+  }
 }
 
 function injectRuntimeScript(document, runtimePayload) {
@@ -101,7 +208,7 @@ function injectRuntimeScript(document, runtimePayload) {
 
   const mainScript =
     document.querySelector('script[src="scripts/main.js"]') ||
-    document.querySelector('script[src="scripts/main.min.js"]');
+    document.querySelector('script[src*="scripts/main"]');
   if (mainScript?.parentNode) {
     mainScript.parentNode.insertBefore(script, mainScript);
   } else {
@@ -120,29 +227,71 @@ function loadJsonWithFallback(filePath, fallback = {}) {
 async function bundleClientAssets() {
   console.log('\n⚙️  Bundling client assets...');
 
-  try {
-    await Promise.all([
-      esbuild({
-        entryPoints: [path.join(rootDir, 'scripts', 'main.js')],
-        bundle: true,
-        minify: true,
-        format: 'iife',
-        platform: 'browser',
-        target: ['es2017'],
-        outfile: bundledJsPath,
-        legalComments: 'none',
-      }),
-      esbuild({
-        entryPoints: [path.join(rootDir, 'styles.css')],
-        bundle: true,
-        minify: true,
-        outfile: bundledCssPath,
-        legalComments: 'none',
-      }),
-    ]);
+  const previousManifest = loadAssetManifest();
+  const criticalCss = extractCriticalCss(readUtf8(stylesSourcePath));
 
-    console.log('✓ Bundled scripts/main.js -> scripts/main.min.js');
-    console.log('✓ Minified styles.css -> styles.min.css');
+  try {
+    const scriptsDir = path.join(rootDir, 'scripts');
+    const jsResult = await esbuild.build({
+      entryPoints: [path.join(scriptsDir, 'main.js')],
+      bundle: true,
+      splitting: true,
+      minify: true,
+      format: 'esm',
+      platform: 'browser',
+      target: ['es2017'],
+      outdir: scriptsDir,
+      entryNames: 'main-[hash]',
+      chunkNames: 'chunk-[hash]',
+      legalComments: 'none',
+      metafile: true,
+    });
+
+    let jsRel = 'scripts/main.min.js';
+    const chunks = [];
+    for (const [outfile, info] of Object.entries(jsResult.metafile.outputs)) {
+      const rel = path.relative(rootDir, outfile).replace(/\\/g, '/');
+      const entry = info.entryPoint?.replace(/\\/g, '/');
+      if (entry?.endsWith('scripts/main.js')) {
+        jsRel = rel;
+      } else if (rel.startsWith('scripts/chunk-')) {
+        chunks.push(rel);
+      }
+    }
+
+    const cssTmp = path.join(rootDir, '.styles-bundle.tmp.css');
+    await esbuild.build({
+      entryPoints: [stylesSourcePath],
+      bundle: true,
+      minify: true,
+      outfile: cssTmp,
+      legalComments: 'none',
+    });
+    const cssBuffer = fs.readFileSync(cssTmp);
+    fs.unlinkSync(cssTmp);
+
+    const cssHash = hashContent(cssBuffer);
+    const cssRel = `styles.${cssHash}.min.css`;
+    fs.writeFileSync(path.join(rootDir, cssRel), cssBuffer);
+
+    const manifest = { css: cssRel, js: jsRel, chunks };
+    const keepPaths = [cssRel, jsRel, ...chunks];
+    pruneHashedAssets(keepPaths);
+    fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+    const legacyAssets = [
+      path.join(rootDir, 'styles.min.css'),
+      path.join(rootDir, 'scripts', 'main.min.js'),
+    ];
+    for (const legacyPath of legacyAssets) {
+      if (fs.existsSync(legacyPath)) fs.unlinkSync(legacyPath);
+    }
+
+    console.log(`✓ Bundled scripts/main.js -> ${jsRel}${chunks.length ? ` (+${chunks.length} chunks)` : ''}`);
+    console.log(`✓ Minified styles.css -> ${cssRel}`);
+    console.log(`✓ Critical CSS extracted (${criticalCss.length} bytes)`);
+
+    return { manifest, criticalCss };
   } catch (err) {
     console.error(`✗ Asset bundling failed: ${err.message}`);
     process.exit(1);
@@ -211,7 +360,7 @@ try {
   process.exit(1);
 }
 
-await bundleClientAssets();
+const { manifest: assetManifest, criticalCss } = await bundleClientAssets();
 
 console.log('\n🌐 Rendering tab content in build DOM...');
 
@@ -358,28 +507,37 @@ replaceFaIcons(outputDocument);
 applySvgIcons(outputDocument);
 console.log('✓ Applied inline SVG icons');
 
-const runtimePayload = generateRuntimePayload(data);
+cleanupLegacyHead(outputDocument);
+
+const faceImages = collectFaceImages(data);
+injectCoverflowLcp(outputDocument, faceImages, colors);
+console.log('✓ Injected static coverflow LCP card + image preload');
+
+const runtimePayload = generateRuntimePayload(data, colors);
 injectRuntimeScript(outputDocument, runtimePayload);
 console.log(
   `✓ Injected site runtime payload (${JSON.stringify(runtimePayload).length} bytes)`,
 );
-
-cleanupLegacyHead(outputDocument);
-injectStylesheet(outputDocument);
-console.log('✓ Linked blocking styles.min.css (preload hint)');
+injectStylesheet(outputDocument, {
+  cssHref: assetManifest.css,
+  criticalCss,
+});
+console.log(`✓ Inlined critical CSS; deferred full stylesheet (${assetManifest.css})`);
 
 const scriptTag =
   outputDocument.querySelector('script[src="scripts/main.js"]') ||
-  outputDocument.querySelector('script[src="scripts/main.min.js"]');
+  outputDocument.querySelector('script[src*="scripts/main"]');
 if (scriptTag) {
-  scriptTag.setAttribute('src', 'scripts/main.min.js');
+  scriptTag.setAttribute('src', assetManifest.js);
+  scriptTag.setAttribute('type', 'module');
   scriptTag.setAttribute('defer', '');
-  scriptTag.removeAttribute('type');
 }
 
 for (const modulePreload of outputDocument.querySelectorAll('link[rel="modulepreload"]')) {
   modulePreload.remove();
 }
+
+cleanupBodyStylesheetArtifacts(outputDocument);
 
 let serialized = outputDom.serialize();
 
@@ -440,8 +598,9 @@ Summary:
   • Awards: ${(data.awards || []).length} groups
   • Hero markdown source: templates/hero-tagline.md
   • Hero tagline source: templates/hero-tagline.html
-  • JS output: scripts/main.min.js
-  • CSS output: styles.min.css
+  • JS output: ${assetManifest.js}
+  • CSS output: ${assetManifest.css}
+  • Asset manifest: asset-manifest.json
   • Output: minified index.html generated
 
 Next steps:

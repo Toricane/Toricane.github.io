@@ -1,18 +1,11 @@
-// Pause CSS animations while page is hidden (mobile performance helper)
+// Pause CSS animations while the page tab is hidden (cheap class toggle).
 export function initVisibilityPause() {
-    document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "hidden") {
-            document.querySelectorAll("*").forEach((el) => {
-                if (el.style.animationPlayState !== "paused") {
-                    el.style.animationPlayState = "paused";
-                }
-            });
-        } else {
-            document.querySelectorAll("*").forEach((el) => {
-                if (el.style.animationPlayState === "paused") {
-                    el.style.animationPlayState = "running";
-                }
-            });
-        }
-    });
+  const sync = () => {
+    document.documentElement.classList.toggle(
+      "page-hidden",
+      document.visibilityState === "hidden",
+    );
+  };
+  document.addEventListener("visibilitychange", sync);
+  sync();
 }

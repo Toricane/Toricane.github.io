@@ -135,7 +135,7 @@ function collectSectionImagePaths(id, rawData) {
 }
 
 /** Slim runtime payload embedded in index.html at build time. */
-export function generateRuntimePayload(data) {
+export function generateRuntimePayload(data, colors = {}) {
   const projectLinks = (data.projects || [])
     .map((p) => ({
       slug: slugify(p.title || ""),
@@ -166,6 +166,7 @@ export function generateRuntimePayload(data) {
 
   return {
     faceImages: collectFaceImages(data),
+    coverflowColors: colors && typeof colors === "object" ? colors : {},
     sectionImages: {
       projects: collectSectionImagePaths("projects", data.projects || []),
       hackathons: collectSectionImagePaths(

@@ -1,4 +1,4 @@
-import { initCoverFlow, updateCoverFlowColors } from "./components/coverflow.js";
+import { initCoverFlow } from "./components/coverflow.js";
 import { initLazyThumbs } from "./components/lazyThumbs.js";
 import { initFootnotes } from "./components/footnotes.js";
 import { initImageViewerDelegates } from "./components/imageViewer.js";
@@ -18,30 +18,7 @@ import { setupTilt } from "./components/tilt.js";
 import { initVisibilityPause } from "./components/visibilityPause.js";
 import { collectFaceImages } from "./utils/siteData.js";
 
-let coverflowColorsRequested = false;
-
-function requestCoverflowColors() {
-  if (coverflowColorsRequested) return;
-  coverflowColorsRequested = true;
-  fetch("colors.json")
-    .then((r) => r.json())
-    .then((colors) => {
-      updateCoverFlowColors(colors || {});
-    })
-    .catch(() => {
-      // Keep fallback coverflow glow colors when colors.json is unavailable.
-    });
-}
-
-function scheduleCoverflowColorsFetch() {
-  const run = () => requestCoverflowColors();
-
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(run, { timeout: 8000 });
-    return;
-  }
-  setTimeout(run, 3000);
-}
+let coverflowScheduled = false;
 
 function panelsArePrerendered() {
   return document.getElementById("projects")?.querySelector(".card") != null;
@@ -71,6 +48,7 @@ function loadSiteData() {
     .then((r) => r.json())
     .then((data) => ({
       faceImages: collectFaceImages(data),
+      coverflowColors: {},
       sectionImages: null,
       projectLinks: null,
       timelineLinks: null,
@@ -91,10 +69,40 @@ function timelineWireGroups(runtime, section) {
     }));
 }
 
+function scheduleCoverFlowInit(faceImages, colors) {
+  if (coverflowScheduled) return;
+  coverflowScheduled = true;
+
+  const root = document.querySelector(".coverflow-container");
+  if (!root) return;
+
+  const run = () => initCoverFlow(faceImages, colors || {});
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        runWhenIdle(run, 800);
+      },
+      { rootMargin: "120px 0px" },
+    );
+    observer.observe(root);
+    runWhenIdle(() => {
+      observer.disconnect();
+      run();
+    }, 4000);
+    return;
+  }
+
+  runWhenIdle(run, 1500);
+}
+
 function hydrateFromRuntime(runtime) {
   const faceImages =
     runtime.faceImages || (runtime._full ? collectFaceImages(runtime._full) : []);
-  initCoverFlow(faceImages, {});
+  const coverflowColors = runtime.coverflowColors || {};
+  scheduleCoverFlowInit(faceImages, coverflowColors);
 
   const full = runtime._full;
 
@@ -140,7 +148,7 @@ dataReady.then((runtime) => {
       if (projects) {
         projects.innerHTML = fail("Failed to load projects.");
       }
-      initCoverFlow([], {});
+      scheduleCoverFlowInit([], {});
       return;
     }
     hydrateFromRuntime(runtime);
@@ -182,7 +190,6 @@ window.addEventListener(
   "load",
   () => {
     document.body.classList.add("page-ready");
-    scheduleCoverflowColorsFetch();
   },
   { once: true },
 );

@@ -3,7 +3,10 @@
 // Utilises native CSS horizontal scrolling (`scroll-snap-type`) for touch/keyboard
 // and an invisible wrap-around adjustment to create an infinite loop experience.
 
+import { getCoverflowImageSources } from "../utils/coverflowShared.js";
+
 let coverflowImages = [];
+let coverflowInitialized = false;
 let cardsEl = null;
 let containerEl = null;
 
@@ -129,36 +132,6 @@ function checkInfiniteWrap() {
         cardsEl.style.scrollBehavior = 'smooth';
     });
   }
-}
-
-/** Coverflow cards are large — use full tab-panel assets, not 400px previews. */
-const COVERFLOW_SIZES = "(width <= 600px) 90vw, 480px";
-
-function getCoverflowImageSources(originalPath) {
-  if (!originalPath) {
-    return { src: "", srcset: "", sizes: "" };
-  }
-
-  if (originalPath === "assets/northernlights.webp") {
-    return {
-      src: "assets/northernlights-960.webp",
-      srcset:
-        "assets/northernlights-640.webp 640w, assets/northernlights-960.webp 960w, assets/northernlights.webp 1600w",
-      sizes: COVERFLOW_SIZES,
-    };
-  }
-
-  if (originalPath.includes("tab-panels/")) {
-    const base = originalPath.replace(/\/preview\//, "/").replace(/\/small\//, "/");
-    const smallPath = base.replace("tab-panels/", "tab-panels/small/");
-    return {
-      src: base,
-      srcset: `${smallPath} 800w, ${base} 1600w`,
-      sizes: COVERFLOW_SIZES,
-    };
-  }
-
-  return { src: originalPath, srcset: "", sizes: "" };
 }
 
 function attachCoverflowFallback(imgEl, sources) {
@@ -455,6 +428,7 @@ export function updateCoverFlowColors(colors = {}) {
 }
 
 export function initCoverFlow(images, colors = {}) {
+  if (coverflowInitialized) return;
   containerEl = document.querySelector(".coverflow-container");
   cardsEl = document.getElementById("coverflowCards");
   if (!containerEl || !cardsEl) return;
@@ -464,6 +438,7 @@ export function initCoverFlow(images, colors = {}) {
     return;
   }
 
+  coverflowInitialized = true;
   coverflowImages = shuffle(images);
   renderCards(coverflowImages, colors);
 
