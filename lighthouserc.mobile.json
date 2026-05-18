@@ -3,7 +3,7 @@
     "collect": {
       "numberOfRuns": 1,
       "settings": {
-        "preset": "mobile"
+        "formFactor": "mobile"
       }
     },
     "assert": {
