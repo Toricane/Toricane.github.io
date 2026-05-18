@@ -1,10 +1,10 @@
 # Audits the live GitHub Pages site after deployment finishes.
-# Requires the repo's "pages build and deployment" workflow (name: pages-build-deployment).
+# Runs after .github/workflows/pages.yml ("Deploy Astro site") completes successfully.
 name: Lighthouse
 
 on:
   workflow_run:
-    workflows: [pages-build-deployment]
+    workflows: [Deploy Astro site]
     types: [completed]
     branches: [main]
   workflow_dispatch:
@@ -46,6 +46,7 @@ jobs:
           exit 1
 
       - name: Lighthouse CI (${{ matrix.device }})
+        id: lhci
         uses: treosh/lighthouse-ci-action@v12
         with:
           urls: |
@@ -53,3 +54,123 @@ jobs:
           configPath: ./lighthouserc.${{ matrix.device }}.json
           uploadArtifacts: true
           temporaryPublicStorage: true
+
+      - name: Export category scores
+        if: always() && steps.lhci.outcome != 'cancelled'
+        run: |
+          node <<'NODE' > "scores-${{ matrix.device }}.json"
+          const fs = require('fs');
+          const device = process.env.DEVICE;
+          const manifestPath = '.lighthouseci/manifest.json';
+
+          if (!fs.existsSync(manifestPath)) {
+            console.log(JSON.stringify({ device, error: true }));
+            process.exit(0);
+          }
+
+          const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+          const run = manifest.find((entry) => entry.isRepresentativeRun) ?? manifest[0];
+          const summary = run?.summary;
+
+          if (!summary) {
+            console.log(JSON.stringify({ device, error: true }));
+            process.exit(0);
+          }
+
+          const pct = (value) => Math.round(value * 100);
+          console.log(
+            JSON.stringify({
+              device,
+              performance: pct(summary.performance),
+              accessibility: pct(summary.accessibility),
+              bestPractices: pct(summary['best-practices']),
+              seo: pct(summary.seo),
+            }),
+          );
+          NODE
+        env:
+          DEVICE: ${{ matrix.device }}
+
+      - name: Upload scores artifact
+        if: always() && steps.lhci.outcome != 'cancelled'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-scores-${{ matrix.device }}
+          path: scores-${{ matrix.device }}.json
+          if-no-files-found: ignore
+
+  summary:
+    name: Lighthouse scores
+    needs: lighthouse
+    runs-on: ubuntu-latest
+    if: always() && needs.lighthouse.result != 'cancelled'
+    steps:
+      - name: Download score artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: lighthouse-scores-*
+          merge-multiple: true
+
+      - name: Write job summary
+        env:
+          LIVE_SITE_URL: ${{ env.LIVE_SITE_URL }}
+        run: |
+          node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
+          const fs = require('fs');
+
+          const thresholds = {
+            performance: 85,
+            accessibility: 90,
+            bestPractices: 90,
+            seo: 90,
+          };
+
+          const categories = [
+            { key: 'performance', label: 'Performance' },
+            { key: 'accessibility', label: 'Accessibility' },
+            { key: 'bestPractices', label: 'Best practices' },
+            { key: 'seo', label: 'SEO' },
+          ];
+
+          const devices = ['desktop', 'mobile'];
+          const scores = {};
+
+          for (const device of devices) {
+            const path = `scores-${device}.json`;
+            if (!fs.existsSync(path)) {
+              scores[device] = { error: true };
+              continue;
+            }
+            scores[device] = JSON.parse(fs.readFileSync(path, 'utf8'));
+          }
+
+          const status = (value, key) => {
+            if (value == null) return '—';
+            const min = thresholds[key];
+            return value >= min ? `✅ ${value}` : `⚠️ ${value}`;
+          };
+
+          const lines = [
+            '## Lighthouse audit results',
+            '',
+            `Audited [**${process.env.LIVE_SITE_URL}/**](${process.env.LIVE_SITE_URL}/) after deploy.`,
+            '',
+            '| Category | Desktop | Mobile |',
+            '| --- | ---: | ---: |',
+          ];
+
+          for (const { key, label } of categories) {
+            const desktop = scores.desktop?.error ? '—' : status(scores.desktop?.[key], key);
+            const mobile = scores.mobile?.error ? '—' : status(scores.mobile?.[key], key);
+            lines.push(`| ${label} | ${desktop} | ${mobile} |`);
+          }
+
+          lines.push(
+            '',
+            'Targets (warn if below): Performance ≥85, Accessibility ≥90, Best practices ≥90, SEO ≥90.',
+            '',
+            'Full HTML reports and temporary public links are in each matrix job log.',
+          );
+
+          process.stdout.write(lines.join('\n'));
+          NODE
