@@ -12,9 +12,10 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 
 -   **Split Hero Section**: Engaging introduction with animated image carousel
 -   **Tabbed Content System**: Interactive Projects / Hackathons / Awards sections
--   **Coverflow Gallery**: Smooth infinite-scroll image showcase with dynamic color-extracted glow effects
+-   **3D Coverflow Gallery**: Smooth infinite-scroll showcase with dynamic scroll-synchronized 3D perspective transforms and color-extracted ambient neon glow backdrops
 -   **Dynamic Highlight Images**: Tab-synchronized visual previews
 -   **Responsive Design**: Mobile-first approach with adaptive layouts
+-   **Premium Light Mode**: Elegant warm-and-cool glassmorphism with high-contrast amber/slate highlight cards, custom interactive timeline dots, and typography gradients
 
 ### 🎯 User Experience
 
@@ -22,6 +23,7 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 -   **Progressive Enhancement**: Works without JavaScript, enhanced with it
 -   **Smooth Animations**: Subtle transitions and scroll behaviors
 -   **Social Integration**: Newsletter widgets and social media links
+-   **Mobile-Friendly Links Drawer**: Interactive links popup that morphs into a premium slide-up bottom drawer on mobile with dynamic platform-specific badge labeling
 -   **Deep Linking**: Hash URLs switch tabs, expand grouped timeline entries, scroll to items, and flash a highlight
 -   **PWA Ready**: Web app manifest for install shortcuts
 

@@ -9,6 +9,7 @@ let coverflowImages = [];
 let coverflowInitialized = false;
 let cardsEl = null;
 let containerEl = null;
+let glowEl = null;
 
 let isPaused = false;
 let isHovered = false;
@@ -19,6 +20,71 @@ let metricsTimeoutId = null;
 let metricsLastRunTs = 0;
 let resizeRafId = null;
 let centeringPaddingPx = 0;
+
+let rafActive = false;
+
+function update3DEffects() {
+  if (!cardsEl || !containerEl) return;
+  const cw = cardsEl.clientWidth;
+  const center = cardsEl.scrollLeft + cw / 2;
+  const cards = Array.from(cardsEl.querySelectorAll(".coverflow-card"));
+  if (!cards.length) return;
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let activeCard = null;
+  let minOffset = Infinity;
+
+  cards.forEach((card) => {
+    if (reduceMotion) {
+      card.style.transform = "";
+      card.style.opacity = "";
+      return;
+    }
+
+    const cardWidth = card.offsetWidth || 240;
+    const cardCenter = card.offsetLeft + cardWidth / 2;
+    const offset = cardCenter - center;
+    const maxDistance = cardWidth * 2.5;
+
+    let r = offset / maxDistance;
+    r = Math.max(-1, Math.min(1, r));
+
+    // Calculate rotation, scale, translateZ
+    const rotY = r * -32;
+    const scale = 1 - Math.abs(r) * 0.15;
+    const transZ = Math.abs(r) * -50;
+    
+    // Smooth opacity reduction for off-center cards
+    const opacity = 1 - Math.abs(r) * 0.25;
+
+    card.style.transform = `perspective(1000px) rotateY(${rotY}deg) scale(${scale}) translateZ(${transZ}px)`;
+    card.style.opacity = opacity;
+
+    // Track active card (closest to center)
+    const absOffset = Math.abs(offset);
+    if (absOffset < minOffset) {
+      minOffset = absOffset;
+      activeCard = card;
+    }
+  });
+
+  // Update ambient glow color dynamically based on active card
+  if (activeCard && glowEl && !reduceMotion) {
+    const glowRgb = activeCard.style.getPropertyValue('--card-glow-rgb') || '77, 181, 255';
+    glowEl.style.setProperty('--card-glow-rgb', glowRgb);
+  }
+}
+
+function onScroll() {
+  if (!rafActive) {
+    rafActive = true;
+    requestAnimationFrame(() => {
+      update3DEffects();
+      rafActive = false;
+    });
+  }
+}
 
 function requestBaseMetrics() {
   if (metricsTimeoutId) clearTimeout(metricsTimeoutId);
@@ -433,6 +499,11 @@ export function initCoverFlow(images, colors = {}) {
   cardsEl = document.getElementById("coverflowCards");
   if (!containerEl || !cardsEl) return;
 
+  // Create ambient neon glow element
+  glowEl = document.createElement("div");
+  glowEl.className = "coverflow-ambient-glow";
+  containerEl.appendChild(glowEl);
+
   if (!images || !images.length) {
     cardsEl.innerHTML = "";
     return;
@@ -450,6 +521,7 @@ export function initCoverFlow(images, colors = {}) {
   setTimeout(() => {
       calcBaseMetrics();
       setInitialScrollPosition();
+      update3DEffects();
       startAnimation();
   }, 50);
 
@@ -522,8 +594,10 @@ export function initCoverFlow(images, colors = {}) {
       setTimeout(() => isInteracting = false, 1000);
   });
   
-  // Native scroll handler for lazy loading and invisible wrapping
+  // Native scroll handler for lazy loading, 3D transforms, and invisible wrapping
   cardsEl.addEventListener("scroll", () => {
+      onScroll();
+      
       // Debounce the wrap check slightly so it waits for scroll snap settling
       if (scrollTimeoutId) clearTimeout(scrollTimeoutId);
       scrollTimeoutId = setTimeout(() => {

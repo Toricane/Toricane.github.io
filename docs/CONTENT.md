@@ -207,6 +207,9 @@ External links stay a single bracket pair (always quote the line if the URL cont
 
 Clicking a cross-ref switches tab, expands grouped timeline months if needed, and highlights the target entry. `npm run reformat:content` preserves this format.
 
+> [!TIP]
+> **Automated Platform Badges**: The site automatically parses all entry links. Internal section links (hashes like `#projects/...` or `#awards/...`) will be rendered with `✦ Project`, `✦ Hackathon`, or `✦ Award` badges. External links are dynamically badged with platform tags (e.g. `GitHub ↗`, `LinkedIn ↗`, `Devpost ↗`, `YouTube ↗`, or `Website ↗`). Content authors do not need any special markup; this happens completely automatically based on the URL or domain.
+
 ## Regenerate `data.json` only
 
 ```bash

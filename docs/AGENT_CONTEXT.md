@@ -67,10 +67,12 @@ Architectural, stylistic, and operational context for AI agents working in `Tori
 
 ## 2. Design System (CRITICAL)
 
-*   **Theme**: Dark glassmorphism; light via `theme.js` / `[data-theme="light"]`.
+*   **Theme**: Dark glassmorphism; premium Light Mode via `theme.js` / `[data-theme="light"]` using elegant white glass-wash transparent overrides, warm amber-toned gradients for `gold-highlight` cards, cool slate-toned card borders/texts for `silver-highlight`, active-tab glows, pointer timeline hovers, and animated title typography gradients.
+*   **3D Coverflow Gallery**: `src/scripts/components/coverflow.js` uses scroll listeners optimized with `requestAnimationFrame` to apply smooth 3D perspective translations (`perspective(1000px) rotateY(...) scale(...) translateZ(...)`) to cards. Includes an ambient backdrop glow element (`.coverflow-ambient-glow`) which dynamically changes colors (`--card-glow-rgb`) to match the dominant colors of the center-most active card. Respects `prefers-reduced-motion`.
 *   **Colors**: `config/colors.json` from `python scripts/update_colors.py` (reads image paths from content; synced to `src/data/` on build).
-*   **Coverflow**: `*face` / `!` on image lines in frontmatter → face in coverflow carousel.
+*   **Coverflow Config**: `*face` / `!` on image lines in frontmatter → face in coverflow carousel.
 *   **Responsive**: Mobile-first; optional tab highlight fallbacks: `assets/*_highlight.webp`.
+*   **Platform-Intelligent Links Popup**: Handled by `src/scripts/components/linksPopup.js`. Automatically parses external and internal URLs to display platform badges (GitHub, LinkedIn, Devpost, YouTube, Section markers). On mobile (<= 768px), it morphs into an elegant slide-up bottom drawer (`mobile-drawer`) with a grab handle, dark backdrop overlay, and smooth CSS entry/exit animations. Fully supports ESC key close.
 
 ### Adding images (agents)
 
