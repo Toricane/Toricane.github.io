@@ -19,7 +19,7 @@ Portfolio content lives in **`src/content/`** as Markdown notes with YAML frontm
 | `tags` | YAML list, hyphens for spaces: `- Chrome-Ext` | Shown as `Chrome Ext` |
 | `badges` | Same as tags (hackathons) | Badge pills on timeline |
 | `images` | Short lines (see below) | Thumbnails; `*face` adds coverflow |
-| `links` | One markdown link per line | Link popup on timeline groups |
+| `links` | Quoted markdown links; cross-refs use `[[award] Title](#awards/slug)` | Link popup; internal hash navigation |
 
 ### Example (project)
 
@@ -179,12 +179,33 @@ Edit `src/content/hero/intro.md`. Custom mini-syntax (not standard Obsidian):
 - Footnotes: `(footnote text)`
 - Internal links to `prajwal.is-a.dev` stay in the same tab
 
-## Internal links (site)
+## Internal links (cross-references)
 
-- `#projects/jarvis-for-the-visually-impaired`
-- `#awards/class-valedictorian`
+Link to another portfolio entry in the **`links`** list (link popup on project cards / timeline). Slugs match the `.md` filename (without `.md`).
 
-Slugs match the `.md` filename (without `.md`).
+### Cross-ref syntax (required double `[`)
+
+The visible label on the site is **`[award] Title`**, **`[project] Title`**, or **`[hackathon] Title`**. In frontmatter you must write an extra leading `[` so YAML/markdown parsing works — the stored line looks like `[[award] …](#awards/…)`, not `[award] …](#awards/…)`.
+
+```yaml
+links:
+  - "[[award] Ingenious+ Regional Award CAD$1K](#awards/ingenious-regional-grant-cad-1k)"
+  - "[[project] JARVIS for the Visually Impaired](#projects/jarvis-for-the-visually-impaired)"
+```
+
+| Prefix in label | Hash URL |
+|-----------------|----------|
+| `[award]` | `#awards/<slug>` |
+| `[project]` | `#projects/<slug>` |
+| `[hackathon]` | `#hackathons/<slug>` |
+
+External links stay a single bracket pair (always quote the line if the URL contains `:`):
+
+```yaml
+  - "[Demo Tweet](https://x.com/...)"
+```
+
+Clicking a cross-ref switches tab, expands grouped timeline months if needed, and highlights the target entry. `npm run reformat:content` preserves this format.
 
 ## Regenerate `data.json` only
 

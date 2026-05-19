@@ -79,6 +79,30 @@ export function parseImages(images) {
   return images.map(parseImageEntry).filter(Boolean);
 }
 
+/** Restore "[award] Title" labels broken by `]` inside standard markdown links. */
+function normalizeCrossLinkLabel(label) {
+  const m = String(label).match(/^(\w+)\]\s*(.+)$/);
+  if (m) return `[${m[1]}] ${m[2]}`;
+  return label;
+}
+
+function parseMarkdownLinkLine(line) {
+  const open = line.lastIndexOf('](');
+  if (!line.startsWith('[') || open < 2) return null;
+  const close = line.lastIndexOf(')');
+  if (close <= open + 2) return null;
+
+  let label = normalizeCrossLinkLabel(line.slice(1, open).trim());
+  const url = line.slice(open + 2, close).trim();
+  let date;
+  const embedded = label.match(/\s+(?:\||·)\s+(\d{4}[-/]\d{1,2}(?:[-/]\d{1,2})?)\s*$/);
+  if (embedded) {
+    date = embedded[1];
+    label = label.slice(0, embedded.index).trim();
+  }
+  return { label, url, ...(date ? { date } : {}) };
+}
+
 export function parseLinkEntry(entry) {
   if (typeof entry === 'object' && entry !== null && (entry.url || entry.href)) {
     return {
@@ -88,9 +112,12 @@ export function parseLinkEntry(entry) {
     };
   }
   const line = String(entry).trim();
+  const fromEnd = parseMarkdownLinkLine(line);
+  if (fromEnd) return fromEnd;
+
   const md = line.match(MD_LINK_RE);
   if (md) {
-    let label = md[1];
+    let label = normalizeCrossLinkLabel(md[1].trim());
     let date = md[3]?.trim();
     const embedded = label.match(/\s+(?:\||·)\s+(\d{4}[-/]\d{1,2}(?:[-/]\d{1,2})?)\s*$/);
     if (embedded) {
@@ -147,5 +174,7 @@ export function formatLinkLine(link) {
   const label = link.label || link.url;
   // Date inside the brackets keeps Obsidian Properties links clickable (`[label](url) | date` outside does not).
   const displayLabel = link.date ? `${label} | ${link.date}` : label;
-  return `[${displayLabel}](${link.url})`;
+  const url = String(link.url ?? '');
+  // Cross-ref labels are already "[award] Title" — output "[[award] Title](#awards/slug)" (extra "[" is required markdown).
+  return `[${displayLabel}](${url})`;
 }

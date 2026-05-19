@@ -39,6 +39,11 @@ function listItemScalar(value) {
   return JSON.stringify(s);
 }
 
+/** Markdown link lines must be quoted or YAML breaks on `:` in URLs. */
+function linkListItem(value) {
+  return JSON.stringify(String(value));
+}
+
 function formatWhenField(value) {
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
     const y = value.getFullYear();
@@ -137,7 +142,7 @@ function writeNote(filePath, data, body) {
         return parsed ? formatLinkLine(parsed) : null;
       })
       .filter(Boolean);
-    appendList(lines, 'links', formatted);
+    appendList(lines, 'links', formatted, linkListItem);
   }
 
   lines.push('---', '');

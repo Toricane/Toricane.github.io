@@ -15,6 +15,7 @@ images:
   - 2nd_prototype.webp*2nd Prototype
   - 2nd_prototype_continued.webp*2nd Prototype Continued
 links:
+  - "[[award] Ingenious+ Regional Award CAD$1K](#awards/ingenious-regional-grant-cad-1k)"
   - "[AI Voice Project | 2024/03/03](https://www.linkedin.com/posts/prajwal-prashanth_create-your-own-ai-voice-assistant-for-free-activity-7169593571602362368-Rn7y)"
   - "[Ingenious+ Regional Award CAD$1K | 2024/04/16](https://www.linkedin.com/posts/prajwal-prashanth_last-tuesday-i-had-the-incredible-opportunity-activity-7188737473236160513-mCiZ)"
   - "[1st Demo (500 reactions) | 2024/04/28](https://www.linkedin.com/posts/prajwal-prashanth_demo-video-of-my-jarvis-project-jarvis-activity-7190196909771268096-mV2p)"

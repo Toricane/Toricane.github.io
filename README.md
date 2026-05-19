@@ -310,7 +310,7 @@ Static files at the site root help crawlers and AI systems find and understand t
 ### Internal links & deep URLs
 
 - **Hero tagline** ([`src/content/hero/intro.md`](src/content/hero/intro.md)): Use absolute same-origin links (`https://prajwal.is-a.dev/...`) for in-copy internal navigation; the build omits `target="_blank"` on those.
-- **Cross-references in content frontmatter / hero**: Use `#tab/slug` URLs (e.g. `#awards/ingenious-regional-grant-cad-1k`). Slugs must match `slugify()` on the item title (lowercase, non-alphanumeric → hyphens). Verify with the rendered `data-slug` attribute after build.
+- **Cross-references in `links` frontmatter**: Use hash URLs (`#awards/ingenious-regional-grant-cad-1k`, `#projects/jarvis-for-the-visually-impaired`). Write **`[[award] Title](#awards/slug)`** (note the **double** `[` before `award` / `project` / `hackathon`) — see [docs/CONTENT.md](docs/CONTENT.md). Slugs match the `.md` basename / `data-slug` after build.
 - **Supported hash patterns** (handled by [`src/scripts/components/navigation.js`](src/scripts/components/navigation.js)):
     - `#content` — scroll to the work section
     - `#projects`, `#hackathons`, `#awards` — switch tab and scroll

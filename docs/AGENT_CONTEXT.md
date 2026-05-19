@@ -94,7 +94,7 @@ Architectural, stylistic, and operational context for AI agents working in `Tori
 *   Highlight: `significance: gold | silver` (not boolean `gold:` / `silver:` in new content).
 *   Tags/badges: YAML list with hyphens (`Chrome-Ext` → displayed as spaces).
 *   Images: `file.webp`, `file.webp*caption*face`, wikilinks `[[file|caption]]`; default folder `assets/tab-panels/`.
-*   Links: `[Label](url)` per line; optional date inside brackets: `[Label | 2024/03/03](url)`.
+*   Links: quoted `[Label](url)` per line; optional date: `[Label | 2024/03/03](url)`. Cross-refs to other entries: `"[[award] Title](#awards/slug)"` / `[[project]…](#projects/…)` / `[[hackathon]…](#hackathons/…)` — **double** `[` before the type prefix (see CONTENT.md). Parsed by `parseMarkdownLinkLine` in `content-normalize.mjs`.
 *   Body: plain description below frontmatter (not in YAML).
 
 Templates: `src/content/_templates/{project,hackathon,award}.md`.
