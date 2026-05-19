@@ -3,7 +3,19 @@
     "collect": {
       "numberOfRuns": 1,
       "settings": {
-        "formFactor": "mobile"
+        "formFactor": "mobile",
+        "throttlingMethod": "simulate",
+        "throttling": {
+          "cpuSlowdownMultiplier": 1.2
+        },
+        "screenEmulation": {
+          "mobile": true,
+          "width": 412,
+          "height": 823,
+          "deviceScaleFactor": 1.75,
+          "disabled": false
+        },
+        "skipAudits": ["uses-http2", "bf-cache"]
       }
     },
     "assert": {
