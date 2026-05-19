@@ -197,7 +197,7 @@ To deploy your own fork: enable Pages with **Source: GitHub Actions**, add your 
 -   **Inline SVG icons**: [src/scripts/icons.js](src/scripts/icons.js) — FA 6.5.2 paths
 -   **Lazy loading**: Tab thumbs, coverflow off-screen cards, highlight carousel deferred until visible
 -   **Conditional anime.js**: Loaded only when `?tap=true`
--   **Dynamic widgets**: Newsletter module imported after idle / intersection
+-   **Dynamic widgets**: Substack loaded client-side (rss2json); LinkedIn posts baked in at build via Apify
 -   **Coverflow LCP**: Preload set in JS for the actual center card after shuffle (not a static head preload)
 
 ## 🎨 Customization
@@ -222,6 +222,18 @@ Main theme colors defined in CSS custom properties:
 2. **Social Links**: Update [src/data/connections.ts](src/data/connections.ts)
 3. **Portfolio Content**: Add/edit Markdown under [src/content/](src/content/) — see [docs/CONTENT.md](docs/CONTENT.md)
 4. **Footnotes**: Inline expandable explanations
+
+### Hero feed widgets (Substack + LinkedIn)
+
+- **Newsletter** (left column): loads the latest Substack post via [rss2json](https://rss2json.com/) when the hero nears the viewport. URL in [`config/feeds.json`](config/feeds.json) → `window.__SITE_RUNTIME__.feeds.substack`. Cached in `localStorage` for 6 hours.
+- **LinkedIn** (right column, below coverflow): three most recent posts from [Apify](https://apify.com/) actor `apimaestro~linkedin-profile-posts`, fetched at **build time** in [`src/components/LinkedInFeed.astro`](src/components/LinkedInFeed.astro) (token never sent to the browser).
+
+**LinkedIn setup**
+
+1. Add a GitHub Actions secret `APIFY_TOKEN` (Apify API token).
+2. Schedule the Apify actor (or run it manually) so `runs/last/dataset/items` has fresh posts before each deploy.
+3. Deploy workflow (`.github/workflows/pages.yml`) rebuilds on push, manual dispatch, and cron (`35 1,5,17,21 * * *` UTC — four times daily). No commits are made for feed data; HTML is generated into the Pages artifact only.
+4. Local builds: set `APIFY_TOKEN` in `.env` (see `.env.example`) before `npm run build`.
 
 ### Tagline Icons
 
@@ -306,7 +318,6 @@ Static files at the site root help crawlers and AI systems find and understand t
 
 ## Roadmap Ideas
 
--   Replace placeholder widget text with real Substack & LinkedIn content (requires proxy / API integration)
 -   Add print / PDF resume link
 
 ## License

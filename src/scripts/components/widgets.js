@@ -1,19 +1,32 @@
 import { escapeHtml } from "../utils/data.js";
 
+const CACHE_TTL_MS = 1000 * 60 * 60 * 6;
+const RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
+
 export function initWidgets() {
-    const widgetRoot = document.getElementById("widgets");
-    if (!widgetRoot || widgetRoot.dataset.initialized === "1") return;
-    widgetRoot.dataset.initialized = "1";
-    widgetRoot.replaceChildren();
+    const newsletterRoot = document.getElementById("widgets-newsletter");
+    if (!newsletterRoot || newsletterRoot.dataset.initialized === "1") return;
+    newsletterRoot.dataset.initialized = "1";
+    newsletterRoot.replaceChildren();
+
+    const feeds = window.__SITE_RUNTIME__?.feeds;
+    const substackUrl = feeds?.substack || "";
 
     const newsletter = mkWidget("Latest Newsletter Update");
-    widgetRoot.append(newsletter.el);
+    newsletterRoot.append(newsletter.el);
 
-    const loadNewsletter = () =>
-        fetchSubstack("https://prajwalprashanth.substack.com/feed", newsletter);
+    const loadNewsletter = () => {
+        if (substackUrl) {
+            fetchFeed(substackUrl, newsletter, "newsletterCache", {
+                error: "Could not load newsletter.",
+            });
+        } else {
+            newsletter.set("<p>Could not load newsletter.</p>");
+        }
+    };
 
-    // Keep newsletter off the initial critical chain; load as it nears view.
-    if ("IntersectionObserver" in window) {
+    const hero = document.getElementById("hero");
+    if ("IntersectionObserver" in window && hero) {
         const observer = new IntersectionObserver(
             (entries) => {
                 const entry = entries[0];
@@ -23,7 +36,7 @@ export function initWidgets() {
             },
             { root: null, rootMargin: "180px 0px" }
         );
-        observer.observe(newsletter.el);
+        observer.observe(hero);
         return;
     }
 
@@ -43,115 +56,112 @@ function mkWidget(title) {
     };
 }
 
-function fetchSubstack(feedUrl, widget) {
-    try {
-        const cached = JSON.parse(
-            localStorage.getItem("newsletterCache") || "null"
+function pickImageUrl(item) {
+    if (item.thumbnail) return item.thumbnail;
+    if (item.enclosure?.link) return item.enclosure.link;
+
+    if (item.content) {
+        const imgMatch = item.content.match(/<img[^>]+src="([^"]+)"[^>]*>/i);
+        if (imgMatch?.[1]) return imgMatch[1];
+    }
+
+    return "";
+}
+
+function stripHtml(text) {
+    return String(text || "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function truncateExcerpt(sourceText) {
+    if (sourceText.length <= 250) return sourceText;
+
+    const afterMin = sourceText.slice(250, 400);
+    const punctMatch = afterMin.match(/[.!?;:]/);
+    if (punctMatch) {
+        const cutPoint = 250 + punctMatch.index + 1;
+        const trimmed = sourceText.slice(0, cutPoint).trim();
+        return sourceText.length > cutPoint ? `${trimmed} ...` : trimmed;
+    }
+
+    const trimmed = sourceText.slice(0, 400).trim();
+    return sourceText.length > 400 ? `${trimmed} ...` : trimmed;
+}
+
+function renderFeedItem(item) {
+    const imageUrl = pickImageUrl(item);
+    const imageHtml = imageUrl
+        ? `<div class="widget-image"><img src="${escapeHtml(imageUrl)}" alt="Post image" loading="lazy"></div>`
+        : "";
+
+    let bodyText = "";
+    if (item.content) {
+        bodyText = stripHtml(
+            String(item.content).replace(/<img[^>]*>/gi, "")
         );
-        if (cached && Date.now() - cached.time < 1000 * 60 * 60 * 6) {
+    }
+
+    const descriptionText = stripHtml(item.description);
+    const sourceText =
+        bodyText && bodyText.length > descriptionText.length
+            ? bodyText
+            : descriptionText;
+    const fullContent = truncateExcerpt(sourceText);
+
+    const descriptionHtml = descriptionText
+        ? `<p class="widget-description">${escapeHtml(descriptionText)}</p>`
+        : "";
+
+    return `
+        <div class="widget-link" data-url="${escapeHtml(item.link)}">
+            <div class="widget-layout">
+                <div class="widget-content">
+                    <h3 class="widget-title">${escapeHtml(item.title)}</h3>
+                    ${descriptionHtml}
+                    <div class="widget-excerpt-container">
+                        <p class="widget-excerpt">${escapeHtml(fullContent)}</p>
+                    </div>
+                </div>
+                ${imageHtml}
+            </div>
+        </div>`;
+}
+
+function wireWidgetInteraction(widget) {
+    const widgetEl = widget.el.querySelector(".widget-link[data-url]");
+    if (widgetEl) setupWidgetInteraction(widgetEl);
+}
+
+function fetchFeed(feedUrl, widget, cacheKey, { error }) {
+    try {
+        const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
+        if (cached && Date.now() - cached.time < CACHE_TTL_MS) {
             widget.set(cached.html);
-            setTimeout(() => {
-                const widgetEl = document.querySelector(
-                    ".widget-link[data-url]"
-                );
-                if (widgetEl) setupWidgetInteraction(widgetEl);
-            }, 10);
+            setTimeout(() => wireWidgetInteraction(widget), 10);
             return;
         }
     } catch (_) {}
 
-    const proxy =
-        "https://api.rss2json.com/v1/api.json?rss_url=" +
-        encodeURIComponent(feedUrl);
-    fetch(proxy)
+    fetch(RSS2JSON + encodeURIComponent(feedUrl))
         .then((r) => r.json())
         .then((j) => {
             const first = j.items && j.items[0];
-            if (!first) throw 0;
+            if (!first?.link) throw new Error("no items");
 
-            let imageHtml = "";
-            let bodyText = "";
-
-            if (first.content) {
-                const imgMatch = first.content.match(
-                    /<img[^>]+src="([^"]+)"[^>]*>/i
-                );
-                if (imgMatch && imgMatch[1]) {
-                    imageHtml = `<div class="widget-image"><img src="${imgMatch[1]}" alt="Post image" loading="lazy"></div>`;
-                }
-                bodyText = first.content
-                    .replace(/<img[^>]*>/gi, "")
-                    .replace(/<[^>]+>/g, " ")
-                    .replace(/\s+/g, " ")
-                    .trim();
-            }
-
-            const sourceText =
-                bodyText &&
-                bodyText.length >
-                    first.description.replace(/<[^>]+>/g, " ").trim().length
-                    ? bodyText
-                    : first.description.replace(/<[^>]+>/g, " ").trim();
-
-            let fullContent = sourceText;
-            if (sourceText.length > 250) {
-                const afterMin = sourceText.slice(250, 400);
-                const punctMatch = afterMin.match(/[.!?;:]/);
-                if (punctMatch) {
-                    const cutPoint = 250 + punctMatch.index + 1;
-                    fullContent = sourceText.slice(0, cutPoint).trim();
-                    if (sourceText.length > cutPoint) fullContent += " ...";
-                } else {
-                    fullContent = sourceText.slice(0, 400).trim();
-                    if (sourceText.length > 400) fullContent += " ...";
-                }
-            }
-
-            const feedDescription = first.description
-                ? String(first.description)
-                      .replace(/<[^>]+>/g, " ")
-                      .trim()
-                : "";
-            const descriptionHtml = feedDescription
-                ? `<p class="widget-description">${escapeHtml(
-                      feedDescription
-                  )}</p>`
-                : "";
-
-            const html = `
-                <div class="widget-link" data-url="${first.link}">
-                    <div class="widget-layout">
-                        <div class="widget-content">
-                            <h3 class="widget-title">${escapeHtml(
-                                first.title
-                            )}</h3>
-                            ${descriptionHtml}
-                            <div class="widget-excerpt-container">
-                                <p class="widget-excerpt">${escapeHtml(
-                                    fullContent
-                                )}</p>
-                            </div>
-                        </div>
-                        ${imageHtml}
-                    </div>
-                </div>`;
+            const html = renderFeedItem(first);
             widget.set(html);
-
-            setTimeout(() => {
-                const widgetEl = document.querySelector(
-                    ".widget-link[data-url]"
-                );
-                if (widgetEl) setupWidgetInteraction(widgetEl);
-            }, 10);
+            setTimeout(() => wireWidgetInteraction(widget), 10);
 
             try {
                 localStorage.setItem(
-                    "newsletterCache",
+                    cacheKey,
                     JSON.stringify({ time: Date.now(), html })
                 );
             } catch (_) {}
         })
-        .catch(() => widget.set("<p>Could not load newsletter.</p>"));
+        .catch(() => widget.set(`<p>${error}</p>`));
 }
 
 function setupWidgetInteraction(widgetEl) {

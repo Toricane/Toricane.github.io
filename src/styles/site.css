@@ -150,21 +150,30 @@ img {
     align-items: start;
 }
 
-.intro-col {
+.hero-col-left,
+.hero-col-right {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
     width: 100%;
     min-width: 0;
 }
 
-.media-col {
+.hero-head {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.hero-coverflow {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+}
+
+.hero-widgets-newsletter,
+.hero-widgets-linkedin {
     width: 100%;
-    min-width: 0;
 }
 
 .content {
@@ -976,6 +985,182 @@ body.page-ready .widget-ring-active {
 
 .widget-excerpt span {
     display: inline;
+}
+
+.widget--linkedin-feed::after {
+    display: none;
+}
+
+.widget--linkedin-feed:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.linkedin-feed-empty {
+    margin: 0;
+    font-size: 0.83rem;
+    line-height: 1.45;
+    color: var(--text-dim);
+}
+
+.linkedin-feed-empty code {
+    font-size: 0.78rem;
+    color: var(--text);
+}
+
+.linkedin-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.linkedin-post {
+    --linkedin-post-bg: color-mix(in srgb, var(--panel) 98%, white 2%);
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+    padding: 0.55rem 0.6rem;
+    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid transparent;
+    background: var(--linkedin-post-bg);
+    color: inherit;
+    text-decoration: none;
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.linkedin-post:hover,
+.linkedin-post:focus-visible {
+    --linkedin-post-bg: color-mix(in srgb, var(--panel) 94%, var(--accent) 6%);
+    border-color: rgba(77, 181, 255, 0.35);
+    background: var(--linkedin-post-bg);
+    box-shadow: 0 0 0 1px rgba(77, 181, 255, 0.15);
+}
+
+.linkedin-post-thumb {
+    position: relative;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: calc(var(--radius) - 4px);
+    overflow: hidden;
+}
+
+.linkedin-post-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.linkedin-post-thumb-count {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    padding: 0.1rem 0.3rem;
+    border-radius: 4px;
+    background: rgba(6, 8, 9, 0.85);
+    color: var(--text);
+}
+
+.linkedin-post-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.linkedin-post-text {
+    margin: 0 0 0.2rem;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    overflow: hidden;
+}
+
+.linkedin-post-lead {
+    color: var(--text);
+    opacity: 0.95;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.linkedin-post-text:has(.linkedin-post-rest) .linkedin-post-lead {
+    -webkit-line-clamp: 1;
+}
+
+.linkedin-post-rest {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-dim);
+}
+
+.linkedin-post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+    font-size: 0.68rem;
+    line-height: 1.3;
+    color: var(--text-dim);
+}
+
+.linkedin-post-date:not(:last-child)::after {
+    content: "·";
+    margin-left: 0.5rem;
+    opacity: 0.6;
+}
+
+.linkedin-post-stats {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.linkedin-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.12rem;
+}
+
+.linkedin-stat-icon {
+    display: inline-flex;
+    width: 0.85em;
+    height: 0.85em;
+    flex-shrink: 0;
+}
+
+.linkedin-stat-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.linkedin-stat-count {
+    font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 901px) {
+    .hero-inner {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: stretch;
+    }
+
+    .hero-widgets-newsletter,
+    .hero-widgets-linkedin {
+        margin-top: auto;
+    }
+
+    .widget--linkedin-feed {
+        height: auto;
+    }
 }
 
 /* Tabs */
@@ -2261,7 +2446,112 @@ body.page-ready .widget-ring-active {
 
 @media (max-width: 900px) {
     .hero-inner {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .hero-col-left,
+    .hero-col-right {
+        display: contents;
+    }
+
+    .hero-head {
+        order: 1;
+    }
+
+    .hero-coverflow {
+        order: 2;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .hero-coverflow .coverflow-container {
+        margin-inline: auto;
+        width: min(500px, 100%);
+    }
+
+    .hero-widgets-newsletter {
+        order: 3;
+    }
+
+    .hero-widgets-linkedin {
+        order: 4;
+        width: 100%;
+    }
+
+    .widget--linkedin-feed {
+        height: 188px;
+        overflow: hidden;
+    }
+
+    .widget--linkedin-feed .linkedin-feed {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.35rem;
+        overflow: hidden;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .linkedin-post {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.35rem;
+        gap: 0.25rem;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .linkedin-post-body {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        gap: 0.15rem;
+    }
+
+    .linkedin-post-thumb {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+        max-height: 46px;
+    }
+
+    .linkedin-post-text {
+        font-size: 0.62rem;
+        line-height: 1.25;
+    }
+
+    .linkedin-post-meta {
+        flex-shrink: 0;
+        flex-direction: column;
+        align-items: flex-start;
+        font-size: 0.62rem;
+        line-height: 1.25;
+        gap: 0.12rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+    }
+
+    .linkedin-post-date::after {
+        display: none;
+    }
+
+    .linkedin-post-stats {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.35rem;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .linkedin-stat-icon {
+        width: 0.85em;
+        height: 0.85em;
     }
 
     .portrait {
@@ -2295,8 +2585,9 @@ body.page-ready .widget-ring-active {
     }
 
     .coverflow-container {
-        width: min(500px, 90vw);
+        width: min(500px, 100%);
         height: min(260px, 50vw);
+        margin-inline: auto;
     }
 
     .coverflow-overlay {

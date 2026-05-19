@@ -1,0 +1,72 @@
+---
+import { iconHtml } from '../lib/icons';
+import {
+  fetchLinkedInPosts,
+  formatPostDate,
+  getPostStats,
+  mediaCount,
+  pickMediaUrl,
+  renderPostTextHtml,
+} from '../lib/linkedinFeed';
+
+const posts = await fetchLinkedInPosts(import.meta.env.APIFY_TOKEN);
+---
+
+<article class="widget widget--linkedin-feed">
+  <h2>Recent LinkedIn Posts</h2>
+  {
+    posts.length === 0 ? (
+      <p class="linkedin-feed-empty">
+        LinkedIn posts unavailable. Set <code>APIFY_TOKEN</code> for build-time fetch, or
+        run the Apify actor before deploy.
+      </p>
+    ) : (
+      <div class="linkedin-feed">
+        {posts.map((post) => {
+          const imageUrl = pickMediaUrl(post);
+          const extraImages = mediaCount(post) - 1;
+          const textHtml = renderPostTextHtml(post.text || '');
+          const dateLabel = formatPostDate(post.posted_at?.relative);
+          const statItems = getPostStats(post.stats);
+
+          return (
+            <a
+              class="linkedin-post"
+              href={post.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {imageUrl && (
+                <div class="linkedin-post-thumb">
+                  <img src={imageUrl} alt="" loading="lazy" decoding="async" />
+                  {extraImages > 0 && (
+                    <span class="linkedin-post-thumb-count">+{extraImages}</span>
+                  )}
+                </div>
+              )}
+              <div class="linkedin-post-body">
+                <div class="linkedin-post-text" set:html={textHtml} />
+                <div class="linkedin-post-meta">
+                  {dateLabel && <span class="linkedin-post-date">{dateLabel}</span>}
+                  {statItems.length > 0 && (
+                    <span class="linkedin-post-stats">
+                      {statItems.map((stat) => (
+                        <span class="linkedin-stat">
+                          <span
+                            class="svg-icon linkedin-stat-icon"
+                            set:html={iconHtml(stat.icon)}
+                          />
+                          <span class="linkedin-stat-count">{stat.count}</span>
+                        </span>
+                      ))}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    )
+  }
+</article>

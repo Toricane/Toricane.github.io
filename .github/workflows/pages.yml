@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '35 1,5,17,21 * * *'
 
 permissions:
   contents: read
@@ -34,6 +36,7 @@ jobs:
       - name: Build Astro site
         env:
           PUBLIC_DEPLOY_SHA: ${{ github.sha }}
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
         run: npm run build
 
       - name: Upload Pages artifact

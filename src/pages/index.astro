@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Connections from '../components/Connections.astro';
 import Coverflow from '../components/Coverflow.astro';
+import LinkedInFeed from '../components/LinkedInFeed.astro';
 import TabsSection from '../components/TabsSection.astro';
 import { iconHtml } from '../lib/icons';
 import { portfolio, coverflowColors, seo } from '../lib/portfolio';
@@ -9,11 +10,12 @@ import { generateRuntimePayload } from '../lib/siteRuntime';
 import { compileHeroTagline } from '../lib/heroTagline';
 import { getCoverflowLcpPreload } from '../lib/coverflow';
 import { getEntry } from 'astro:content';
+import feeds from '../data/feeds.json';
 
 const heroEntry = await getEntry('hero', 'intro');
 if (!heroEntry) throw new Error('Missing src/content/hero/intro.md');
 const heroTaglineHtml = compileHeroTagline(heroEntry.body);
-const runtime = generateRuntimePayload(portfolio, coverflowColors);
+const runtime = { ...generateRuntimePayload(portfolio, coverflowColors), feeds };
 const lcpPreload = getCoverflowLcpPreload(runtime.faceImages);
 ---
 
@@ -41,16 +43,23 @@ const lcpPreload = getCoverflowLcpPreload(runtime.faceImages);
 
   <header id="hero">
     <div class="hero-inner">
-      <div class="intro-col">
-        <h1 class="site-title" aria-label="Prajwal Prashanth">
-          Prajwal <span class="last-name">Prashanth</span>
-        </h1>
-        <p class="tagline" set:html={heroTaglineHtml} />
-        <Connections />
-        <div id="widgets" class="widgets"></div>
+      <div class="hero-col-left">
+        <div class="hero-head">
+          <h1 class="site-title" aria-label="Prajwal Prashanth">
+            Prajwal <span class="last-name">Prashanth</span>
+          </h1>
+          <p class="tagline" set:html={heroTaglineHtml} />
+          <Connections />
+        </div>
+        <div id="widgets-newsletter" class="widgets hero-widgets-newsletter"></div>
       </div>
-      <div class="media-col">
-        <Coverflow faceImages={runtime.faceImages} coverflowColors={coverflowColors} />
+      <div class="hero-col-right">
+        <div class="hero-coverflow">
+          <Coverflow faceImages={runtime.faceImages} coverflowColors={coverflowColors} />
+        </div>
+        <div class="widgets widgets--linkedin hero-widgets-linkedin">
+          <LinkedInFeed />
+        </div>
       </div>
     </div>
     <button id="scrollMore" class="scroll-more" type="button" aria-label="Scroll to content">

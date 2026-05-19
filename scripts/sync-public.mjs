@@ -40,7 +40,7 @@ if (fs.existsSync(staticDir)) {
   }
 }
 
-for (const json of ['colors.json', 'seo.json']) {
+for (const json of ['colors.json', 'seo.json', 'feeds.json']) {
   const src = path.join(configDir, json);
   const dest = path.join(root, 'src', 'data', json);
   if (fs.existsSync(src)) {

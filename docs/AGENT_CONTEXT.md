@@ -29,6 +29,7 @@ Architectural, stylistic, and operational context for AI agents working in `Tori
 *   `src/lib/buildPortfolio.ts`, `src/lib/renderProjects.ts`, `src/lib/renderTimeline.ts` — build-time HTML for tabs.
 *   `src/scripts/boot.js` — client hydration from inlined `window.__SITE_RUNTIME__`.
 *   `src/components/TabsSection.astro`, `Coverflow.astro`, `SeoHead.astro`.
+*   Hero widgets: Substack via `src/scripts/components/widgets.js` (`#widgets-newsletter`, rss2json); LinkedIn via `src/components/LinkedInFeed.astro` (build-time Apify, `APIFY_TOKEN`). Substack URL in `config/feeds.json` → `window.__SITE_RUNTIME__.feeds`.
 *   `src/scripts/utils/data.js` — `slugify`, `normalizeImages`, `projectEndTimestamp`, date formatting (shared logic with renderers).
 
 ## 1b. Commands (CRITICAL)
@@ -53,7 +54,7 @@ Architectural, stylistic, and operational context for AI agents working in `Tori
 | `update_colors.py` | Scan content for image paths; update `config/colors.json` (dominant RGB for neon glows) |
 | `generate_coverflow_images.py` | Generate `preview/` + `small/` WebP variants for face-tagged images |
 
-**`sync-public.mjs`** copies `assets/`, `connect4/`, and `static/*` → `public/`; syncs `config/colors.json` + `config/seo.json` → `src/data/`; runs `export-data-json.mjs`.
+**`sync-public.mjs`** copies `assets/`, `connect4/`, and `static/*` → `public/`; syncs `config/colors.json`, `config/seo.json`, and `config/feeds.json` → `src/data/`; runs `export-data-json.mjs`.
 
 **Production runtime**: Portfolio data is inlined in `window.__SITE_RUNTIME__` at build — do not add a production `fetch('data.json')`.
 
@@ -103,6 +104,7 @@ Templates: `src/content/_templates/{project,hackathon,award}.md`.
 | File | Role |
 |------|------|
 | `config/seo.json` | Canonical URL, meta, JSON-LD source → synced to `src/data/seo.json` |
+| `config/feeds.json` | Substack RSS URL for newsletter widget → synced to `src/data/feeds.json` |
 | `static/robots.txt` | Copied to `public/`; points to `sitemap-index.xml` |
 | `static/llms.txt` | AI-readable summary |
 | `dist/sitemap-index.xml` | `@astrojs/sitemap` on build |
