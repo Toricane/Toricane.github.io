@@ -11,6 +11,8 @@ import { spawnSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const publicDir = path.join(root, 'public');
+const staticDir = path.join(root, 'static');
+const configDir = path.join(root, 'config');
 
 function copyDir(src, dest) {
   if (!fs.existsSync(src)) return;
@@ -29,23 +31,20 @@ fs.mkdirSync(publicDir, { recursive: true });
 copyDir(path.join(root, 'assets'), path.join(publicDir, 'assets'));
 copyDir(path.join(root, 'connect4'), path.join(publicDir, 'connect4'));
 
-for (const name of [
-  'CNAME',
-  'robots.txt',
-  'llms.txt',
-  'site.webmanifest',
-  'apple-touch-icon.png',
-  'favicon-16x16.png',
-  'favicon-32x32.png',
-  'favicon.ico',
-]) {
-  copyFile(path.join(root, name), path.join(publicDir, name));
+if (fs.existsSync(staticDir)) {
+  for (const name of fs.readdirSync(staticDir)) {
+    const src = path.join(staticDir, name);
+    if (fs.statSync(src).isFile()) {
+      copyFile(src, path.join(publicDir, name));
+    }
+  }
 }
 
 for (const json of ['colors.json', 'seo.json']) {
-  const src = path.join(root, json);
+  const src = path.join(configDir, json);
   const dest = path.join(root, 'src', 'data', json);
   if (fs.existsSync(src)) {
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.copyFileSync(src, dest);
   }
 }

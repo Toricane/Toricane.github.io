@@ -45,7 +45,7 @@ def get_dominant_rgb(image_path):
 
 def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    colors_path = os.path.join(base_dir, 'colors.json')
+    colors_path = os.path.join(base_dir, 'config', 'colors.json')
 
     image_paths = image_paths_from_content()
 

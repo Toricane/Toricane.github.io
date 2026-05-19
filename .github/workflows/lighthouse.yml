@@ -77,7 +77,7 @@ jobs:
         with:
           urls: |
             ${{ env.LIVE_SITE_URL }}/
-          configPath: ./lighthouserc.${{ matrix.device }}.json
+          configPath: ./config/lighthouse/${{ matrix.device }}.json
           uploadArtifacts: true
           temporaryPublicStorage: true
 
