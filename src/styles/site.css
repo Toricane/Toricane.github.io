@@ -619,27 +619,6 @@ body:not(.page-ready) .site-title {
     align-items: center;
 }
 
-.coverflow-container::before,
-.coverflow-container::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: clamp(16px, 4vw, 56px);
-    pointer-events: none;
-    z-index: 2;
-}
-
-.coverflow-container::before {
-    left: 0;
-    background: linear-gradient(to right, var(--bg) 0%, transparent 100%);
-}
-
-.coverflow-container::after {
-    right: 0;
-    background: linear-gradient(to left, var(--bg) 0%, transparent 100%);
-}
-
 .coverflow-ambient-glow {
     position: absolute;
     inset: 40px;
@@ -679,6 +658,22 @@ body:not(.page-ready) .site-title {
     /* Hide scrollbar */
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
+
+    /* Premium edge fading using high-performance CSS mask-image */
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        black clamp(16px, 4vw, 56px),
+        black calc(100% - clamp(16px, 4vw, 56px)),
+        transparent
+    );
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        black clamp(16px, 4vw, 56px),
+        black calc(100% - clamp(16px, 4vw, 56px)),
+        transparent
+    );
 }
 
 .coverflow-cards::-webkit-scrollbar {
