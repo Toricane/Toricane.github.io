@@ -3,7 +3,7 @@ when: "2025/06"
 groupSummary: "Graduation awards and academic achievements"
 name: "Top Mathematics 12 Award"
 from: "MacNeill Secondary"
-significance: silver
+significance: notable
 tags:
   - Math
   - Academic

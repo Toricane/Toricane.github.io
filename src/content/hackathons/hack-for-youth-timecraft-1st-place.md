@@ -2,7 +2,7 @@
 when: "2024/11"
 name: "Hack For Youth – TimeCraft (1st Place)"
 from: "Hack For Youth 2024"
-significance: gold
+significance: impactful
 badges:
   - Winner
   - In-Person

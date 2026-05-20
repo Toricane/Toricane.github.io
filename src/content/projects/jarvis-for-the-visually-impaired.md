@@ -3,7 +3,7 @@ title: "JARVIS for the Visually Impaired"
 from: "Independent / TKS"
 startDate: "2024-01-01"
 endDate: "2024-12-19"
-significance: gold
+significance: impactful
 tags:
   - AI
   - Edge

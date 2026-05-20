@@ -21,8 +21,8 @@ function entryToProject(entry: CollectionEntry<'projects'>): Project {
     tags: data.tags,
     images: data.images,
     link: data.links?.length ? data.links : undefined,
-    gold: data.gold,
-    silver: data.silver,
+    impactful: data.impactful,
+    notable: data.notable,
   };
 }
 
@@ -36,8 +36,8 @@ function entryToTimelineItem(entry: CollectionEntry<'hackathons' | 'awards'>) {
     tags: data.tags,
     images: data.images,
     link: data.links?.length ? data.links : undefined,
-    gold: data.gold,
-    silver: data.silver,
+    impactful: data.impactful,
+    notable: data.notable,
   };
 }
 

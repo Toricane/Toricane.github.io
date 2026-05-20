@@ -2,7 +2,7 @@
 when: "2024/04"
 name: "Ingenious+ Regional Grant (CAD$1K)"
 from: "Ingenious+"
-significance: gold
+significance: impactful
 tags:
   - Grant
   - AI

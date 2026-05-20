@@ -2,7 +2,7 @@
 when: "2025/03"
 name: "Scrapyard Vancouver – Itémon (2nd Place)"
 from: "Scrapyard Vancouver 2025"
-significance: gold
+significance: impactful
 badges:
   - Second-Place
   - In-Person

@@ -120,8 +120,8 @@ function noteToProject({ data, body }) {
   if (images) project.images = images;
   const link = toLegacyLinks(data.links);
   if (link !== '') project.link = link;
-  if (medals.gold) project.gold = true;
-  if (medals.silver) project.silver = true;
+  if (medals.impactful) project.impactful = true;
+  if (medals.notable) project.notable = true;
   return project;
 }
 
@@ -139,8 +139,8 @@ function noteToTimelineItem({ data, body }) {
   if (tags?.length) item.tags = tags;
   const images = toLegacyImages(data.images);
   if (images) item.images = images;
-  if (medals.gold) item.gold = true;
-  if (medals.silver) item.silver = true;
+  if (medals.impactful) item.impactful = true;
+  if (medals.notable) item.notable = true;
   return item;
 }
 

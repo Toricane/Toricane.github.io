@@ -3,7 +3,7 @@ when: "2023/06"
 groupSummary: "Grade 10 academic excellence and achievements"
 name: "Top Raven Award (Gr.10)"
 from: "MacNeill Secondary"
-significance: gold
+significance: impactful
 tags:
   - Academic
   - Citizenship

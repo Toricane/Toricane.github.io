@@ -3,7 +3,7 @@ when: "2025/06"
 groupSummary: "Graduation awards and academic achievements"
 name: "Top Raven Award (Gr.12)"
 from: "MacNeill Secondary"
-significance: gold
+significance: impactful
 tags:
   - Academic
   - Citizenship

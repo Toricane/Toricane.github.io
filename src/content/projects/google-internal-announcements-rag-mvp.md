@@ -3,7 +3,7 @@ title: "Google Internal Announcements RAG MVP"
 from: "Google Canada Challenge Winner"
 startDate: "2023-12-01"
 endDate: "2024-08-06"
-significance: silver
+significance: notable
 tags:
   - LLM
   - RAG

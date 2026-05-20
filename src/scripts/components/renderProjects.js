@@ -81,8 +81,8 @@ export function renderProjects(list) {
     sorted.forEach((p) => {
         const li = document.createElement("li");
         let cardClass = "card";
-        if (p.gold) cardClass += " gold-highlight";
-        else if (p.silver) cardClass += " silver-highlight";
+        if (p.impactful) cardClass += " impactful-highlight";
+        else if (p.notable) cardClass += " notable-highlight";
         li.className = cardClass;
 
         const projSlug = slugify(p.title || "");

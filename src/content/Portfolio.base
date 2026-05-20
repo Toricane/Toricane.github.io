@@ -26,8 +26,8 @@ formulas:
   thumb2: if(formula.coverPath2, link(formula.coverPath2), "")
   thumb3: if(formula.coverPath3, link(formula.coverPath3), "")
   dateRange: if(startDate && endDate, date(startDate).format("MMM YYYY") + " – " + date(endDate).format("MMM YYYY"), if(endDate, date(endDate).format("MMM YYYY"), if(startDate, date(startDate).format("MMM YYYY"), "")))
-  significanceLabel: if(significance == "gold", "★ gold", if(significance == "silver", "◇ silver", ""))
-  significanceRank: if(significance == "gold", 0, if(significance == "silver", 1, 2))
+  significanceLabel: if(significance == "impactful", "★ impactful", if(significance == "notable", "◇ notable", ""))
+  significanceRank: if(significance == "impactful", 0, if(significance == "notable", 1, 2))
   labels: if(badges && badges.length > 0, badges.join(" · "), if(tags && tags.length > 0, tags.join(" · "), ""))
   hackathonBucket: if(groupSummary, formula.whenText + " — " + groupSummary, formula.whenText + " — " + name)
 properties:

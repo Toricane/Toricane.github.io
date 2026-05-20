@@ -3,7 +3,7 @@ when: "2023/06"
 groupSummary: "Grade 10 academic excellence and achievements"
 name: "Top Math 11 (Gr.10)"
 from: "MacNeill Secondary"
-significance: gold
+significance: impactful
 tags:
   - Math
   - Academic

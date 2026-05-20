@@ -16,7 +16,7 @@ const linkSchema = z.object({
 const imageInput = z.union([z.string(), imageSchema]);
 const linkInput = z.union([z.string(), linkSchema]);
 
-const significanceSchema = z.enum(['gold', 'silver']).optional();
+const significanceSchema = z.enum(['impactful', 'notable']).optional();
 
 /** YAML may parse 2024-06-01 as a Date; Obsidian may write long date strings. */
 const dateField = z.preprocess((val) => {
@@ -55,8 +55,8 @@ const projects = defineCollection({
     images: z.array(imageInput).optional(),
     links: z.array(linkInput).optional(),
     significance: significanceSchema,
-    gold: z.boolean().optional(),
-    silver: z.boolean().optional(),
+    impactful: z.boolean().optional(),
+    notable: z.boolean().optional(),
   }),
 });
 
@@ -70,8 +70,8 @@ const timelineEntry = z.object({
   images: z.array(imageInput).optional(),
   links: z.array(linkInput).optional(),
   significance: significanceSchema,
-  gold: z.boolean().optional(),
-  silver: z.boolean().optional(),
+  impactful: z.boolean().optional(),
+  notable: z.boolean().optional(),
 });
 
 const hackathons = defineCollection({

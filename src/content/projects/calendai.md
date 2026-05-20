@@ -3,7 +3,7 @@ title: CalendAI
 from: "buildspace / Community Meetup Demo"
 startDate: "2024-06-01"
 endDate: "2024-07-01"
-significance: gold
+significance: impactful
 tags:
   - Chrome-Ext
   - AI

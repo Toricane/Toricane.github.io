@@ -3,7 +3,7 @@ when: "2024/09"
 groupSummary: "Two hackathons with AI-focused projects"
 name: "Hack the North 2024 – DaVinci Solve"
 from: "Hack the North 2024"
-significance: silver
+significance: notable
 badges:
   - In-Person
 images:

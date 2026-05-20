@@ -13,12 +13,14 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 -   **Split Hero Section**: Engaging introduction with animated image carousel
 -   **Tabbed Content System**: Interactive Projects / Hackathons / Awards sections
 -   **3D Coverflow Gallery**: Smooth infinite-scroll showcase with dynamic scroll-synchronized 3D perspective transforms and color-extracted ambient neon glow backdrops
+-   **Dynamic Ambient Kinetic Background**: An organic radial-gradient liquid canvas with cursor attraction and scroll-speed velocity physics, with a sparkles control to freeze/disable the loop (stored in `localStorage` for zero CPU overhead)
 -   **Dynamic Highlight Images**: Tab-synchronized visual previews
 -   **Responsive Design**: Mobile-first approach with adaptive layouts
 -   **Premium Light Mode**: Elegant warm-and-cool glassmorphism with high-contrast amber/slate highlight cards, custom interactive timeline dots, and typography gradients
 
 ### 🎯 User Experience
 
+-   **Instant Tab Filtration & Search Tag Cloud**: Client-side search, multi-selectable significance filters (`⭐ Impactful` and `✦ Notable`, falling back to showing `All` items when none are selected), and dynamically scoped tag cloud that automatically adapts to show only tags present in the active category. Includes a premium float-reveal entry animation and timeline accordion auto-expansion
 -   **Accessibility First**: ARIA labels, skip links, keyboard navigation
 -   **Progressive Enhancement**: Works without JavaScript, enhanced with it
 -   **Smooth Animations**: Subtle transitions and scroll behaviors
@@ -31,7 +33,7 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 
 -   **Astro 6 static site**: Pre-rendered HTML with vanilla CSS/JS client enhancements (no React/Vue)
 -   **Performance Optimized**: Minified CSS/JS, inlined runtime payload, lazy images, `content-visibility` on inactive panels
--   **SEO / AEO Enhanced**: Open Graph, Twitter Cards, canonical URLs, JSON-LD `@graph`, `robots.txt`, Astro sitemap (`sitemap-index.xml`), and `llms.txt`
+-   **SEO / AEO Enhanced**: Open Graph, Twitter Cards, canonical URLs, circular-linked JSON-LD `@graph` Knowledge Graph mapping child works to creator, `robots.txt`, Astro sitemap (`sitemap-index.xml`), and `llms.txt`
 -   **Content Management**: Markdown in `src/content/` with Astro Content Collections; [Obsidian](https://obsidian.md) Base for editing — see [docs/CONTENT.md](docs/CONTENT.md) and [docs/AGENT_CONTEXT.md](docs/AGENT_CONTEXT.md) for agents
 
 ### 🎭 Interactive Elements
@@ -95,7 +97,7 @@ Visit: **[prajwal.is-a.dev](https://prajwal.is-a.dev)**
 
 **Obsidian Base** (`Portfolio.base`) updates live when you add or edit notes — card views for Projects / Hackathons / Awards, sorted like the site. Keep `when: "YYYY/MM"` **quoted** so Obsidian does not break grouping formulas.
 
-**Key frontmatter:** `title` or `name`, `from`, `startDate`/`endDate` (projects), `when` (timeline), `groupSummary` (collapsed month groups on site), `significance: gold|silver`, `tags`/`badges`, `images`, `links`. See [docs/CONTENT.md](docs/CONTENT.md) for full examples.
+**Key frontmatter:** `title` or `name`, `from`, `startDate`/`endDate` (projects), `when` (timeline), `groupSummary` (collapsed month groups on site), `significance: impactful|notable`, `tags`/`badges`, `images`, `links`. See [docs/CONTENT.md](docs/CONTENT.md) for full examples.
 
 ## 🛠 Development
 

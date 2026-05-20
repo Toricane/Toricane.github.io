@@ -3,7 +3,7 @@ when: "2025/06"
 groupSummary: "Graduation awards and academic achievements"
 name: "Class Valedictorian"
 from: "MacNeill Secondary"
-significance: gold
+significance: impactful
 tags:
   - Academic
   - Leadership

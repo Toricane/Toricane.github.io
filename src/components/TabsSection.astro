@@ -35,10 +35,40 @@ const awardsHtml = renderTimelineHtml('awards', portfolio.awards, false);
       </div>
     </div>
     <div class="tab-layout">
-      <div id="tabPanels" class="tab-panels">
-        <div id="projects" class="tab-panel active" set:html={projectsHtml} />
-        <div id="hackathons" class="tab-panel" hidden set:html={hackathonsHtml} />
-        <div id="awards" class="tab-panel" hidden set:html={awardsHtml} />
+      <div class="tab-main-content">
+        <!-- Filtration & Search Bar -->
+        <div class="filter-bar-container">
+          <div class="filter-bar">
+            <div class="search-wrapper">
+              <span class="search-icon" set:html={iconHtml('search')}></span>
+              <input
+                type="text"
+                id="portfolio-search"
+                placeholder="Search projects..."
+                aria-label="Search portfolio items"
+                autocomplete="off"
+              />
+              <button id="search-clear" class="search-clear-btn" aria-label="Clear search" type="button">&times;</button>
+            </div>
+            <div class="significance-filters" role="group" aria-label="Filter by significance">
+              <button type="button" class="sig-btn active" data-sig="all" aria-pressed="true">All</button>
+              <button type="button" class="sig-btn" data-sig="impactful" aria-pressed="false">⭐ Impactful</button>
+              <button type="button" class="sig-btn" data-sig="notable" aria-pressed="false">✦ Notable</button>
+            </div>
+          </div>
+          <div class="tags-cloud-container">
+            <div id="filter-tags-cloud" class="tags-cloud" aria-label="Filter by tags"></div>
+            <button type="button" id="tags-toggle-btn" class="tags-toggle-btn hidden" aria-label="Toggle all tags">
+              <span class="btn-text">More</span>
+              <span class="btn-icon" set:html={iconHtml('chevronDown')}></span>
+            </button>
+          </div>
+        </div>
+        <div id="tabPanels" class="tab-panels">
+          <div id="projects" class="tab-panel active" set:html={projectsHtml} />
+          <div id="hackathons" class="tab-panel" hidden set:html={hackathonsHtml} />
+          <div id="awards" class="tab-panel" hidden set:html={awardsHtml} />
+        </div>
       </div>
       <aside class="tab-highlight" role="region" aria-label="Featured portfolio images">
         <div class="tab-highlight-figure">

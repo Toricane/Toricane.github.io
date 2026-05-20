@@ -37,6 +37,12 @@ const lcpPreload = getCoverflowLcpPreload(runtime.faceImages);
 
   <a href="#content" class="skip-link">Skip to content</a>
 
+  <canvas id="ambient-canvas" class="ambient-canvas"></canvas>
+
+  <button id="bg-toggle" class="bg-toggle" aria-label="Toggle background animation" type="button">
+    <span class="svg-icon" set:html={iconHtml('sparkles')} />
+  </button>
+
   <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" type="button">
     <span class="svg-icon" set:html={iconHtml('moon')} />
   </button>

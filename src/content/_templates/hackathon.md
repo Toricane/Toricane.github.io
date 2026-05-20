@@ -3,7 +3,7 @@ when: "2025/03"
 groupSummary: "Optional group label when multiple entries share this month"
 name: "Hackathon Name – Project (Place)"
 from: "Event name"
-significance: gold
+significance: impactful
 badges:
   - In-Person
 images:

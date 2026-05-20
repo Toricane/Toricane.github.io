@@ -15,7 +15,7 @@ Portfolio content lives in **`src/content/`** as Markdown notes with YAML frontm
 | `startDate` / `endDate` | Quoted ISO: `"2024-06-01"` | Project date range |
 | `when` | Quoted `YYYY/MM`: `"2025/03"` | Timeline month grouping |
 | `groupSummary` | Optional string | Collapsed label when multiple entries share a month |
-| `significance` | `gold`, `silver`, or omit | Gold/silver highlight |
+| `significance` | `impactful`, `notable`, or omit | Impactful/notable highlight |
 | `tags` | YAML list, hyphens for spaces: `- Chrome-Ext` | Shown as `Chrome Ext` |
 | `badges` | Same as tags (hackathons) | Badge pills on timeline |
 | `images` | Short lines (see below) | Thumbnails; `*face` adds coverflow |
@@ -29,7 +29,7 @@ title: CalendAI
 from: buildspace / Community Meetup Demo
 startDate: "2024-06-01"
 endDate: "2024-07-01"
-significance: gold
+significance: impactful
 tags:
   - Chrome-Ext
   - AI
@@ -54,7 +54,7 @@ when: "2024/09"
 groupSummary: "Two hackathons with AI-focused projects"
 name: "Hack the North 2024 – DaVinci Solve"
 from: "Hack the North 2024"
-significance: silver
+significance: notable
 badges:
   - In-Person
 images:
@@ -80,7 +80,7 @@ The Base reads your notes automatically — **no need to edit `Portfolio.base` w
 | View | What it shows |
 |------|----------------|
 | **Projects** | Card grid; cover + extra thumbnails; sorted by **end date** (newest first; ongoing / missing end date at top — same as the site) |
-| **Hackathons** / **Awards** | Cards grouped by month (`whenSort`, newest first); cover images; awards sorted gold → silver → name within each month |
+| **Hackathons** / **Awards** | Cards grouped by month (`whenSort`, newest first); cover images; awards sorted impactful → notable → name within each month |
 | **Hackathons (grouped)** | Same cards, grouped by `groupSummary` when the site shows one collapsed timeline row (e.g. Sep 2024) |
 | **Projects (edit)** / **Hackathons (edit)** / **Awards (edit)** | Tables with full frontmatter for bulk edits |
 

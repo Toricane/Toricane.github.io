@@ -3,7 +3,7 @@ title: "Project title"
 from: "Organization / context"
 startDate: 2025-01-01
 endDate: 2025-06-01
-significance: gold
+significance: impactful
 tags:
   - AI
   - Web

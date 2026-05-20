@@ -25,8 +25,8 @@ export function renderProjectsHtml(list: Project[]) {
   const cards = sortProjects(list)
     .map((p) => {
       let cardClass = 'card';
-      if (p.gold) cardClass += ' gold-highlight';
-      else if (p.silver) cardClass += ' silver-highlight';
+      if (p.impactful) cardClass += ' impactful-highlight';
+      else if (p.notable) cardClass += ' notable-highlight';
 
       const projSlug = slugify(p.title || '');
       const slugAttr = projSlug ? ` data-slug="${escapeHtml(projSlug)}"` : '';

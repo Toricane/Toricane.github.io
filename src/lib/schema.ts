@@ -29,8 +29,8 @@ export const projectSchema = z.object({
   tags: z.array(z.string()).optional(),
   images: z.array(imageSchema).optional(),
   link: z.union([linkSchema, z.array(linkSchema)]).optional(),
-  gold: z.boolean().optional(),
-  silver: z.boolean().optional(),
+  impactful: z.boolean().optional(),
+  notable: z.boolean().optional(),
 });
 
 export const timelineItemSchema = z.object({
@@ -41,8 +41,8 @@ export const timelineItemSchema = z.object({
   tags: z.array(z.string()).optional(),
   images: z.array(imageSchema).optional(),
   link: z.union([linkSchema, z.array(linkSchema)]).optional(),
-  gold: z.boolean().optional(),
-  silver: z.boolean().optional(),
+  impactful: z.boolean().optional(),
+  notable: z.boolean().optional(),
 });
 
 export const timelineGroupSchema = z.object({

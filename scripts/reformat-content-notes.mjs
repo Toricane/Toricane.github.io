@@ -90,12 +90,12 @@ function appendList(lines, key, items, formatter = listItemScalar) {
 
 function writeNote(filePath, data, body) {
   const lines = ['---'];
-  const skip = new Set(['gold', 'silver', 'images', 'links', 'tags', 'badges']);
+  const skip = new Set(['impactful', 'notable', 'images', 'links', 'tags', 'badges']);
 
-  if (data.gold) data.significance = 'gold';
-  else if (data.silver) data.significance = 'silver';
-  delete data.gold;
-  delete data.silver;
+  if (data.impactful) data.significance = 'impactful';
+  else if (data.notable) data.significance = 'notable';
+  delete data.impactful;
+  delete data.notable;
 
   const images = data.images;
   const links = data.links;

@@ -3,7 +3,7 @@ when: "2024/06"
 groupSummary: "Grade 11 academic excellence and contest achievements"
 name: "Top Mathematics 12 (Gr.11)"
 from: "MacNeill Secondary"
-significance: silver
+significance: notable
 tags:
   - Math
   - Academic

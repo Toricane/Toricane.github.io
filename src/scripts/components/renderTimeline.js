@@ -97,7 +97,7 @@ function sortTimelineGroups(items) {
 function itemsForTimelineGroup(id, group) {
     return id === "awards" && Array.isArray(group.items)
         ? [...group.items].sort((a, b) => {
-              const rank = (it) => (it?.gold ? 0 : it?.silver ? 1 : 2);
+              const rank = (it) => (it?.impactful ? 0 : it?.notable ? 1 : 2);
               const ra = rank(a);
               const rb = rank(b);
               if (ra !== rb) return ra - rb;
@@ -214,10 +214,10 @@ export function renderTimeline(id, items, showBadges) {
             const badgesBlock = allBadges.length
                 ? `<div class="tags award-tags">${allBadges.join("")}</div>`
                 : "";
-            const highlightClass = item.gold
-                ? " gold-highlight"
-                : item.silver
-                ? " silver-highlight"
+            const highlightClass = item.impactful
+                ? " impactful-highlight"
+                : item.notable
+                ? " notable-highlight"
                 : "";
             li.innerHTML = `<div class="time">${timeDisplay}</div><div class="entry${highlightClass}"><h3>${item.name}</h3>${fromLine}<p>${item.description}</p>${imagesBlock}${badgesBlock}</div>`;
             ol.appendChild(li);
@@ -239,12 +239,12 @@ export function renderTimeline(id, items, showBadges) {
                 countText = itemCount === 1 ? "1 item" : `${itemCount} items`;
             }
 
-            const hasGold = itemsForGroup.some((item) => item && item.gold);
-            const hasSilver = itemsForGroup.some((item) => item && item.silver);
-            const categoryClass = hasGold
-                ? " category-gold"
-                : hasSilver
-                ? " category-silver"
+            const hasImpactful = itemsForGroup.some((item) => item && item.impactful);
+            const hasNotable = itemsForGroup.some((item) => item && item.notable);
+            const categoryClass = hasImpactful
+                ? " category-impactful"
+                : hasNotable
+                ? " category-notable"
                 : "";
             li.className = `timeline-group${categoryClass}`;
 
@@ -321,10 +321,10 @@ export function renderTimeline(id, items, showBadges) {
                                               .join("")}</div>`
                                         : "";
 
-                                    const itemHighlight = item.gold
-                                        ? " gold-highlight"
-                                        : item.silver
-                                        ? " silver-highlight"
+                                    const itemHighlight = item.impactful
+                                        ? " impactful-highlight"
+                                        : item.notable
+                                        ? " notable-highlight"
                                         : "";
                                     const itemLinks = normalizeLinks(item.link);
                                     const dataAttr = itemLinks.length

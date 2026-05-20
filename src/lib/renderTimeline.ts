@@ -27,7 +27,7 @@ function itemsForGroup(id: string, group: TimelineGroup) {
   if (id === 'awards') {
     return [...group.items].sort((a, b) => {
       const rank = (it: (typeof group.items)[0]) =>
-        it?.gold ? 0 : it?.silver ? 1 : 2;
+        it?.impactful ? 0 : it?.notable ? 1 : 2;
       const ra = rank(a);
       const rb = rank(b);
       if (ra !== rb) return ra - rb;
@@ -80,10 +80,10 @@ export function renderTimelineHtml(
         const badgesBlock = allBadges.length
           ? `<div class="tags award-tags">${allBadges.join('')}</div>`
           : '';
-        const highlightClass = item.gold
-          ? ' gold-highlight'
-          : item.silver
-            ? ' silver-highlight'
+        const highlightClass = item.impactful
+          ? ' impactful-highlight'
+          : item.notable
+            ? ' notable-highlight'
             : '';
 
         return `<li${slugAttr}><div class="time">${escapeHtml(timeDisplay)}</div><div class="entry${highlightClass}"><h3>${escapeHtml(item.name)}</h3>${fromLine}<p>${escapeHtml(item.description || '')}</p>${imagesBlock}${badgesBlock}</div></li>`;
@@ -101,12 +101,12 @@ export function renderTimelineHtml(
         countText = itemCount === 1 ? '1 item' : `${itemCount} items`;
       }
 
-      const hasGold = itemsForGroupList.some((item) => item?.gold);
-      const hasSilver = itemsForGroupList.some((item) => item?.silver);
-      const categoryClass = hasGold
-        ? ' category-gold'
-        : hasSilver
-          ? ' category-silver'
+      const hasImpactful = itemsForGroupList.some((item) => item?.impactful);
+      const hasNotable = itemsForGroupList.some((item) => item?.notable);
+      const categoryClass = hasImpactful
+        ? ' category-impactful'
+        : hasNotable
+          ? ' category-notable'
           : '';
 
       const innerItems = itemsForGroupList
@@ -135,10 +135,10 @@ export function renderTimelineHtml(
                 )
                 .join('')}</div>`
             : '';
-          const itemHighlight = item.gold
-            ? ' gold-highlight'
-            : item.silver
-              ? ' silver-highlight'
+          const itemHighlight = item.impactful
+            ? ' impactful-highlight'
+            : item.notable
+              ? ' notable-highlight'
               : '';
           const itemLinks = normalizeLinks(item.link);
           const dataAttr = itemLinks.length

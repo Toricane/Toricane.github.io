@@ -6,7 +6,7 @@ import {
   significanceToMedals,
 } from '../../scripts/content-normalize.mjs';
 
-type MedalLegacy = { significance?: string; gold?: boolean; silver?: boolean };
+type MedalLegacy = { significance?: string; impactful?: boolean; notable?: boolean };
 
 export function normalizeProjectData<
   T extends MedalLegacy & {

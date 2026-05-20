@@ -20,7 +20,7 @@ Architectural, stylistic, and operational context for AI agents working in `Tori
 | `coverflow` | `src/content/coverflow/*.md` | Optional standalone face images |
 
 *   `src/lib/buildPortfolio.ts` aggregates collections → legacy `Portfolio` shape for `renderProjectsHtml` / `renderTimelineHtml`.
-*   `src/lib/normalizeContent.ts` + `scripts/content-normalize.mjs` — image/link lines, `significance` ↔ legacy `gold`/`silver`, hyphenated tags.
+*   `src/lib/normalizeContent.ts` + `scripts/content-normalize.mjs` — image/link lines, `significance` ↔ legacy `impactful`/`notable`, hyphenated tags.
 *   Root **`data.json`** is **generated** on sync (`scripts/export-data-json.mjs`); do not edit by hand. Site does **not** fetch it in production.
 *   Never hardcode portfolio items in Astro pages.
 
@@ -67,8 +67,11 @@ Architectural, stylistic, and operational context for AI agents working in `Tori
 
 ## 2. Design System (CRITICAL)
 
-*   **Theme**: Dark glassmorphism; premium Light Mode via `theme.js` / `[data-theme="light"]` using elegant white glass-wash transparent overrides, warm amber-toned gradients for `gold-highlight` cards, cool slate-toned card borders/texts for `silver-highlight`, active-tab glows, pointer timeline hovers, and animated title typography gradients.
+*   **Theme**: Dark glassmorphism; premium Light Mode via `theme.js` / `[data-theme="light"]` using elegant white glass-wash transparent overrides, warm amber-toned gradients for `impactful-highlight` cards, cool slate-toned card borders/texts for `notable-highlight`, active-tab glows, pointer timeline hovers, and animated title typography gradients.
 *   **3D Coverflow Gallery**: `src/scripts/components/coverflow.js` uses scroll listeners optimized with `requestAnimationFrame` to apply smooth 3D perspective translations (`perspective(1000px) rotateY(...) scale(...) translateZ(...)`) to cards. Includes an ambient backdrop glow element (`.coverflow-ambient-glow`) which dynamically changes colors (`--card-glow-rgb`) to match the dominant colors of the center-most active card. Respects `prefers-reduced-motion`.
+*   **Dynamic Ambient Background**: Handled by `src/scripts/components/ambientBg.js`. Renders 3 particle oscillators on a 4x-downscaled canvas overlaid at `z-index: -2` and blurred heavily using CSS (`filter: blur(80px); opacity: 0.38;`) for fluid performance. Responds to `mousemove` cursor attraction and vertical scroll momentum. Paired with a sparkles toggle button (`#bg-toggle`) that caches active preference to `localStorage` to freeze the loop. In light mode, uses normal blend mode at low opacity (`0.08`) to keep gradient layers clean.
+*   **Instant Filtration & Search Engine**: Handled by `src/scripts/components/filter.js`. Offers reactive search, multi-selectable significance filters (`⭐ Impactful` and `✦ Notable`, falling back to `All` when neither is chosen), and tab-scoped tag clouds. Features floating-reveal entry animations via `@keyframes filterReveal` and automatic timeline group accordion auto-expansion when filters are active, and auto-collapsing when cleared. Tab changes are detected reactively via a `MutationObserver` on panel visibility classes.
+    *   **Dynamic Expandable Tag Cloud**: Supported by a layout shifting system when tag elements exceed a single row height (> 38px). The "More"/"Less" toggle button (`#tags-toggle-btn`) and the parent `.tags-cloud-container` leverage the `.expanded` class. When collapsed, `.tags-cloud` uses a horizontal row layout with `flex: 1` to share space with the button. When expanded via click, `.tags-cloud-container.expanded` switches to a vertical flex column direction with `width: 100%` and `flex: none` on `.tags-cloud.expanded`. This forces the tag cloud to expand up to `500px` height, occupy 100% horizontal width, and wrap/spill naturally to the right. The toggle button (`#tags-toggle-btn`) is aligned to the bottom-right via `align-self: flex-end`, changing its text to "Less" and rotating the chevron icon.
 *   **Colors**: `config/colors.json` from `python scripts/update_colors.py` (reads image paths from content; synced to `src/data/` on build).
 *   **Coverflow Config**: `*face` / `!` on image lines in frontmatter → face in coverflow carousel.
 *   **Responsive**: Mobile-first; optional tab highlight fallbacks: `assets/*_highlight.webp`.
@@ -83,7 +86,7 @@ Architectural, stylistic, and operational context for AI agents working in `Tori
 
 ## 3. Components & Update Rules
 
-*   **Tabs / timeline**: Pre-rendered at build from collections; grouped hackathons/awards by `when`; awards sorted gold → silver → name within month (`renderTimeline.ts`).
+*   **Tabs / timeline**: Pre-rendered at build from collections; grouped hackathons/awards by `when`; awards sorted impactful → notable → name within month (`renderTimeline.ts`).
 *   **Projects sort**: Newest `endDate` first; ongoing/missing end date → top (`projectEndTimestamp` in `data.js`).
 *   **Navigation**: `#projects`, `#hackathons`, `#awards`, `#tab/slug` — `src/scripts/components/navigation.js`; slugs = `slugify(title|name)` = `.md` basename.
 *   **Hero**: `src/content/hero/intro.md` only.
@@ -93,7 +96,7 @@ Architectural, stylistic, and operational context for AI agents working in `Tori
 
 *   Dates: `"2024-06-01"` for `startDate` / `endDate` (quoted ISO).
 *   Timeline: `when: "2025/03"` (quoted `YYYY/MM`).
-*   Highlight: `significance: gold | silver` (not boolean `gold:` / `silver:` in new content).
+*   Highlight: `significance: impactful | notable` (not boolean `impactful:` / `notable:` in new content).
 *   Tags/badges: YAML list with hyphens (`Chrome-Ext` → displayed as spaces).
 *   Images: `file.webp`, `file.webp*caption*face`, wikilinks `[[file|caption]]`; default folder `assets/tab-panels/`.
 *   Links: quoted `[Label](url)` per line; optional date: `[Label | 2024/03/03](url)`. Cross-refs to other entries: `"[[award] Title](#awards/slug)"` / `[[project]…](#projects/…)` / `[[hackathon]…](#hackathons/…)` — **double** `[` before the type prefix (see CONTENT.md). Parsed by `parseMarkdownLinkLine` in `content-normalize.mjs`.

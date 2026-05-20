@@ -3,7 +3,7 @@ when: "2025/06"
 groupSummary: "Graduation awards and academic achievements"
 name: "Top Science 12 Award"
 from: "MacNeill Secondary"
-significance: silver
+significance: notable
 tags:
   - Science
   - Academic

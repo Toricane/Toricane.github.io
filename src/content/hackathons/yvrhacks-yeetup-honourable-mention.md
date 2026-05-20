@@ -3,7 +3,7 @@ when: "2024/09"
 groupSummary: "Two hackathons with AI-focused projects"
 name: "yvrHacks – yeetup (Honourable Mention)"
 from: "yvrHacks 2024"
-significance: silver
+significance: notable
 badges:
   - Honourable-Mention
   - In-Person

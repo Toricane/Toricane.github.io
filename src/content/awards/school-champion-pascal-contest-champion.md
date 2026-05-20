@@ -3,7 +3,7 @@ when: "2022/06"
 groupSummary: "Grade 9 academic achievements"
 name: "School Champion – Pascal Contest (Champion)"
 from: "CEMC, University of Waterloo"
-significance: silver
+significance: notable
 tags:
   - Math
   - Contest

@@ -19,6 +19,8 @@ import { initTapMode } from './components/tapMode.js';
 import { initThemeToggle, initYear } from './components/theme.js';
 import { setupTilt } from './components/tilt.js';
 import { initVisibilityPause } from './components/visibilityPause.js';
+import { initAmbientBg } from './components/ambientBg.js';
+import { initFilterBar } from './components/filter.js';
 
 let coverflowScheduled = false;
 
@@ -95,6 +97,7 @@ function hydrateFromRuntime(runtime) {
 export function boot(runtime) {
   if (!runtime) return;
 
+  initAmbientBg();
   initYear();
   initThemeToggle();
   initScrollButton();
@@ -106,6 +109,7 @@ export function boot(runtime) {
   initImageViewerDelegates();
 
   hydrateFromRuntime(runtime);
+  initFilterBar();
 
   runWhenIdle(async () => {
     const { initWidgets } = await import('./components/widgets.js');

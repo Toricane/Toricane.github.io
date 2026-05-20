@@ -149,8 +149,8 @@ export function parseLinks(links) {
 
 export function significanceToMedals(significance, legacy = {}) {
   const value = (significance || '').toLowerCase();
-  if (value === 'gold' || legacy.gold) return { gold: true };
-  if (value === 'silver' || legacy.silver) return { silver: true };
+  if (value === 'impactful' || legacy.impactful) return { impactful: true };
+  if (value === 'notable' || legacy.notable) return { notable: true };
   return {};
 }
 

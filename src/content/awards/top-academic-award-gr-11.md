@@ -3,7 +3,7 @@ when: "2024/06"
 groupSummary: "Grade 11 academic excellence and contest achievements"
 name: "Top Academic Award (Gr.11)"
 from: "MacNeill Secondary"
-significance: gold
+significance: impactful
 tags:
   - Academic
 images:

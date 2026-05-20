@@ -3,7 +3,7 @@ when: "2024/06"
 groupSummary: "Grade 11 academic excellence and contest achievements"
 name: "Top Science 11 Award"
 from: "MacNeill Secondary"
-significance: silver
+significance: notable
 tags:
   - Science
   - Academic

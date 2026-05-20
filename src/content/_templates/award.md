@@ -3,7 +3,7 @@ when: "2025/06"
 groupSummary: "Optional group label when multiple entries share this month"
 name: "Award name"
 from: "Institution"
-significance: gold
+significance: impactful
 tags:
   - Academic
 images:
