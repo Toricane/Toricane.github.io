@@ -121,7 +121,7 @@ function entryImages(file: PortfolioFile, limit = Infinity): GalleryImage[] {
 }
 
 function cardImages(file: PortfolioFile) {
-  return entryImages(file, 3).map((image) => ({
+  return entryImages(file, 4).map((image) => ({
     ...image,
     src: imageVariant(image.src, "small"),
   }))
@@ -272,6 +272,11 @@ function TagList({ tags = [], compact = false }: { tags?: string[]; compact?: bo
   )
 }
 
+function collageClass(count: number) {
+  if (count <= 4) return `portfolio-card__collage portfolio-card__collage--${count}`
+  return "portfolio-card__collage portfolio-card__collage--many"
+}
+
 function CardMedia({ images }: { images: GalleryImage[] }) {
   if (!images.length) return null
   if (images.length === 1) {
@@ -282,14 +287,19 @@ function CardMedia({ images }: { images: GalleryImage[] }) {
     )
   }
 
-  const cover = images[0]
+  const count = images.length
+  const sideRows = count <= 4 ? count - 1 : Math.ceil((count - 1) / 2)
   return (
     <div
-      class={`portfolio-card__stack portfolio-card__stack--${Math.min(images.length, 3)}`}
-      style={{ "--portfolio-stack-fill": `url("${cover.src}")` } as Record<string, string>}
+      class={collageClass(count)}
+      style={
+        {
+          "--collage-rows": String(sideRows),
+        } as Record<string, string>
+      }
     >
-      {images.slice(0, 3).map((image, index) => (
-        <figure class={`portfolio-card__media portfolio-card__media--stack-${index}`}>
+      {images.map((image, index) => (
+        <figure>
           <img
             src={image.src}
             alt={image.alt}

@@ -658,7 +658,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-card__media,
-.portfolio-card__stack {
+.portfolio-card__collage {
   position: absolute;
   top: 0;
   left: 0;
@@ -672,8 +672,8 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 /* Full-bleed media fading seamlessly into the card panel color. */
-.portfolio-card__media:not([class*="--stack-"])::after,
-.portfolio-card__stack::after {
+.portfolio-card__media::after,
+.portfolio-card__collage::after {
   content: "";
   position: absolute;
   inset: auto 0 0;
@@ -690,7 +690,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-card__media img,
-.portfolio-card__stack img {
+.portfolio-card__collage img {
   position: absolute;
   inset: 0;
   display: block;
@@ -705,54 +705,63 @@ body[data-slug="coverflow"] .portfolio-footer {
   transition: transform 220ms ease-out;
 }
 
-.portfolio-card__stack {
-  perspective: 600px;
-  /* Fill gutters behind the fan so the media area never looks empty. */
-  background-color: var(--portfolio-raised);
-  background-image: linear-gradient(rgba(11, 17, 24, 0.35), rgba(11, 17, 24, 0.35)),
-    var(--portfolio-stack-fill);
-  background-position: center 30%;
-  background-size: cover;
-  background-repeat: no-repeat;
+/*
+ * Multi-image collage: cover is largest (left), remaining tiles fill the rest.
+ * No fan/peek — the media area stays fully covered.
+ */
+.portfolio-card__collage {
+  display: grid;
+  gap: 2px;
+  background: var(--portfolio-ink);
 }
 
-.portfolio-card__stack .portfolio-card__media {
-  position: absolute;
-  max-height: none;
-  aspect-ratio: auto;
+.portfolio-card__collage figure {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
   overflow: hidden;
-  border: 1px solid rgba(231, 237, 243, 0.14);
-  border-radius: 6px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
   background: var(--portfolio-raised);
 }
 
-.portfolio-card__stack .portfolio-card__media::after {
-  display: none;
+/* Side tiles are often certificates — keep them centered, not top-weighted. */
+.portfolio-card__collage figure:not(:first-child) img {
+  object-position: center center;
 }
 
-/* Classic fanned stack: cover in front, extras clearly peeking behind. */
-.portfolio-card__stack--2 .portfolio-card__media--stack-0,
-.portfolio-card__stack--3 .portfolio-card__media--stack-0 {
-  inset: 4% 8% 0;
-  transform: none;
-  z-index: 3;
+.portfolio-card__collage--2 {
+  grid-template-columns: 1.45fr 1fr;
 }
 
-.portfolio-card__stack--2 .portfolio-card__media--stack-1,
-.portfolio-card__stack--3 .portfolio-card__media--stack-1 {
-  inset: 10% 2% 0 18%;
-  transform: rotate(6deg);
-  z-index: 2;
+.portfolio-card__collage--3 {
+  grid-template-columns: 1.45fr 1fr;
+  grid-template-rows: repeat(2, 1fr);
 }
 
-.portfolio-card__stack--3 .portfolio-card__media--stack-2 {
-  inset: 14% 16% 0 2%;
-  transform: rotate(-6deg);
-  z-index: 1;
+.portfolio-card__collage--3 > :first-child {
+  grid-row: 1 / -1;
 }
 
-.portfolio-card > a:hover .portfolio-card__media img {
+.portfolio-card__collage--4 {
+  grid-template-columns: 1.45fr 1fr;
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.portfolio-card__collage--4 > :first-child {
+  grid-row: 1 / -1;
+}
+
+.portfolio-card__collage--many {
+  grid-template-columns: 1.35fr 1fr 1fr;
+  grid-template-rows: repeat(var(--collage-rows, 2), 1fr);
+}
+
+.portfolio-card__collage--many > :first-child {
+  grid-row: 1 / -1;
+}
+
+.portfolio-card > a:hover .portfolio-card__media img,
+.portfolio-card > a:hover .portfolio-card__collage img {
   transform: scale(1.03);
 }
 
@@ -771,10 +780,11 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-card__meta {
-  min-height: 16px;
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   gap: var(--portfolio-space-2);
+  line-height: 1.2;
   color: var(--portfolio-copper-soft);
   font-family: var(--codeFont);
   font-size: 0.625rem;
@@ -783,7 +793,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-card h2 {
-  margin: 6px 0;
+  margin: 2px 0 6px;
   color: var(--portfolio-frost);
   font-family: var(--headerFont);
   font-size: 0.875rem;
