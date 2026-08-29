@@ -423,6 +423,8 @@ function wireViewToggle() {
     timeline: collection.querySelector<HTMLElement>('[data-view-panel="timeline"]'),
   }
 
+  const sortGroup = collection.querySelector<HTMLElement>("[data-sort-toggle]")
+
   const setMode = (mode: "gallery" | "timeline") => {
     collection.dataset.view = mode
     for (const button of buttons) {
@@ -430,6 +432,11 @@ function wireViewToggle() {
     }
     if (panels.gallery) panels.gallery.hidden = mode !== "gallery"
     if (panels.timeline) panels.timeline.hidden = mode !== "timeline"
+    if (sortGroup) {
+      sortGroup.hidden = mode !== "gallery"
+      if (mode !== "gallery") sortGroup.style.display = "none"
+      else sortGroup.style.removeProperty("display")
+    }
   }
 
   const onClick = (event: Event) => {
@@ -497,6 +504,10 @@ function wireCollectionFilters() {
   root.dataset.wired = "true"
 
   const toggle = collection.querySelector<HTMLButtonElement>("[data-filter-toggle]")
+  const sortGroup = collection.querySelector<HTMLElement>("[data-sort-toggle]")
+  const sortButtons = sortGroup
+    ? [...sortGroup.querySelectorAll<HTMLButtonElement>("[data-sort-mode]")]
+    : []
   const panel = root.querySelector<HTMLElement>("[data-filter-panel]")
   const badge = collection.querySelector<HTMLElement>("[data-filter-badge]")
   const search = root.querySelector<HTMLInputElement>("[data-filter-search]")
@@ -513,11 +524,46 @@ function wireCollectionFilters() {
   const empty = root.querySelector<HTMLElement>("[data-filter-empty]")
   const countVisible = collection.querySelector<HTMLElement>("[data-collection-count-visible]")
   const items = [...collection.querySelectorAll<HTMLElement>("[data-portfolio-item]")]
+  const gallery = collection.querySelector<HTMLElement>('[data-view-panel="gallery"]')
 
   let significance = "all"
   const selectedTags = new Set<string>()
   let tagMenuOpen = false
   let panelOpen = false
+  let sortMode: "significance" | "date" =
+    sortButtons.find((button) => button.getAttribute("aria-pressed") === "true")?.dataset
+      .sortMode === "date"
+      ? "date"
+      : "significance"
+
+  const syncSortToggle = () => {
+    for (const button of sortButtons) {
+      button.setAttribute("aria-pressed", String(button.dataset.sortMode === sortMode))
+    }
+  }
+
+  const applyGallerySort = () => {
+    if (!gallery) return
+    const cards = [...gallery.querySelectorAll<HTMLElement>("[data-portfolio-item]")]
+    cards.sort((a, b) => {
+      const sigA = Number(a.dataset.sortSignificance ?? 2)
+      const sigB = Number(b.dataset.sortSignificance ?? 2)
+      const recA = Number(a.dataset.sortRecency ?? 0)
+      const recB = Number(b.dataset.sortRecency ?? 0)
+      const titleA = a.dataset.sortTitle ?? ""
+      const titleB = b.dataset.sortTitle ?? ""
+      if (sortMode === "significance") {
+        if (sigA !== sigB) return sigA - sigB
+        if (recA !== recB) return recB - recA
+        return titleA.localeCompare(titleB, undefined, { sensitivity: "base" })
+      }
+      if (recA !== recB) return recB - recA
+      if (sigA !== sigB) return sigA - sigB
+      return titleA.localeCompare(titleB, undefined, { sensitivity: "base" })
+    })
+    for (const card of cards) gallery.append(card)
+    syncSortToggle()
+  }
 
   const setPanelOpen = (open: boolean) => {
     panelOpen = open
@@ -653,6 +699,15 @@ function wireCollectionFilters() {
   const onFilterToggle = () => setPanelOpen(!panelOpen)
   toggle?.addEventListener("click", onFilterToggle)
 
+  const onSortMode = (event: Event) => {
+    const button = event.currentTarget as HTMLButtonElement
+    const mode = button.dataset.sortMode
+    if (mode !== "significance" && mode !== "date") return
+    sortMode = mode
+    applyGallerySort()
+  }
+  for (const button of sortButtons) button.addEventListener("click", onSortMode)
+
   const onTagQueryInput = () => {
     setTagMenuOpen(true)
     syncTagOptions()
@@ -721,12 +776,14 @@ function wireCollectionFilters() {
   setPanelOpen(false)
   renderSelectedTags()
   syncTagOptions()
+  syncSortToggle()
   apply()
 
   ;(window as CleanupWindow).addCleanup?.(() => {
     search?.removeEventListener("input", onSearch)
     search?.removeEventListener("keydown", onPanelKeydown)
     toggle?.removeEventListener("click", onFilterToggle)
+    for (const button of sortButtons) button.removeEventListener("click", onSortMode)
     for (const button of significanceButtons) button.removeEventListener("click", onSignificance)
     tagQuery?.removeEventListener("input", onTagQueryInput)
     tagQuery?.removeEventListener("focus", onTagQueryFocus)

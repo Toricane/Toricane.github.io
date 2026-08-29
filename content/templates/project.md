@@ -3,6 +3,12 @@ title: Project title
 description: One-line blurb for cards and timeline.
 date: YYYY-MM-DD
 modified: YYYY-MM-DD # omit for ongoing
+# pause: YYYY-MM-DD            # optional hiatus start (dashed lane until restart)
+# restart: YYYY-MM-DD          # optional hiatus end
+# pause1: YYYY-MM-DD           # extra pairs: pause1/restart1, pause2/restart2, …
+# restart1: YYYY-MM-DD
+# node: YYYY-MM-DD             # optional open-circle landmark on that month
+# node1: YYYY-MM-DD            # more landmarks: node1, node2, …
 from: Affiliation
 significance: minor # impactful | notable | minor
 tags:

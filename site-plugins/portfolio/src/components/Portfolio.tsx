@@ -13,7 +13,7 @@ import path from "node:path"
 import type { GalleryImage } from "../galleryExtractor"
 import { imageVariant } from "../imageVariant"
 import { applyLinkIconsToHast, linkIconMapFromFilenames, type LinkIconMap } from "../linkIcons"
-import { buildProjectTimeline } from "../projectTimeline"
+import { buildProjectTimeline, type PauseRestart } from "../projectTimeline"
 
 type CoverPhoto = {
   src?: string
@@ -60,6 +60,53 @@ function sectionHref(section: Section) {
 
 function frontmatter(file: PortfolioFile): Frontmatter {
   return (file.frontmatter ?? {}) as Frontmatter
+}
+
+/** Read `pause`/`restart`, `pause1`/`restart1`, … pairs from project frontmatter. */
+function projectPauseRestarts(file: PortfolioFile): PauseRestart[] {
+  const data = (file.frontmatter ?? {}) as Record<string, unknown>
+  const buckets = new Map<number, { pause?: string | Date; restart?: string | Date }>()
+
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value !== "string" && !(value instanceof Date)) continue
+    const pauseMatch = /^pause(\d+)?$/i.exec(key)
+    if (pauseMatch) {
+      const index = pauseMatch[1] === undefined ? 0 : Number(pauseMatch[1])
+      const bucket = buckets.get(index) ?? {}
+      bucket.pause = value
+      buckets.set(index, bucket)
+      continue
+    }
+    const restartMatch = /^restart(\d+)?$/i.exec(key)
+    if (restartMatch) {
+      const index = restartMatch[1] === undefined ? 0 : Number(restartMatch[1])
+      const bucket = buckets.get(index) ?? {}
+      bucket.restart = value
+      buckets.set(index, bucket)
+    }
+  }
+
+  return [...buckets.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .flatMap(([, pair]) =>
+      pair.pause && pair.restart ? [{ pause: pair.pause, restart: pair.restart }] : [],
+    )
+}
+
+/** Read `node`, `node1`, `node2`, … landmark dates from project frontmatter. */
+function projectMilestoneNodes(file: PortfolioFile): Array<string | Date> {
+  const data = (file.frontmatter ?? {}) as Record<string, unknown>
+  const entries: { index: number; value: string | Date }[] = []
+
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value !== "string" && !(value instanceof Date)) continue
+    const match = /^node(\d+)?$/i.exec(key)
+    if (!match) continue
+    const index = match[1] === undefined ? 0 : Number(match[1])
+    entries.push({ index, value })
+  }
+
+  return entries.sort((a, b) => a.index - b.index).map((entry) => entry.value)
 }
 
 function cleanSlug(file: PortfolioFile) {
@@ -268,21 +315,34 @@ function filterSignificance(value: Frontmatter["significance"]): string {
   return value === "impactful" || value === "notable" || value === "minor" ? value : "minor"
 }
 
-/** Searchable blob + filter keys for client-side collection filters. */
-function filterDataset(data: Frontmatter): {
+/** Searchable blob + filter/sort keys for client-side collection controls. */
+function filterDataset(
+  data: Frontmatter,
+  section: Section,
+): {
   "data-filter-text": string
   "data-filter-tags": string
   "data-filter-significance": string
+  "data-sort-significance": string
+  "data-sort-recency": string
+  "data-sort-title": string
 } {
   const tags = tagList(data.tags)
   const text = [data.title, data.from, data.description]
     .filter((part): part is string => typeof part === "string" && part.trim().length > 0)
     .join(" ")
     .toLowerCase()
+  const recency =
+    section === "projects"
+      ? timestamp(data.modified ?? data.date)
+      : whenSortValue(whenKey(data.when))
   return {
     "data-filter-text": text,
     "data-filter-tags": tags.map((tag) => tag.toLowerCase()).join("|"),
     "data-filter-significance": filterSignificance(data.significance),
+    "data-sort-significance": String(significanceRank(data.significance)),
+    "data-sort-recency": String(recency),
+    "data-sort-title": (data.title ?? "").toLowerCase(),
   }
 }
 
@@ -452,12 +512,12 @@ function TimelineThumb({ image }: { image?: GalleryImage }) {
   return <img src={image.src} alt={image.alt || ""} loading="lazy" decoding="async" />
 }
 
-function CollectionCard({ file, section }: { file: PortfolioFile; section: string }) {
+function CollectionCard({ file, section }: { file: PortfolioFile; section: Section }) {
   const data = frontmatter(file)
   const type = section === "projects" ? "project" : section === "hackathons" ? "hackathon" : "award"
   const images = cardImages(file)
   const shown = visibleSignificance(data.significance)
-  const filters = filterDataset(data)
+  const filters = filterDataset(data, section)
   return (
     <li
       class={`portfolio-card portfolio-card--${type}`}
@@ -484,16 +544,17 @@ function CollectionCard({ file, section }: { file: PortfolioFile; section: strin
 
 function TimelineRow({
   file,
+  section,
   showDate = true,
 }: {
   file: PortfolioFile
+  section: Section
   showDate?: boolean
 }) {
   const data = frontmatter(file)
   const thumb = timelineThumbImage(file)
-  const dateLabel = displayDate(data)
   const shown = visibleSignificance(data.significance)
-  const filters = filterDataset(data)
+  const filters = filterDataset(data, section)
   return (
     <li
       class="portfolio-timeline__item"
@@ -501,8 +562,8 @@ function TimelineRow({
       data-significance={shown}
       {...filters}
     >
-      {showDate && dateLabel ? (
-        <time class="portfolio-timeline__date">{dateLabel}</time>
+      {showDate ? (
+        <TimelineWhenLabel when={data.when} />
       ) : (
         <span class="portfolio-timeline__date" aria-hidden="true" />
       )}
@@ -537,7 +598,7 @@ function ProjectTimelineCard({ file }: { file: PortfolioFile }) {
   const thumb = timelineThumbImage(file)
   const shown = visibleSignificance(data.significance)
   const slug = cleanSlug(file)
-  const filters = filterDataset(data)
+  const filters = filterDataset(data, "projects")
   return (
     <a
       class="portfolio-project-timeline__card"
@@ -553,9 +614,13 @@ function ProjectTimelineCard({ file }: { file: PortfolioFile }) {
       </div>
       <div class="portfolio-project-timeline__card-body">
         <h2>{data.title}</h2>
-        {data.from && <p class="portfolio-card__from">{data.from}</p>}
+        {(data.from || (Array.isArray(data.tags) && data.tags.length > 0)) && (
+          <div class="portfolio-project-timeline__card-meta">
+            {data.from && <p class="portfolio-card__from">{data.from}</p>}
+            <TagList tags={data.tags} compact />
+          </div>
+        )}
         {data.description && <p>{data.description}</p>}
-        <TagList tags={data.tags} compact />
       </div>
     </a>
   )
@@ -571,6 +636,8 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
         title: data.title ?? cleanSlug(file),
         start: data.date ?? "",
         end: data.modified,
+        pauses: projectPauseRestarts(file),
+        nodes: projectMilestoneNodes(file),
         parent: projectParentSlug(data.parent),
         series: typeof data.series === "string" ? data.series : undefined,
       }
@@ -613,9 +680,15 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
           <span class="portfolio-project-timeline__legend-node portfolio-project-timeline__legend-node--ongoing" />
           Ongoing
         </li>
-        <li>
-          <span class="portfolio-project-timeline__legend-branch" />
-          Branch
+        <li class="portfolio-project-timeline__legend-pair">
+          <span class="portfolio-project-timeline__legend-item">
+            <span class="portfolio-project-timeline__legend-pause" />
+            Paused
+          </span>
+          <span class="portfolio-project-timeline__legend-item">
+            <span class="portfolio-project-timeline__legend-branch" />
+            Branch
+          </span>
         </li>
       </ul>
       <div
@@ -632,12 +705,27 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
       >
         <div class="portfolio-project-timeline__months" aria-hidden="true">
           {model.months.map((month, index) => {
-            const prev = model.months[index - 1]
+            if (month.kind === "gap") {
+              return (
+                <div
+                  class="portfolio-project-timeline__month portfolio-project-timeline__month--gap"
+                  data-month={month.key}
+                  style={{ gridRow: String(index + 1) }}
+                >
+                  <span class="portfolio-project-timeline__gap-label">{month.label}</span>
+                </div>
+              )
+            }
+            const prev = [...model.months.slice(0, index)]
+              .reverse()
+              .find((entry) => entry.kind === "month")
             const showYear = !prev || prev.year !== month.year
             return (
               <div
                 class="portfolio-project-timeline__month"
                 data-month={month.key}
+                data-season={seasonForMonth(month.month)}
+                data-year-digit={String(month.year % 10)}
                 style={{ gridRow: String(index + 1) }}
               >
                 {showYear && (
@@ -668,7 +756,7 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
             ))}
             {model.segments.map((segment) => (
               <line
-                class={`portfolio-project-timeline__segment portfolio-project-timeline__color-${segment.colorIndex}${segment.ongoing ? " portfolio-project-timeline__segment--ongoing" : ""}`}
+                class={`portfolio-project-timeline__segment portfolio-project-timeline__segment--${segment.style} portfolio-project-timeline__color-${segment.colorIndex}`}
                 data-project-slug={segment.slug}
                 x1={segment.x}
                 y1={segment.y1}
@@ -720,6 +808,43 @@ function monthLabelShort(month: number): string {
     .toUpperCase()
 }
 
+function seasonForMonth(month: number): "winter" | "spring" | "summer" | "fall" {
+  if (month === 12 || month <= 2) return "winter"
+  if (month <= 5) return "spring"
+  if (month <= 8) return "summer"
+  return "fall"
+}
+
+function whenParts(when: string | undefined): { year: number; month: number } | null {
+  const key = whenKey(when)
+  const match = key.match(/^(\d{4})\/(\d{2})$/)
+  if (!match) return null
+  return { year: Number(match[1]), month: Number(match[2]) }
+}
+
+function TimelineWhenLabel({ when }: { when?: string }) {
+  const parts = whenParts(when)
+  if (!parts) {
+    const fallback = displayDate({ when })
+    return fallback ? (
+      <time class="portfolio-timeline__date">{fallback}</time>
+    ) : (
+      <span class="portfolio-timeline__date" aria-hidden="true" />
+    )
+  }
+  return (
+    <time
+      class="portfolio-timeline__date"
+      dateTime={`${parts.year}-${String(parts.month).padStart(2, "0")}`}
+      data-season={seasonForMonth(parts.month)}
+      data-year-digit={String(parts.year % 10)}
+    >
+      <span class="portfolio-timeline__year">{parts.year}</span>
+      <span class="portfolio-timeline__month-label">{monthLabelShort(parts.month)}</span>
+    </time>
+  )
+}
+
 function TimelineGroupRow({ group, section }: { group: TimelineGroup; section: Section }) {
   const hasImpactful = group.items.some((file) => frontmatter(file).significance === "impactful")
   const hasNotable = group.items.some((file) => frontmatter(file).significance === "notable")
@@ -727,10 +852,8 @@ function TimelineGroupRow({ group, section }: { group: TimelineGroup; section: S
     hasImpactful || hasNotable
       ? ` portfolio-timeline__group--${hasImpactful ? "impactful" : "notable"}`
       : ""
-  const monthLabel = displayDate({ when: group.when })
-
   if (group.items.length === 1) {
-    return <TimelineRow file={group.items[0]} />
+    return <TimelineRow file={group.items[0]} section={section} />
   }
 
   return (
@@ -739,11 +862,7 @@ function TimelineGroupRow({ group, section }: { group: TimelineGroup; section: S
       data-timeline-group
       data-significance={hasImpactful ? "impactful" : hasNotable ? "notable" : undefined}
     >
-      {monthLabel ? (
-        <time class="portfolio-timeline__date">{monthLabel}</time>
-      ) : (
-        <span class="portfolio-timeline__date" aria-hidden="true" />
-      )}
+      <TimelineWhenLabel when={group.when} />
       <div class="portfolio-timeline__rail" aria-hidden="true">
         <span />
       </div>
@@ -762,7 +881,7 @@ function TimelineGroupRow({ group, section }: { group: TimelineGroup; section: S
         </button>
         <ol class="portfolio-timeline__children" data-timeline-children hidden>
           {group.items.map((file) => (
-            <TimelineRow file={file} showDate={false} />
+            <TimelineRow file={file} section={section} showDate={false} />
           ))}
         </ol>
       </div>
@@ -778,7 +897,7 @@ function Collection({ section, allFiles }: { section: Section; allFiles: Portfol
   const tags = collectionTags(items)
 
   return (
-    <main class="portfolio-collection" data-portfolio-collection={section}>
+    <main class="portfolio-collection" data-portfolio-collection={section} data-view="gallery">
       <div class="portfolio-heading">
         <div>
           <p data-collection-count>
@@ -789,6 +908,14 @@ function Collection({ section, allFiles }: { section: Section; allFiles: Portfol
           <h1>{title}</h1>
         </div>
         <div class="portfolio-heading__actions">
+          <div class="portfolio-view-toggle" role="group" aria-label="Sort order" data-sort-toggle>
+            <button type="button" data-sort-mode="significance" aria-pressed="true">
+              Significance
+            </button>
+            <button type="button" data-sort-mode="date" aria-pressed="false">
+              Date
+            </button>
+          </div>
           <button
             type="button"
             class="portfolio-filter-toggle"

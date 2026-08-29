@@ -46,12 +46,14 @@ Awards and hackathons also use:
 Projects also use:
 
 - `date` / `modified` — real `YYYY-MM-DD` start and end. The plugin formats the display range. **Do not** set `when` or a handwritten `period`. Omit `modified` for an ongoing project (open-ended lane).
+- `pause` / `restart` (optional) — hiatus bounds (`YYYY-MM-DD`). Timeline draws a dashed lane between them; solid work continues on either side. Extra pairs: `pause1`/`restart1`, `pause2`/`restart2`, …
+- `node` (optional) — extra open-circle landmark on that month (`YYYY-MM-DD`), within `date`…`modified`. More: `node1`, `node2`, …
 - `parent` (optional) — project slug to draw a Git-style branch curve from (e.g. `jarvis-for-the-visually-impaired` or `projects/jarvis-for-the-visually-impaired`). Overlap alone never invents branches.
 - `series` (optional) — soft group name; later projects in the same series branch from the previous one when `parent` is omitted.
 
-Gallery (all collections) sorts by `significance` then recency (`when` for awards/hackathons, `modified ?? date` for projects). Award/hackathon timelines stay month-grouped; the projects timeline is a vertical Git-style lane graph (auto-packed from `date`/`modified`, with optional `parent`/`series` curves).
+Gallery (all collections) sorts by `significance` then recency (`when` for awards/hackathons, `modified ?? date` for projects). Award/hackathon timelines stay month-grouped; the projects timeline is a vertical Git-style lane graph (packed start/end/pause/node months from `date`/`modified`/`pause*`/`restart*`/`node*`, compact gap markers for empty stretches, dashed hiatus segments, optional `parent`/`series` curves — not a linear calendar scale).
 
-Collection pages include client-side **filters**: text search (title / from / description), significance chips, and tag chips (intersection). Filters apply to both Gallery and Timeline views.
+Collection pages include client-side **filters**: text search (title / from / description), significance chips, and tag chips (intersection). Filters apply to both Gallery and Timeline views. Gallery also has a **Sort** toggle: significance-then-date (default) or date-then-significance.
 
 **Keep `projects/`, `hackathons/`, and `awards/` as separate collections.** Do not merge hackathons into projects unless filters still leave the split feeling redundant — different time models (`date`/`modified` ranges vs `when` points) drive different timeline UIs. Related builds can use `parent` / `series` or shared tags instead.
 

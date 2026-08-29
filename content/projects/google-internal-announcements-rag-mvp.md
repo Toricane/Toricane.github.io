@@ -2,6 +2,8 @@
 title: Google Internal Announcements RAG MVP
 description: "Personalized announcements + question answering by integrating Gemini with internal docs (RAG) for sales teams; selected top 3/100+ & ranked #1 in final judging by the Global Head of Partnerships with Google Canada."
 date: 2023-12-01
+pause: 2023-12-20
+restart: 2024-08-01
 modified: 2024-08-06
 from: Google Canada Challenge
 significance: notable
