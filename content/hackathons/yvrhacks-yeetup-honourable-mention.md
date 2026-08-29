@@ -7,7 +7,6 @@ significance: notable
 tags:
   - Honourable-Mention
   - In-Person
-cover: assets/tab-panels/yvrhacks_hackathon.webp
 ---
 
 AI‑first natural language interface to discover youth events & meetups (Groq).

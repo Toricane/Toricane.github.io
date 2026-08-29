@@ -7,7 +7,6 @@ significance: impactful
 tags:
   - Academic
   - Citizenship
-cover: assets/tab-panels/top_raven_g10_trophy.webp
 ---
 
 Highest award: academics & contribution.

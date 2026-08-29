@@ -6,7 +6,6 @@ from: "Richmond Retired Teachers' Association"
 significance: minor
 tags:
   - Scholarship
-cover: assets/tab-panels/jean_myron.webp
 ---
 
 Scholarship for outstanding achievement 2024–25.

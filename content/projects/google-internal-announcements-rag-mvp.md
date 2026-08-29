@@ -9,7 +9,6 @@ tags:
   - LLM
   - RAG
   - Product
-cover: assets/tab-panels/google_internal_announcements_1.webp
 ---
 
 ## Overview

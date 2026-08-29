@@ -7,7 +7,6 @@ significance: impactful
 tags:
   - Second-Place
   - In-Person
-cover: assets/tab-panels/scrapyard_hackathon.webp
 ---
 
 Interactive AI game resembling Pokémon with real‑world items; placed 2nd among 100+ participants.

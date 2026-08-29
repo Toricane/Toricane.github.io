@@ -6,7 +6,6 @@ from: Hack the North
 significance: notable
 tags:
   - In-Person
-cover: assets/tab-panels/hackthenorth_hackathon.webp
 ---
 
 AI interview simulation app for CS majors (Gradio, Groq, OpenAI).

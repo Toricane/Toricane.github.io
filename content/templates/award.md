@@ -6,7 +6,6 @@ from: Issuing organization
 significance: minor # impactful | notable | minor
 tags:
   - Topic
-cover: assets/tab-panels/example.webp
 ---
 
 One-line blurb for cards and timeline.

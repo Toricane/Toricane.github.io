@@ -36,7 +36,8 @@ Shared on every entry:
 | `from` | Source / host / affiliation — who issued it or where it lived, not a restatement of the title or the outcome |
 | `significance` | Always set: `impactful` (gold), `notable` (silver), `minor` (normal). `minor` is YAML-only — the UI never shows a pill or `data-significance="minor"` |
 | `tags` | The only chip list. Awards: topic. Hackathons: placement/format. Projects: stack/topic |
-| `cover` | Path under `assets/…` (full tab-panels image). Optional if there is no image |
+
+Card / timeline / entry hero images come from the note’s `## Gallery` (first image). Do **not** set a `cover` frontmatter field.
 
 Awards and hackathons also use:
 
@@ -44,13 +45,19 @@ Awards and hackathons also use:
 
 Projects also use:
 
-- `date` / `modified` — real `YYYY-MM-DD` start and end. The plugin formats the display range. **Do not** set `when` or a handwritten `period`.
+- `date` / `modified` — real `YYYY-MM-DD` start and end. The plugin formats the display range. **Do not** set `when` or a handwritten `period`. Omit `modified` for an ongoing project (open-ended lane).
+- `parent` (optional) — project slug to draw a Git-style branch curve from (e.g. `jarvis-for-the-visually-impaired` or `projects/jarvis-for-the-visually-impaired`). Overlap alone never invents branches.
+- `series` (optional) — soft group name; later projects in the same series branch from the previous one when `parent` is omitted.
 
-Gallery (all collections) sorts by `significance` then recency (`when` for awards/hackathons, `modified ?? date` for projects). Timelines stay chronological (month groups for awards/hackathons; recency for projects).
+Gallery (all collections) sorts by `significance` then recency (`when` for awards/hackathons, `modified ?? date` for projects). Award/hackathon timelines stay month-grouped; the projects timeline is a vertical Git-style lane graph (auto-packed from `date`/`modified`, with optional `parent`/`series` curves).
+
+Collection pages include client-side **filters**: text search (title / from / description), significance chips, and tag chips (intersection). Filters apply to both Gallery and Timeline views.
+
+**Keep `projects/`, `hackathons/`, and `awards/` as separate collections.** Do not merge hackathons into projects unless filters still leave the split feeling redundant — different time models (`date`/`modified` ranges vs `when` points) drive different timeline UIs. Related builds can use `parent` / `series` or shared tags instead.
 
 Optional, unused until filled: `role`, `outcome` (entry facts). Do not invent copy.
 
-**Do not use:** `groupSummary`, `badges`, `tools`, `featured`, `period`, or `date` on awards/hackathons.
+**Do not use:** `cover` on any collection entry. Also do not use `groupSummary`, `badges`, `tools`, `featured`, `period`, or `date` on awards/hackathons.
 
 `from` conventions:
 
@@ -78,7 +85,7 @@ For `assets/tab-panels/` images, keep three sizes with the **same basename**:
 | Small | `assets/tab-panels/small/{name}.webp` | 800px wide | Gallery cards + coverflows |
 | Preview | `assets/tab-panels/preview/{name}.webp` | 256px wide | Timeline thumbs |
 
-Content should reference the **full** path in frontmatter/`## Gallery`. The plugin rewrites to `small/` or `preview/` at render time via `imageVariant()`.
+Content should reference the **full** path in `## Gallery`. The plugin rewrites to `small/` or `preview/` at render time via `imageVariant()`.
 
 `npm run images` (`scripts/generate-image-variants.mjs`) creates **missing** `small/` and `preview/` WebPs only. Existing files are not overwritten unless you pass `--force`. This is **not** part of `npx quartz build` or GitHub Actions.
 
@@ -128,6 +135,7 @@ Entry-page `## Gallery` coverflow items always open the lightbox on click.
 Edit `site-plugins/portfolio/src/`:
 
 - `components/Portfolio.tsx` — SSR layout
+- `projectTimeline.ts` — projects Git-style timeline layout math (lanes, branches)
 - `scripts/portfolio.inline.ts` — client behavior (modal, lightbox, icons, coverflow)
 - `styles/portfolio.scss` — styling
 - `imageVariant.ts` — asset path rewriting

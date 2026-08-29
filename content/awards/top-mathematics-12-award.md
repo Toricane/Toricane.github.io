@@ -7,7 +7,6 @@ significance: notable
 tags:
   - Math
   - Academic
-cover: assets/tab-panels/top_math_12_g12.webp
 ---
 
 Top marks AP Calc AB + self‑studied BC.

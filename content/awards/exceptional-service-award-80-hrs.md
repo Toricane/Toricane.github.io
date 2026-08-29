@@ -6,7 +6,6 @@ from: MacNeill Secondary
 significance: minor
 tags:
   - Service
-cover: assets/tab-panels/exceptional_service_g10.webp
 ---
 
 80+ service hours (2022–23).

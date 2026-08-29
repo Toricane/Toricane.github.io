@@ -7,7 +7,6 @@ significance: impactful
 tags:
   - Math
   - Academic
-cover: assets/tab-panels/top_math_11_g10.webp
 ---
 
 Highest Grade 11 math while in Gr.10.

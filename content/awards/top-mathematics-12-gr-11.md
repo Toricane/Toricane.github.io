@@ -7,7 +7,6 @@ significance: notable
 tags:
   - Math
   - Academic
-cover: assets/tab-panels/top_math_12_g11.webp
 ---
 
 Highest Pre‑Calculus 12 while in Gr.11.

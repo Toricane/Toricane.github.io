@@ -7,7 +7,6 @@ significance: impactful
 tags:
   - Winner
   - In-Person
-cover: assets/tab-panels/hack4youth_hackathon.webp
 ---
 
 Calendar + AI chatbot for intelligent time management integrating Google Calendar.

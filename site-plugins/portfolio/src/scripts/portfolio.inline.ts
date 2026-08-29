@@ -100,6 +100,46 @@ function wireTimelineGroups(root: ParentNode = document) {
   }
 }
 
+function wireProjectTimeline(root: ParentNode = document) {
+  const boards = [
+    ...root.querySelectorAll<HTMLElement>("[data-project-timeline] .portfolio-project-timeline__board"),
+  ]
+  for (const board of boards) {
+    if (board.dataset.wired === "true") continue
+    board.dataset.wired = "true"
+
+    const setActive = (slug: string | null) => {
+      const marks = board.querySelectorAll<Element>("[data-project-slug]")
+      for (const el of marks) {
+        const elSlug = el.getAttribute("data-project-slug")
+        el.classList.toggle("is-active", slug !== null && elSlug === slug)
+      }
+      board.classList.toggle("is-focusing", slug !== null)
+    }
+
+    const onOver = (event: Event) => {
+      const target = (event.target as Element | null)?.closest?.("[data-project-slug]")
+      if (!target || !board.contains(target)) return
+      const slug = target.getAttribute("data-project-slug")
+      if (slug) setActive(slug)
+    }
+    const onOut = (event: PointerEvent) => {
+      const next = event.relatedTarget as Node | null
+      if (next && board.contains(next)) return
+      setActive(null)
+    }
+
+    board.addEventListener("pointerover", onOver)
+    board.addEventListener("pointerout", onOut)
+    ;(window as CleanupWindow).addCleanup?.(() => {
+      board.removeEventListener("pointerover", onOver)
+      board.removeEventListener("pointerout", onOut)
+      board.dataset.wired = "false"
+      setActive(null)
+    })
+  }
+}
+
 function headingText(node: Element | null) {
   return node?.textContent?.replace(/\s+/g, " ").trim().toLowerCase() ?? ""
 }
@@ -403,6 +443,298 @@ function wireViewToggle() {
 
   ;(window as CleanupWindow).addCleanup?.(() => {
     for (const button of buttons) button.removeEventListener("click", onClick)
+  })
+}
+
+/** Case-insensitive fuzzy match: substring or ordered subsequence, per whitespace token. */
+function fuzzyMatch(haystack: string, needle: string): boolean {
+  const query = needle.trim().toLowerCase()
+  if (!query) return true
+  const text = haystack.toLowerCase()
+  if (!text) return false
+
+  return query.split(/\s+/).every((token) => {
+    if (!token) return true
+    if (text.includes(token)) return true
+    let index = 0
+    for (const char of text) {
+      if (char === token[index]) index += 1
+      if (index >= token.length) return true
+    }
+    return false
+  })
+}
+
+function itemMatchesFilters(
+  item: HTMLElement,
+  query: string,
+  significance: string,
+  tags: string[],
+): boolean {
+  if (significance !== "all") {
+    const value = item.dataset.filterSignificance || "minor"
+    if (value !== significance) return false
+  }
+
+  // Tag chips use OR: match if the item has any selected tag.
+  if (tags.length) {
+    const itemTags = (item.dataset.filterTags || "")
+      .split("|")
+      .map((tag) => tag.trim())
+      .filter(Boolean)
+    if (!tags.some((tag) => itemTags.includes(tag))) return false
+  }
+
+  if (query && !fuzzyMatch(item.dataset.filterText || "", query)) return false
+
+  return true
+}
+
+function wireCollectionFilters() {
+  const collection = document.querySelector<HTMLElement>("[data-portfolio-collection]")
+  const root = collection?.querySelector<HTMLElement>("[data-portfolio-filters]")
+  if (!collection || !root || root.dataset.wired === "true") return
+  root.dataset.wired = "true"
+
+  const toggle = collection.querySelector<HTMLButtonElement>("[data-filter-toggle]")
+  const panel = root.querySelector<HTMLElement>("[data-filter-panel]")
+  const badge = collection.querySelector<HTMLElement>("[data-filter-badge]")
+  const search = root.querySelector<HTMLInputElement>("[data-filter-search]")
+  const significanceButtons = [
+    ...root.querySelectorAll<HTMLButtonElement>("[data-filter-significance]"),
+  ]
+  const combobox = root.querySelector<HTMLElement>("[data-tag-combobox]")
+  const tagQuery = combobox?.querySelector<HTMLInputElement>("[data-tag-query]")
+  const tagSelected = combobox?.querySelector<HTMLElement>("[data-tag-selected]")
+  const tagOptions = combobox?.querySelector<HTMLElement>("[data-tag-options]")
+  const tagOptionItems = tagOptions
+    ? [...tagOptions.querySelectorAll<HTMLElement>("[data-tag-option]")]
+    : []
+  const empty = root.querySelector<HTMLElement>("[data-filter-empty]")
+  const countVisible = collection.querySelector<HTMLElement>("[data-collection-count-visible]")
+  const items = [...collection.querySelectorAll<HTMLElement>("[data-portfolio-item]")]
+
+  let significance = "all"
+  const selectedTags = new Set<string>()
+  let tagMenuOpen = false
+  let panelOpen = false
+
+  const setPanelOpen = (open: boolean) => {
+    panelOpen = open
+    if (panel) panel.hidden = !open
+    toggle?.setAttribute("aria-expanded", String(open))
+    toggle?.classList.toggle("is-open", open)
+    if (open) queueMicrotask(() => search?.focus())
+    else setTagMenuOpen(false)
+  }
+
+  const setTagMenuOpen = (open: boolean) => {
+    tagMenuOpen = open
+    if (tagOptions) tagOptions.hidden = !open
+    tagQuery?.setAttribute("aria-expanded", String(open))
+  }
+
+  const syncFilterBadge = (query: string, tags: string[]) => {
+    if (!badge || !toggle) return
+    let active = tags.length
+    if (query.trim()) active += 1
+    if (significance !== "all") active += 1
+    badge.textContent = String(active)
+    badge.hidden = active === 0
+    toggle.classList.toggle("has-active", active > 0)
+  }
+
+  const renderSelectedTags = () => {
+    if (!tagSelected) return
+    tagSelected.replaceChildren()
+    for (const option of tagOptionItems) {
+      const value = option.dataset.tagOption
+      if (!value || !selectedTags.has(value)) continue
+      const chip = document.createElement("button")
+      chip.type = "button"
+      chip.className = "portfolio-filters__chip"
+      chip.dataset.tagRemove = value
+      chip.setAttribute("aria-label", `Remove tag ${option.dataset.tagLabel || value}`)
+      chip.textContent = option.dataset.tagLabel || value
+      tagSelected.append(chip)
+    }
+  }
+
+  const syncTagOptions = () => {
+    const query = tagQuery?.value || ""
+    for (const option of tagOptionItems) {
+      const value = option.dataset.tagOption || ""
+      const label = option.dataset.tagLabel || value
+      const selected = selectedTags.has(value)
+      option.setAttribute("aria-selected", String(selected))
+      option.classList.toggle("is-selected", selected)
+      const visible = fuzzyMatch(`${label} ${value}`, query)
+      option.hidden = !visible
+      if (visible) option.style.removeProperty("display")
+      else option.style.display = "none"
+    }
+  }
+
+  const apply = () => {
+    const query = search?.value || ""
+    const tags = [...selectedTags]
+    const matchedSlugs = new Set<string>()
+
+    for (const item of items) {
+      const match = itemMatchesFilters(item, query, significance, tags)
+      item.hidden = !match
+      // Author `display` rules beat the UA `[hidden]` stylesheet; force hide.
+      if (match) item.style.removeProperty("display")
+      else item.style.display = "none"
+      if (!match) continue
+      const slug = item.getAttribute("data-project-slug")
+      if (slug) matchedSlugs.add(slug)
+    }
+
+    const projectBoard = collection.querySelector<HTMLElement>(
+      "[data-project-timeline] .portfolio-project-timeline__board",
+    )
+    if (projectBoard) {
+      const filtersActive = Boolean(query.trim()) || significance !== "all" || tags.length > 0
+      for (const mark of projectBoard.querySelectorAll<SVGElement | HTMLElement>("[data-project-slug]")) {
+        if (mark.matches(".portfolio-project-timeline__card")) continue
+        const slug = mark.getAttribute("data-project-slug")
+        if (!slug) continue
+        // SVG elements ignore `hidden`; use visibility so lanes stay aligned.
+        mark.style.visibility = !filtersActive || matchedSlugs.has(slug) ? "" : "hidden"
+      }
+    }
+
+    for (const group of collection.querySelectorAll<HTMLElement>("[data-timeline-group]")) {
+      const children = [...group.querySelectorAll<HTMLElement>("[data-portfolio-item]")]
+      const anyVisible = children.some((child) => !child.hidden)
+      const hideGroup = children.length > 0 && !anyVisible
+      group.hidden = hideGroup
+      if (hideGroup) group.style.display = "none"
+      else group.style.removeProperty("display")
+    }
+
+    // Gallery + timeline both carry items; count once from the gallery panel.
+    const galleryItems = [
+      ...collection.querySelectorAll<HTMLElement>('[data-view-panel="gallery"] [data-portfolio-item]'),
+    ]
+    const visible = galleryItems.filter((item) => !item.hidden).length
+    if (countVisible) countVisible.textContent = String(visible)
+    if (empty) empty.hidden = visible > 0 || galleryItems.length === 0
+    syncFilterBadge(query, tags)
+  }
+
+  const toggleTag = (value: string) => {
+    if (!value) return
+    if (selectedTags.has(value)) selectedTags.delete(value)
+    else selectedTags.add(value)
+    renderSelectedTags()
+    syncTagOptions()
+    apply()
+  }
+
+  const onSearch = () => apply()
+  search?.addEventListener("input", onSearch)
+
+  const onSignificance = (event: Event) => {
+    const button = event.currentTarget as HTMLButtonElement
+    const value = button.dataset.filterSignificance || "all"
+    significance = value
+    for (const candidate of significanceButtons) {
+      candidate.setAttribute(
+        "aria-pressed",
+        String(candidate.dataset.filterSignificance === significance),
+      )
+    }
+    apply()
+  }
+  for (const button of significanceButtons) button.addEventListener("click", onSignificance)
+
+  const onFilterToggle = () => setPanelOpen(!panelOpen)
+  toggle?.addEventListener("click", onFilterToggle)
+
+  const onTagQueryInput = () => {
+    setTagMenuOpen(true)
+    syncTagOptions()
+  }
+  const onTagQueryFocus = () => {
+    setTagMenuOpen(true)
+    syncTagOptions()
+  }
+  const onTagQueryKeydown = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      if (tagMenuOpen) {
+        setTagMenuOpen(false)
+        return
+      }
+      setPanelOpen(false)
+      toggle?.focus()
+      return
+    }
+    if (event.key === "Enter") {
+      event.preventDefault()
+      const first = tagOptionItems.find((option) => !option.hidden)
+      const value = first?.dataset.tagOption
+      if (value) {
+        toggleTag(value)
+        if (tagQuery) tagQuery.value = ""
+        syncTagOptions()
+      }
+    }
+  }
+  const onTagOptionsClick = (event: Event) => {
+    const option = (event.target as HTMLElement | null)?.closest<HTMLElement>("[data-tag-option]")
+    const value = option?.dataset.tagOption
+    if (!value || !tagOptions?.contains(option)) return
+    toggleTag(value)
+  }
+  const onSelectedClick = (event: Event) => {
+    const chip = (event.target as HTMLElement | null)?.closest<HTMLElement>("[data-tag-remove]")
+    const value = chip?.dataset.tagRemove
+    if (!value) return
+    selectedTags.delete(value)
+    renderSelectedTags()
+    syncTagOptions()
+    apply()
+  }
+  const onDocumentPointer = (event: Event) => {
+    if (!tagMenuOpen || !combobox) return
+    const target = event.target as Node | null
+    if (target && combobox.contains(target)) return
+    setTagMenuOpen(false)
+  }
+  const onPanelKeydown = (event: KeyboardEvent) => {
+    if (event.key !== "Escape" || tagMenuOpen || !panelOpen) return
+    if (event.target !== search && event.target !== tagQuery) return
+    setPanelOpen(false)
+    toggle?.focus()
+  }
+
+  tagQuery?.addEventListener("input", onTagQueryInput)
+  tagQuery?.addEventListener("focus", onTagQueryFocus)
+  tagQuery?.addEventListener("keydown", onTagQueryKeydown)
+  tagOptions?.addEventListener("click", onTagOptionsClick)
+  tagSelected?.addEventListener("click", onSelectedClick)
+  search?.addEventListener("keydown", onPanelKeydown)
+  document.addEventListener("pointerdown", onDocumentPointer)
+
+  setPanelOpen(false)
+  renderSelectedTags()
+  syncTagOptions()
+  apply()
+
+  ;(window as CleanupWindow).addCleanup?.(() => {
+    search?.removeEventListener("input", onSearch)
+    search?.removeEventListener("keydown", onPanelKeydown)
+    toggle?.removeEventListener("click", onFilterToggle)
+    for (const button of significanceButtons) button.removeEventListener("click", onSignificance)
+    tagQuery?.removeEventListener("input", onTagQueryInput)
+    tagQuery?.removeEventListener("focus", onTagQueryFocus)
+    tagQuery?.removeEventListener("keydown", onTagQueryKeydown)
+    tagOptions?.removeEventListener("click", onTagOptionsClick)
+    tagSelected?.removeEventListener("click", onSelectedClick)
+    document.removeEventListener("pointerdown", onDocumentPointer)
+    root.dataset.wired = "false"
   })
 }
 
@@ -972,7 +1304,9 @@ function initializePortfolio() {
   redirectLegacyHash()
   wireReel()
   wireTimelineGroups()
+  wireProjectTimeline()
   wireViewToggle()
+  wireCollectionFilters()
   wireLightbox()
   wireModal()
   // Full entry pages get the same gallery coverflow + bookmark links as the modal.

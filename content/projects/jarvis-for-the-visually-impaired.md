@@ -10,7 +10,6 @@ tags:
   - Edge
   - C++
   - Embedded
-cover: assets/tab-panels/vanaimay.webp
 ---
 
 ## Overview

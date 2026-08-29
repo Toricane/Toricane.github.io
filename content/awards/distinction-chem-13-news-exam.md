@@ -7,7 +7,6 @@ significance: minor
 tags:
   - Chemistry
   - Contest
-cover: assets/tab-panels/chem_13_news_distinction.webp
 ---
 
 Top 20% internationally.

@@ -7,7 +7,6 @@ significance: minor
 tags:
   - Physics
   - Contest
-cover: assets/tab-panels/sin_certificate_g11.webp
 ---
 
 282/3077 worldwide; 3rd school (Gr.11).

@@ -6,7 +6,6 @@ from: MacNeill Secondary
 significance: impactful
 tags:
   - Academic
-cover: assets/tab-panels/top_academic_g11_trophy.webp
 ---
 
 96.75% average over 8 courses.

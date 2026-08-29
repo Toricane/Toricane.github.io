@@ -7,7 +7,6 @@ significance: impactful
 tags:
   - Academic
   - Citizenship
-cover: assets/tab-panels/top_raven_g12_trophy.webp
 ---
 
 Highest award: academics, citizenship, school spirit.

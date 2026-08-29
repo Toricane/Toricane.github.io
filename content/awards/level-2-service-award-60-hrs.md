@@ -6,7 +6,6 @@ from: MacNeill Secondary
 significance: minor
 tags:
   - Service
-cover: assets/tab-panels/level_2_g11.webp
 ---
 
 60+ service hours (2023–24).

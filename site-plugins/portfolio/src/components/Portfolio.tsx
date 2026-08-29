@@ -13,6 +13,7 @@ import path from "node:path"
 import type { GalleryImage } from "../galleryExtractor"
 import { imageVariant } from "../imageVariant"
 import { applyLinkIconsToHast, linkIconMapFromFilenames, type LinkIconMap } from "../linkIcons"
+import { buildProjectTimeline } from "../projectTimeline"
 
 type CoverPhoto = {
   src?: string
@@ -29,12 +30,15 @@ type Frontmatter = {
   date?: string | Date
   modified?: string | Date
   tags?: string[]
-  cover?: string
   significance?: VisibleSignificance | "minor"
   from?: string
   role?: string
   outcome?: string
   when?: string
+  /** Optional curated Git-style fork source (project slug without `projects/`). */
+  parent?: string
+  /** Optional series name; later entries branch from the previous in the series. */
+  series?: string
   photos?: CoverPhoto[]
   groups?: Record<string, string>
 }
@@ -100,23 +104,18 @@ function extractedGallery(file: PortfolioFile): GalleryImage[] {
     }))
 }
 
-/** Cover + gallery images, de-duplicated by path. */
+/** ## Gallery images, de-duplicated by path. First image is the card/timeline/entry hero. */
 function entryImages(file: PortfolioFile, limit = Infinity): GalleryImage[] {
-  const data = frontmatter(file)
   const seen = new Set<string>()
   const images: GalleryImage[] = []
 
-  const push = (src: string | undefined, alt = "") => {
-    if (!src) return
-    const normalized = normalizeImageSrc(src)
+  for (const image of extractedGallery(file)) {
+    const normalized = normalizeImageSrc(image.src)
     const key = normalized.replace(/^\/+/, "").toLowerCase()
-    if (!key || seen.has(key)) return
+    if (!key || seen.has(key)) continue
     seen.add(key)
-    images.push({ src: normalized, alt })
+    images.push({ src: normalized, alt: image.alt })
   }
-
-  push(data.cover, data.title ?? "")
-  for (const image of extractedGallery(file)) push(image.src, image.alt)
   return images.slice(0, limit)
 }
 
@@ -261,11 +260,147 @@ function countLabel(section: Section, count: number) {
   return count === 1 ? "1 item" : `${count} items`
 }
 
-function TagList({ tags = [], compact = false }: { tags?: string[]; compact?: boolean }) {
-  if (!tags.length) return null
+function tagList(tags: Frontmatter["tags"]): string[] {
+  return Array.isArray(tags) ? tags.filter((tag): tag is string => typeof tag === "string" && tag.length > 0) : []
+}
+
+function filterSignificance(value: Frontmatter["significance"]): string {
+  return value === "impactful" || value === "notable" || value === "minor" ? value : "minor"
+}
+
+/** Searchable blob + filter keys for client-side collection filters. */
+function filterDataset(data: Frontmatter): {
+  "data-filter-text": string
+  "data-filter-tags": string
+  "data-filter-significance": string
+} {
+  const tags = tagList(data.tags)
+  const text = [data.title, data.from, data.description]
+    .filter((part): part is string => typeof part === "string" && part.trim().length > 0)
+    .join(" ")
+    .toLowerCase()
+  return {
+    "data-filter-text": text,
+    "data-filter-tags": tags.map((tag) => tag.toLowerCase()).join("|"),
+    "data-filter-significance": filterSignificance(data.significance),
+  }
+}
+
+function collectionTags(files: PortfolioFile[]): string[] {
+  const seen = new Set<string>()
+  const ordered: string[] = []
+  for (const file of files) {
+    for (const tag of tagList(frontmatter(file).tags)) {
+      const key = tag.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      ordered.push(tag)
+    }
+  }
+  return ordered.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
+}
+
+function CollectionFilters({ tags }: { tags: string[] }) {
+  return (
+    <div class="portfolio-filters" data-portfolio-filters>
+      <div
+        class="portfolio-filters__panel"
+        id="portfolio-filters-panel"
+        data-filter-panel
+        hidden
+      >
+        <label class="portfolio-filters__search">
+          <span class="portfolio-filters__label">Search</span>
+          <input
+            type="search"
+            data-filter-search
+            placeholder="Title, from, description…"
+            autocomplete="off"
+            spellcheck={false}
+          />
+        </label>
+        {tags.length > 0 && (
+          <div class="portfolio-filters__group portfolio-filters__group--tags" data-filter-tags>
+            <span class="portfolio-filters__label" id="portfolio-filter-tags-label">
+              Tags
+            </span>
+            <div
+              class="portfolio-filters__combobox"
+              data-tag-combobox
+              aria-labelledby="portfolio-filter-tags-label"
+            >
+              <div class="portfolio-filters__selected" data-tag-selected />
+              <input
+                type="text"
+                data-tag-query
+                placeholder="Filter tags…"
+                autocomplete="off"
+                spellcheck={false}
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="portfolio-filter-tag-list"
+                aria-haspopup="listbox"
+              />
+              <ul
+                class="portfolio-filters__options"
+                id="portfolio-filter-tag-list"
+                data-tag-options
+                role="listbox"
+                aria-multiselectable="true"
+                hidden
+              >
+                {tags.map((tag) => {
+                  const value = tag.toLowerCase()
+                  const label = tag.replaceAll("-", " ")
+                  return (
+                    <li
+                      role="option"
+                      data-tag-option={value}
+                      data-tag-label={label}
+                      aria-selected="false"
+                    >
+                      {label}
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          </div>
+        )}
+        <div
+          class="portfolio-filters__group portfolio-filters__group--significance"
+          role="group"
+          aria-label="Significance"
+        >
+          <span class="portfolio-filters__label">Significance</span>
+          <div class="portfolio-filters__chips">
+            <button type="button" data-filter-significance="all" aria-pressed="true">
+              All
+            </button>
+            <button type="button" data-filter-significance="impactful" aria-pressed="false">
+              Impactful
+            </button>
+            <button type="button" data-filter-significance="notable" aria-pressed="false">
+              Notable
+            </button>
+          </div>
+        </div>
+      </div>
+      <p class="portfolio-filters__empty" data-filter-empty hidden>
+        No entries match these filters.
+      </p>
+    </div>
+  )
+}
+
+function TagList({ tags, compact = false }: { tags?: string[] | null; compact?: boolean }) {
+  // Frontmatter may pass explicit `null`, which bypasses a default param of [].
+  const list = Array.isArray(tags) ? tags.filter((tag): tag is string => typeof tag === "string") : []
+  if (!list.length) return null
   return (
     <ul class={`portfolio-tags${compact ? " portfolio-tags--compact" : ""}`} aria-label="Tags">
-      {tags.map((tag) => (
+      {list.map((tag) => (
         <li>{tag.replaceAll("-", " ")}</li>
       ))}
     </ul>
@@ -322,11 +457,13 @@ function CollectionCard({ file, section }: { file: PortfolioFile; section: strin
   const type = section === "projects" ? "project" : section === "hackathons" ? "hackathon" : "award"
   const images = cardImages(file)
   const shown = visibleSignificance(data.significance)
+  const filters = filterDataset(data)
   return (
     <li
       class={`portfolio-card portfolio-card--${type}`}
       data-significance={shown}
       data-portfolio-item
+      {...filters}
     >
       <a href={linkFor(file)} data-portfolio-open={cleanSlug(file)}>
         <CardMedia images={images} />
@@ -356,11 +493,13 @@ function TimelineRow({
   const thumb = timelineThumbImage(file)
   const dateLabel = displayDate(data)
   const shown = visibleSignificance(data.significance)
+  const filters = filterDataset(data)
   return (
     <li
       class="portfolio-timeline__item"
       data-portfolio-item
       data-significance={shown}
+      {...filters}
     >
       {showDate && dateLabel ? (
         <time class="portfolio-timeline__date">{dateLabel}</time>
@@ -383,6 +522,202 @@ function TimelineRow({
       </a>
     </li>
   )
+}
+
+function projectParentSlug(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const trimmed = value.trim().replace(/^\/+|\/+$/g, "")
+  if (!trimmed) return undefined
+  if (trimmed.startsWith("projects/")) return trimmed
+  return `projects/${trimmed}`
+}
+
+function ProjectTimelineCard({ file }: { file: PortfolioFile }) {
+  const data = frontmatter(file)
+  const thumb = timelineThumbImage(file)
+  const shown = visibleSignificance(data.significance)
+  const slug = cleanSlug(file)
+  const filters = filterDataset(data)
+  return (
+    <a
+      class="portfolio-project-timeline__card"
+      href={linkFor(file)}
+      data-portfolio-open={slug}
+      data-project-slug={slug}
+      data-portfolio-item
+      data-significance={shown}
+      {...filters}
+    >
+      <div class="portfolio-project-timeline__card-media">
+        {thumb && <TimelineThumb image={thumb} />}
+      </div>
+      <div class="portfolio-project-timeline__card-body">
+        <h2>{data.title}</h2>
+        {data.from && <p class="portfolio-card__from">{data.from}</p>}
+        {data.description && <p>{data.description}</p>}
+        <TagList tags={data.tags} compact />
+      </div>
+    </a>
+  )
+}
+
+function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
+  const fileBySlug = new Map(files.map((file) => [cleanSlug(file), file]))
+  const model = buildProjectTimeline(
+    files.map((file) => {
+      const data = frontmatter(file)
+      return {
+        slug: cleanSlug(file),
+        title: data.title ?? cleanSlug(file),
+        start: data.date ?? "",
+        end: data.modified,
+        parent: projectParentSlug(data.parent),
+        series: typeof data.series === "string" ? data.series : undefined,
+      }
+    }),
+  )
+
+  if (!model) {
+    return (
+      <div class="portfolio-project-timeline" data-view-panel="timeline" data-project-timeline hidden>
+        <p class="portfolio-project-timeline__empty">No projects with dates to show.</p>
+      </div>
+    )
+  }
+
+  const { geometry } = model
+  const tracksByStartRow = new Map<number, typeof model.tracks>()
+  for (const track of model.tracks) {
+    const list = tracksByStartRow.get(track.bottomRow) ?? []
+    list.push(track)
+    tracksByStartRow.set(track.bottomRow, list)
+  }
+
+  return (
+    <div
+      class="portfolio-project-timeline"
+      data-view-panel="timeline"
+      data-project-timeline
+      hidden
+    >
+      <ul class="portfolio-project-timeline__legend" aria-label="Timeline legend">
+        <li>
+          <span class="portfolio-project-timeline__legend-node portfolio-project-timeline__legend-node--start" />
+          Started
+        </li>
+        <li>
+          <span class="portfolio-project-timeline__legend-node portfolio-project-timeline__legend-node--end" />
+          Completed
+        </li>
+        <li>
+          <span class="portfolio-project-timeline__legend-node portfolio-project-timeline__legend-node--ongoing" />
+          Ongoing
+        </li>
+        <li>
+          <span class="portfolio-project-timeline__legend-branch" />
+          Branch
+        </li>
+      </ul>
+      <div
+        class="portfolio-project-timeline__board"
+        style={
+          {
+            "--pt-months": String(model.months.length),
+            "--pt-lanes": String(model.laneCount),
+            "--pt-row-h": `${geometry.rowHeight}px`,
+            "--pt-graph-w": `${geometry.svgWidth}px`,
+            gridTemplateRows: geometry.rowHeights.map((height) => `${height}px`).join(" "),
+          } as Record<string, string>
+        }
+      >
+        <div class="portfolio-project-timeline__months" aria-hidden="true">
+          {model.months.map((month, index) => {
+            const prev = model.months[index - 1]
+            const showYear = !prev || prev.year !== month.year
+            return (
+              <div
+                class="portfolio-project-timeline__month"
+                data-month={month.key}
+                style={{ gridRow: String(index + 1) }}
+              >
+                {showYear && (
+                  <span class="portfolio-project-timeline__year">{month.year}</span>
+                )}
+                <span class="portfolio-project-timeline__month-label">
+                  {monthLabelShort(month.month)}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+        <div class="portfolio-project-timeline__graph" aria-hidden="true">
+          <svg
+            class="portfolio-project-timeline__svg"
+            width={geometry.svgWidth}
+            height={geometry.svgHeight}
+            viewBox={`0 0 ${geometry.svgWidth} ${geometry.svgHeight}`}
+            role="presentation"
+          >
+            {model.branches.map((branch) => (
+              <path
+                class={`portfolio-project-timeline__branch portfolio-project-timeline__color-${branch.colorIndex}`}
+                data-project-slug={branch.slug}
+                d={branch.path}
+                fill="none"
+              />
+            ))}
+            {model.segments.map((segment) => (
+              <line
+                class={`portfolio-project-timeline__segment portfolio-project-timeline__color-${segment.colorIndex}${segment.ongoing ? " portfolio-project-timeline__segment--ongoing" : ""}`}
+                data-project-slug={segment.slug}
+                x1={segment.x}
+                y1={segment.y1}
+                x2={segment.x}
+                y2={segment.y2}
+              />
+            ))}
+            {model.nodes.map((node) => (
+              <circle
+                class={`portfolio-project-timeline__node portfolio-project-timeline__node--${node.kind} portfolio-project-timeline__color-${node.colorIndex}`}
+                data-project-slug={node.slug}
+                cx={node.x}
+                cy={node.y}
+                r={geometry.nodeRadius}
+              />
+            ))}
+          </svg>
+        </div>
+        <div class="portfolio-project-timeline__cards">
+          {model.months.map((month, row) => {
+            const tracks = tracksByStartRow.get(row) ?? []
+            return (
+              <div
+                class="portfolio-project-timeline__card-slot"
+                data-month={month.key}
+                style={{ gridRow: String(row + 1) }}
+              >
+                {tracks.map((track) => {
+                  const file = fileBySlug.get(track.slug)
+                  if (!file) return null
+                  return <ProjectTimelineCard file={file} />
+                })}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function monthLabelShort(month: number): string {
+  const date = new Date(Date.UTC(2000, month - 1, 1))
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    timeZone: "UTC",
+  })
+    .format(date)
+    .toUpperCase()
 }
 
 function TimelineGroupRow({ group, section }: { group: TimelineGroup; section: Section }) {
@@ -438,37 +773,59 @@ function TimelineGroupRow({ group, section }: { group: TimelineGroup; section: S
 function Collection({ section, allFiles }: { section: Section; allFiles: PortfolioFile[] }) {
   const items = itemsForSection(allFiles, section)
   const galleryItems = [...items].sort((a, b) => compareGallery(a, b, section))
-  const timelineItems =
-    section === "projects" ? [...items].sort(compareByRecency) : galleryItems
   const title = section[0].toUpperCase() + section.slice(1)
   const grouped = section === "projects" ? null : groupTimelineEntries(items, section, allFiles)
+  const tags = collectionTags(items)
 
   return (
     <main class="portfolio-collection" data-portfolio-collection={section}>
       <div class="portfolio-heading">
         <div>
-          <p>{items.length} entries</p>
+          <p data-collection-count>
+            <span data-collection-count-visible>{items.length}</span>
+            {" of "}
+            {items.length} entries
+          </p>
           <h1>{title}</h1>
         </div>
-        <div class="portfolio-view-toggle" role="group" aria-label="View mode">
-          <button type="button" data-view-mode="gallery" aria-pressed="true">
-            Gallery
+        <div class="portfolio-heading__actions">
+          <button
+            type="button"
+            class="portfolio-filter-toggle"
+            data-filter-toggle
+            aria-expanded="false"
+            aria-controls="portfolio-filters-panel"
+          >
+            Filter
+            <span class="portfolio-filter-toggle__badge" data-filter-badge hidden>
+              0
+            </span>
           </button>
-          <button type="button" data-view-mode="timeline" aria-pressed="false">
-            Timeline
-          </button>
+          <div class="portfolio-view-toggle" role="group" aria-label="View mode">
+            <button type="button" data-view-mode="gallery" aria-pressed="true">
+              Gallery
+            </button>
+            <button type="button" data-view-mode="timeline" aria-pressed="false">
+              Timeline
+            </button>
+          </div>
         </div>
       </div>
+      <CollectionFilters tags={tags} />
       <ul class="portfolio-grid" data-view-panel="gallery">
         {galleryItems.map((file) => (
           <CollectionCard file={file} section={section} />
         ))}
       </ul>
-      <ol class="portfolio-timeline" data-view-panel="timeline" hidden>
-        {grouped
-          ? grouped.map((group) => <TimelineGroupRow group={group} section={section} />)
-          : timelineItems.map((file) => <TimelineRow file={file} />)}
-      </ol>
+      {section === "projects" ? (
+        <ProjectTimeline files={items} />
+      ) : (
+        <ol class="portfolio-timeline" data-view-panel="timeline" hidden>
+          {grouped!.map((group) => (
+            <TimelineGroupRow group={group} section={section} />
+          ))}
+        </ol>
+      )}
     </main>
   )
 }
@@ -635,6 +992,7 @@ function EntryHeading({ fileData }: QuartzComponentProps) {
   const data = (fileData.frontmatter ?? {}) as Frontmatter
   const slug = String(fileData.slug ?? "")
   const section = sections.find((candidate) => slug.startsWith(`${candidate}/`))
+  const hero = entryImages(fileData as PortfolioFile, 1)[0]
 
   return (
     <div class="portfolio-entry-heading" data-portfolio-entry-heading>
@@ -643,9 +1001,9 @@ function EntryHeading({ fileData }: QuartzComponentProps) {
           ← {section}
         </a>
       )}
-      {data.cover && (
+      {hero && (
         <figure class="portfolio-entry-cover">
-          <img src={`/${data.cover}`} alt="" decoding="async" />
+          <img src={hero.src} alt={hero.alt || ""} decoding="async" />
         </figure>
       )}
       <h1>{data.title}</h1>

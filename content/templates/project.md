@@ -2,12 +2,13 @@
 title: Project title
 description: One-line blurb for cards and timeline.
 date: YYYY-MM-DD
-modified: YYYY-MM-DD
+modified: YYYY-MM-DD # omit for ongoing
 from: Affiliation
 significance: minor # impactful | notable | minor
 tags:
   - Topic
-cover: assets/tab-panels/example.webp
+# parent: other-project-slug   # optional Git-style branch source
+# series: ai-product           # optional; later entries branch from previous in series
 ---
 
 ## Overview

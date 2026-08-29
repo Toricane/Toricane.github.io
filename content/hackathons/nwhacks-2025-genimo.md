@@ -6,7 +6,6 @@ from: nwHacks
 significance: minor
 tags:
   - In-Person
-cover: assets/tab-panels/nwhacks_hackathon.webp
 ---
 
 AI + animation tool converting user text into educational animations (Generate + Manim).

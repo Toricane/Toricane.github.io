@@ -7,7 +7,6 @@ significance: notable
 tags:
   - Math
   - Contest
-cover: assets/tab-panels/pascal_champion.webp
 ---
 
 Top 25% & school champion Pascal.

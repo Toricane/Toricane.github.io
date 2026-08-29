@@ -7,7 +7,6 @@ significance: notable
 tags:
   - Language
   - Academic
-cover: assets/tab-panels/top_french_g11.webp
 ---
 
 Highest French 11 marks.

@@ -6,7 +6,6 @@ from: Event name
 significance: minor # impactful | notable | minor
 tags:
   - In-Person
-cover: assets/tab-panels/example.webp
 ---
 
 One-line blurb for cards and timeline.
@@ -18,5 +17,3 @@ One-line blurb for cards and timeline.
 ## Links
 
 - [Devpost](https://devpost.com/software/example)
-- [GitHub](https://github.com/example)
-- [Hackathon Website](https://example.com)

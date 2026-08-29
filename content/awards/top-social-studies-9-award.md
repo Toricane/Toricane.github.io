@@ -7,7 +7,6 @@ significance: notable
 tags:
   - Academic
   - Social-Studies
-cover: assets/tab-panels/top_socials_9.webp
 ---
 
 Highest Social Studies 9 marks.

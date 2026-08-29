@@ -7,7 +7,6 @@ significance: minor
 tags:
   - Math
   - Contest
-cover: assets/tab-panels/csmc_distinction.webp
 ---
 
 Top 25% Canadian Senior Mathematics Contest.

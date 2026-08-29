@@ -7,7 +7,6 @@ significance: impactful
 tags:
   - Academic
   - Leadership
-cover: assets/tab-panels/valedictorian_speech.webp
 ---
 
 Chosen to deliver farewell speech (GPA 96.43%).

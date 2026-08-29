@@ -9,7 +9,6 @@ tags:
   - Chrome-Ext
   - AI
   - Productivity
-cover: assets/tab-panels/calendai_demo.webp
 ---
 
 ## Overview

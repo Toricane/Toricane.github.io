@@ -7,7 +7,6 @@ significance: minor
 tags:
   - Math
   - Contest
-cover: assets/tab-panels/fermat_certificate.webp
 ---
 
 Top 25% Fermat contest.

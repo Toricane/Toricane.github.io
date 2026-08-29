@@ -9,7 +9,6 @@ tags:
   - Health
   - Research
   - Bio
-cover: assets/tab-panels/peter_pan_1.webp
 ---
 
 ## Overview

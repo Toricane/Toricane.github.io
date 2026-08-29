@@ -7,7 +7,6 @@ significance: notable
 tags:
   - Science
   - Academic
-cover: assets/tab-panels/top_senior_science_trophy.webp
 ---
 
 Excellence & potential in senior sciences.

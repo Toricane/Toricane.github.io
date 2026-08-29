@@ -7,7 +7,6 @@ significance: notable
 tags:
   - Science
   - Academic
-cover: assets/tab-panels/top_science_12.webp
 ---
 
 AP Chem 97%, Chem 12 97%, Physics 12 96%.

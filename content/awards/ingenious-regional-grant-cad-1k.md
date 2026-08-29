@@ -7,7 +7,6 @@ significance: impactful
 tags:
   - Grant
   - AI
-cover: assets/tab-panels/ingenious_plus_photo.webp
 ---
 
 Funding for JARVIS project.
