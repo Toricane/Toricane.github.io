@@ -1,0 +1,137 @@
+# yaml-language-server: $schema=./quartz/plugins/quartz-plugins.schema.json
+configuration:
+  pageTitle: Prajwal Prashanth
+  pageTitleSuffix: " · Prajwal's Portfolio"
+  enableSPA: true
+  enablePopovers: false
+  analytics:
+    provider: goatcounter
+    websiteId: prajwal
+  locale: en-US
+  baseUrl: prajwal.is-a.dev
+  ignorePatterns:
+    - private
+    - templates
+    - .obsidian
+  theme:
+    fontOrigin: googleFonts
+    cdnCaching: true
+    typography:
+      header: Geologica
+      body: IBM Plex Sans
+      code: IBM Plex Mono
+    colors:
+      lightMode:
+        light: "#0b1118"
+        lightgray: "#2a3947"
+        gray: "#647586"
+        darkgray: "#c7d1da"
+        dark: "#e7edf3"
+        secondary: "#d58a4b"
+        tertiary: "#f0bc86"
+        highlight: rgba(213, 138, 75, 0.12)
+        textHighlight: rgba(240, 188, 134, 0.28)
+      darkMode:
+        light: "#0b1118"
+        lightgray: "#2a3947"
+        gray: "#647586"
+        darkgray: "#c7d1da"
+        dark: "#e7edf3"
+        secondary: "#d58a4b"
+        tertiary: "#f0bc86"
+        highlight: rgba(213, 138, 75, 0.12)
+        textHighlight: rgba(240, 188, 134, 0.28)
+plugins:
+  - source: "@quartz-community/note-properties"
+    enabled: true
+    options:
+      includeAll: false
+      includedProperties: []
+      excludedProperties: []
+      hidePropertiesView: true
+      delimiters: ---
+      language: yaml
+    order: 5
+  - source: "@quartz-community/created-modified-date"
+    enabled: true
+    options:
+      defaultDateType: modified
+      priority:
+        - frontmatter
+        - git
+        - filesystem
+    order: 10
+  - source: "@quartz-community/syntax-highlighting"
+    enabled: true
+    options:
+      theme:
+        light: github-dark
+        dark: github-dark
+      keepBackground: false
+    order: 20
+  - source: "@quartz-community/obsidian-flavored-markdown"
+    enabled: true
+    options:
+      enableInHtmlEmbed: false
+      enableCheckbox: true
+    order: 30
+  - source: "@quartz-community/github-flavored-markdown"
+    enabled: true
+    order: 40
+  - source: "@quartz-community/crawl-links"
+    enabled: true
+    options:
+      markdownLinkResolution: absolute
+    order: 50
+  - source: "@quartz-community/description"
+    enabled: true
+    order: 60
+  - source: "@quartz-community/quartz-fonts"
+    enabled: false
+  - source: "@quartz-community/remove-draft"
+    enabled: true
+  - source: "@quartz-community/alias-redirects"
+    enabled: true
+  - source: "@quartz-community/content-index"
+    enabled: true
+    options:
+      enableSiteMap: true
+      enableRSS: true
+  - source: "@quartz-community/favicon"
+    enabled: true
+  - source: "@quartz-community/og-image"
+    enabled: false
+  - source: "@quartz-community/cname"
+    enabled: true
+  - source: "@quartz-community/content-page"
+    enabled: true
+  - source: "@quartz-community/folder-page"
+    enabled: true
+    options:
+      showFolderCount: false
+      showSubfolders: false
+  - source: "@quartz-community/tag-page"
+    enabled: true
+  - source: ./site-plugins/portfolio
+    enabled: true
+    order: 55
+    layout:
+      position: beforeBody
+      priority: 0
+layout:
+  byPageType:
+    "404":
+      template: full-width
+      positions:
+        left: []
+        right: []
+    content:
+      template: full-width
+      positions:
+        left: []
+        right: []
+    folder:
+      template: full-width
+      positions:
+        left: []
+        right: []

@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "plugins": {
+    "portfolio": {
+      "source": "./site-plugins/portfolio",
+      "resolved": "C:\\Users\\prajw\\Desktop\\Coding\\Website\\Toricane.github.io\\site-plugins\\portfolio",
+      "commit": "local",
+      "installedAt": "2026-08-28T01:28:48.809Z"
+    }
+  }
+}

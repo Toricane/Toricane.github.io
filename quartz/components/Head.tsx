@@ -28,11 +28,15 @@ export default (() => {
     const iconPath = joinSegments(baseDir, "static/icon.png")
 
     // Url of current page
+    const canonicalSlug =
+      fileData.slug === "index" ? "" : (fileData.slug ?? "").replace(/\/index$/, "")
     const socialUrl =
-      fileData.slug === "404" ? url.toString() : joinSegments(url.toString(), fileData.slug!)
+      fileData.slug === "404"
+        ? url.toString()
+        : new URL(canonicalSlug ? `/${canonicalSlug}` : "/", url).toString()
 
     const usesCustomOgImage = ctx.cfg.plugins.emitters.some((e) => e.name === "CustomOgImages")
-    const ogImageDefaultPath = `https://${cfg.baseUrl}/static/og-image.png`
+    const ogImageDefaultPath = `https://${cfg.baseUrl}/static/og-image.webp`
 
     const coreStylesheet = css[0]?.content
     const coreScript = js.find(
@@ -59,6 +63,7 @@ export default (() => {
         )}
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>{`html,body{background:#0b1118;color-scheme:dark}`}</style>
 
         <meta name="og:site_name" content={cfg.pageTitle}></meta>
         <meta property="og:title" content={title} />
@@ -76,7 +81,7 @@ export default (() => {
             <meta name="twitter:image" content={ogImageDefaultPath} />
             <meta
               property="og:image:type"
-              content={`image/${getFileExtension(ogImageDefaultPath) ?? "png"}`}
+              content={`image/${(getFileExtension(ogImageDefaultPath) ?? ".png").replace(/^\./, "")}`}
             />
           </>
         )}
@@ -90,6 +95,12 @@ export default (() => {
         )}
 
         <link rel="icon" href={iconPath} />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="canonical" href={socialUrl} />
+        <meta name="msvalidate.01" content="E2A7C694A3DA29F0ECDCD5CEB363BB52" />
         <meta name="description" content={description} />
         <meta name="generator" content="Quartz" />
 

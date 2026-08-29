@@ -1,0 +1,68 @@
+{
+  "name": "@toricane/quartz-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Site-specific Quartz components for prajwal.is-a.dev",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "preact": "^10.0.0"
+  },
+  "dependencies": {
+    "@quartz-community/types": "^0.3.0",
+    "hast-util-to-jsx-runtime": "^2.3.6"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.2",
+    "sass": "^1.97.3",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "preact": "^10.28.2"
+  },
+  "quartz": {
+    "name": "portfolio",
+    "displayName": "Portfolio",
+    "description": "Portfolio navigation, homepage, collections, gallery extraction, and client enhancements.",
+    "category": [
+      "transformer",
+      "component"
+    ],
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultEnabled": true,
+    "defaultOrder": 55,
+    "defaultOptions": {},
+    "components": {
+      "Portfolio": {
+        "name": "Portfolio",
+        "displayName": "Portfolio",
+        "description": "Renders portfolio-specific UI.",
+        "version": "1.0.0",
+        "quartzVersion": ">=5.0.0",
+        "defaultPosition": "beforeBody",
+        "defaultPriority": 0
+      }
+    }
+  },
+  "engines": {
+    "node": ">=22",
+    "npm": ">=10.9.2"
+  }
+}

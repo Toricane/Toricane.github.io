@@ -1,0 +1,4 @@
+#!/bin/sh
+# Generate missing tab-panels small/ (800w) and preview/ (256w) WebPs, then stage them.
+npm run images
+git add content/assets/tab-panels/small content/assets/tab-panels/preview
