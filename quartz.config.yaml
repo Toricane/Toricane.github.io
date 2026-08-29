@@ -15,11 +15,19 @@ configuration:
     - .obsidian
   theme:
     fontOrigin: googleFonts
-    cdnCaching: true
+    # Self-host at build time (no render-blocking fonts.googleapis.com CSS).
+    cdnCaching: false
     typography:
-      header: Geologica
-      body: IBM Plex Sans
-      code: IBM Plex Mono
+      header:
+        name: Geologica
+        weights: [400, 700]
+      body:
+        name: IBM Plex Sans
+        weights: [400, 600]
+        includeItalic: false
+      code:
+        name: IBM Plex Mono
+        weights: [400]
     colors:
       lightMode:
         light: "#0b1118"

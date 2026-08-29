@@ -983,8 +983,13 @@ function PhotoCoverflow({ allFiles }: { allFiles: PortfolioFile[] }) {
   const photos = coverPhotos(allFiles)
   if (!photos.length) return null
 
+  const firstSrc = normalizeImageSrc(photos[0]?.src ?? "")
+
   return (
     <section class="portfolio-coverflow" aria-label="Photo coverflow">
+      {firstSrc && (
+        <link rel="preload" as="image" href={firstSrc} fetchpriority="high" />
+      )}
       <div class="portfolio-coverflow__controls">
         <button type="button" data-reel-previous aria-label="Previous photo">
           ←
@@ -994,13 +999,20 @@ function PhotoCoverflow({ allFiles }: { allFiles: PortfolioFile[] }) {
         </button>
       </div>
       <div class="portfolio-coverflow__viewport" data-portfolio-reel tabindex={0}>
-        {photos.map((photo) => {
+        {photos.map((photo, index) => {
           const src = normalizeImageSrc(photo.src ?? "")
           const caption = photo.caption ?? ""
           const link = typeof photo.link === "string" ? photo.link.trim() : ""
+          const priority = index === 0
           const media = (
             <>
-              <img src={src} alt={caption} loading="lazy" decoding="async" />
+              <img
+                src={src}
+                alt={caption}
+                loading={priority ? "eager" : "lazy"}
+                decoding="async"
+                {...(priority ? { fetchpriority: "high" as const } : {})}
+              />
               {caption && <figcaption>{caption}</figcaption>}
             </>
           )

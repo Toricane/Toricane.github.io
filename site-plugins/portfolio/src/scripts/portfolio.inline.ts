@@ -217,7 +217,7 @@ function enhanceEntryGallery(root: ParentNode) {
   viewport.dataset.portfolioReel = ""
   viewport.tabIndex = 0
 
-  for (const image of images) {
+  images.forEach((image, index) => {
     const figure = document.createElement("figure")
     figure.className = "portfolio-coverflow__item"
     figure.dataset.portfolioLightbox = ""
@@ -230,8 +230,9 @@ function enhanceEntryGallery(root: ParentNode) {
     const img = document.createElement("img")
     img.src = imageVariant(image.src, "small")
     img.alt = image.alt
-    img.loading = "lazy"
+    img.loading = index === 0 ? "eager" : "lazy"
     img.decoding = "async"
+    if (index === 0) img.fetchPriority = "high"
     figure.append(img)
     if (image.alt) {
       const caption = document.createElement("figcaption")
@@ -239,7 +240,7 @@ function enhanceEntryGallery(root: ParentNode) {
       figure.append(caption)
     }
     viewport.append(figure)
-  }
+  })
 
   coverflow.append(controls, viewport)
   galleryHeading.insertAdjacentElement("afterend", coverflow)
