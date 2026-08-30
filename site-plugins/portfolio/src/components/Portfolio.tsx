@@ -908,13 +908,23 @@ function Collection({ section, allFiles }: { section: Section; allFiles: Portfol
           <h1>{title}</h1>
         </div>
         <div class="portfolio-heading__actions">
-          <div class="portfolio-view-toggle" role="group" aria-label="Sort order" data-sort-toggle>
-            <button type="button" data-sort-mode="significance" aria-pressed="true">
-              Significance
-            </button>
-            <button type="button" data-sort-mode="date" aria-pressed="false">
-              Date
-            </button>
+          <div class="portfolio-heading__toggles">
+            <div class="portfolio-view-toggle" role="group" aria-label="Sort order" data-sort-toggle>
+              <button type="button" data-sort-mode="significance" aria-pressed="true">
+                Significance
+              </button>
+              <button type="button" data-sort-mode="date" aria-pressed="false">
+                Date
+              </button>
+            </div>
+            <div class="portfolio-view-toggle" role="group" aria-label="View mode">
+              <button type="button" data-view-mode="gallery" aria-pressed="true">
+                Gallery
+              </button>
+              <button type="button" data-view-mode="timeline" aria-pressed="false">
+                Timeline
+              </button>
+            </div>
           </div>
           <button
             type="button"
@@ -928,14 +938,6 @@ function Collection({ section, allFiles }: { section: Section; allFiles: Portfol
               0
             </span>
           </button>
-          <div class="portfolio-view-toggle" role="group" aria-label="View mode">
-            <button type="button" data-view-mode="gallery" aria-pressed="true">
-              Gallery
-            </button>
-            <button type="button" data-view-mode="timeline" aria-pressed="false">
-              Timeline
-            </button>
-          </div>
         </div>
       </div>
       <CollectionFilters tags={tags} />

@@ -521,14 +521,24 @@ body[data-slug="coverflow"] .portfolio-footer {
 
 .portfolio-heading__actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-end;
   gap: var(--portfolio-space-2);
+  min-width: 0;
+}
+
+.portfolio-heading__toggles {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--portfolio-space-2);
+  min-width: 0;
 }
 
 .portfolio-filter-toggle {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 6px;
   min-height: 36px;
@@ -2583,7 +2593,26 @@ a.internal.portfolio-bookmark {
 
   .portfolio-heading__actions {
     width: 100%;
-    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .portfolio-heading__toggles {
+    gap: 6px;
+  }
+
+  .portfolio-filter-toggle,
+  .portfolio-view-toggle button {
+    min-height: 32px;
+    padding: 0 8px;
+    font-size: 0.5625rem;
+    letter-spacing: 0.02em;
+  }
+
+  .portfolio-filter-toggle__badge {
+    min-width: 1.1rem;
+    padding: 0 4px;
+    font-size: 0.5625rem;
+    line-height: 1.1rem;
   }
 
   .portfolio-filters__panel {
