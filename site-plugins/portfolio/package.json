@@ -22,7 +22,13 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "preact": "^10.0.0"
+    "preact": "^10.0.0",
+    "sharp": ">=0.33.0"
+  },
+  "peerDependenciesMeta": {
+    "sharp": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@quartz-community/types": "^0.3.0",
@@ -41,6 +47,7 @@
     "description": "Portfolio navigation, homepage, collections, gallery extraction, and client enhancements.",
     "category": [
       "transformer",
+      "emitter",
       "component"
     ],
     "version": "1.0.0",

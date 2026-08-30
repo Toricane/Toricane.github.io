@@ -46,7 +46,8 @@ export default defineConfig({
   outDir: "dist",
   platform: "node",
   noExternal: [/.*/],
-  external: ["preact", "preact/*"],
+  // sharp is a native module (also used by @quartz-community/og-image) — never bundle it.
+  external: ["preact", "preact/*", "sharp"],
   esbuildOptions(options) {
     options.jsx = "automatic"
     options.jsxImportSource = "preact"

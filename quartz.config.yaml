@@ -104,7 +104,8 @@ plugins:
     enabled: true
     options:
       enableSiteMap: true
-      enableRSS: true
+      # Portfolio plugin emits index.xml (entries only — not empty tag pages).
+      enableRSS: false
   - source: "@quartz-community/favicon"
     enabled: true
   - source: "@quartz-community/og-image"
