@@ -159,3 +159,8 @@ layout:
       positions:
         left: []
         right: []
+    tag:
+      template: full-width
+      positions:
+        left: []
+        right: []

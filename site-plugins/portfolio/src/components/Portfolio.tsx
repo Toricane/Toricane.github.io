@@ -341,6 +341,75 @@ function collectionTags(files: PortfolioFile[]): string[] {
   return ordered.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
 }
 
+/** Quartz tag page slug: lowercase, spaces → hyphens (keeps `/` for hierarchies). */
+function tagSlug(tag: string) {
+  return tag.trim().toLowerCase().replace(/\s+/g, "-")
+}
+
+function displayTag(tag: string) {
+  return tag.replaceAll("-", " ")
+}
+
+function displayTagHeading(tag: string) {
+  return displayTag(tag).replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+function tagHref(tag: string) {
+  return `/tags/${tagSlug(tag)}`
+}
+
+function sectionOf(file: PortfolioFile): Section | null {
+  const slug = cleanSlug(file)
+  return sections.find((section) => slug.startsWith(`${section}/`) && !slug.endsWith("/index")) ?? null
+}
+
+function portfolioEntries(allFiles: PortfolioFile[]) {
+  return allFiles.filter((file) => sectionOf(file) !== null)
+}
+
+/** Match Quartz hierarchy: `plugin/emitter` appears on `/tags/plugin` and `/tags/plugin/emitter`. */
+function fileMatchesTag(file: PortfolioFile, targetSlug: string) {
+  return tagList(frontmatter(file).tags).some((tag) => {
+    const slug = tagSlug(tag)
+    return slug === targetSlug || slug.startsWith(`${targetSlug}/`)
+  })
+}
+
+function entryRecency(file: PortfolioFile) {
+  const data = frontmatter(file)
+  const section = sectionOf(file)
+  if (section === "projects") return timestamp(data.modified ?? data.date)
+  if (section === "hackathons" || section === "awards") return whenSortValue(whenKey(data.when))
+  return Math.max(timestamp(data.modified ?? data.date), whenSortValue(whenKey(data.when)))
+}
+
+function compareTagGallery(a: PortfolioFile, b: PortfolioFile) {
+  const rank =
+    significanceRank(frontmatter(a).significance) - significanceRank(frontmatter(b).significance)
+  if (rank !== 0) return rank
+  const recency = entryRecency(b) - entryRecency(a)
+  return recency !== 0 ? recency : compareByTitle(a, b)
+}
+
+function allPortfolioTags(allFiles: PortfolioFile[]): { tag: string; count: number }[] {
+  const counts = new Map<string, { tag: string; count: number }>()
+  for (const file of portfolioEntries(allFiles)) {
+    for (const tag of tagList(frontmatter(file).tags)) {
+      const key = tagSlug(tag)
+      const existing = counts.get(key)
+      if (existing) {
+        existing.count += 1
+      } else {
+        counts.set(key, { tag, count: 1 })
+      }
+    }
+  }
+  return [...counts.values()].sort((a, b) => {
+    if (b.count !== a.count) return b.count - a.count
+    return displayTag(a.tag).localeCompare(displayTag(b.tag), undefined, { sensitivity: "base" })
+  })
+}
+
 function CollectionFilters({ tags }: { tags: string[] }) {
   return (
     <div class="portfolio-filters" data-portfolio-filters>
@@ -435,14 +504,25 @@ function CollectionFilters({ tags }: { tags: string[] }) {
   )
 }
 
-function TagList({ tags, compact = false }: { tags?: string[] | null; compact?: boolean }) {
+function TagList({
+  tags,
+  compact = false,
+  linked = false,
+}: {
+  tags?: string[] | null
+  compact?: boolean
+  /** Use only outside nested anchors (entry heading / tag pages). Cards keep plain chips. */
+  linked?: boolean
+}) {
   // Frontmatter may pass explicit `null`, which bypasses a default param of [].
   const list = Array.isArray(tags) ? tags.filter((tag): tag is string => typeof tag === "string") : []
   if (!list.length) return null
   return (
     <ul class={`portfolio-tags${compact ? " portfolio-tags--compact" : ""}`} aria-label="Tags">
       {list.map((tag) => (
-        <li>{tag.replaceAll("-", " ")}</li>
+        <li>
+          {linked ? <a href={tagHref(tag)}>{displayTag(tag)}</a> : displayTag(tag)}
+        </li>
       ))}
     </ul>
   )
@@ -870,6 +950,72 @@ function TimelineGroupRow({ group, section }: { group: TimelineGroup; section: S
   )
 }
 
+function TagCollection({ tag, allFiles }: { tag: string; allFiles: PortfolioFile[] }) {
+  const items = portfolioEntries(allFiles)
+    .filter((file) => fileMatchesTag(file, tag))
+    .sort(compareTagGallery)
+  const countLabelText =
+    items.length === 1 ? "1 entry with this tag" : `${items.length} entries with this tag`
+
+  return (
+    <main class="portfolio-collection portfolio-tag-page" data-portfolio-collection="tags" data-view="gallery">
+      <div class="portfolio-heading">
+        <div>
+          <a class="portfolio-back" href="/tags/">
+            ← Tags
+          </a>
+          <p>{countLabelText}</p>
+          <h1>{displayTagHeading(tag)}</h1>
+        </div>
+      </div>
+      {items.length === 0 ? (
+        <p class="portfolio-filters__empty">No portfolio entries use this tag.</p>
+      ) : (
+        <ul class="portfolio-grid" data-view-panel="gallery">
+          {items.map((file) => {
+            const section = sectionOf(file)!
+            return <CollectionCard file={file} section={section} />
+          })}
+        </ul>
+      )}
+    </main>
+  )
+}
+
+function TagIndex({ allFiles }: { allFiles: PortfolioFile[] }) {
+  const tags = allPortfolioTags(allFiles)
+  const total = tags.reduce((sum, entry) => sum + entry.count, 0)
+
+  return (
+    <main class="portfolio-collection portfolio-tag-page" data-portfolio-collection="tags" data-view="gallery">
+      <div class="portfolio-heading">
+        <div>
+          <p>
+            {tags.length} tag{tags.length === 1 ? "" : "s"}
+            {" · "}
+            {total} tagged entr{total === 1 ? "y" : "ies"}
+          </p>
+          <h1>Tags</h1>
+        </div>
+      </div>
+      {tags.length === 0 ? (
+        <p class="portfolio-filters__empty">No tags yet.</p>
+      ) : (
+        <ul class="portfolio-tag-cloud" aria-label="All tags">
+          {tags.map(({ tag, count }) => (
+            <li>
+              <a href={tagHref(tag)}>
+                <span class="portfolio-tag-cloud__name">{displayTag(tag)}</span>
+                <span class="portfolio-tag-cloud__count">{count}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </main>
+  )
+}
+
 function Collection({ section, allFiles }: { section: Section; allFiles: PortfolioFile[] }) {
   const items = itemsForSection(allFiles, section)
   const galleryItems = [...items].sort((a, b) => compareGallery(a, b, section))
@@ -1136,7 +1282,7 @@ function EntryHeading({ fileData }: QuartzComponentProps) {
           {displayDate(data) && <span>{displayDate(data)}</span>}
         </p>
       )}
-      <TagList tags={data.tags} compact />
+      <TagList tags={data.tags} compact linked />
       {(data.role || data.outcome) && (
         <dl class="portfolio-entry-facts">
           {data.role && (
@@ -1284,6 +1430,9 @@ export default (() => {
     const slug = String(props.fileData.slug ?? "")
     const folder = sections.find((section) => slug === `${section}/index`)
     const dataOnly = slug === "404" || slug === "coverflow"
+    const isTagIndex = slug === "tags" || slug === "tags/index"
+    const tagName =
+      slug.startsWith("tags/") && slug !== "tags/index" ? slug.slice("tags/".length) : null
 
     return (
       <div class="portfolio-component">
@@ -1292,6 +1441,10 @@ export default (() => {
           <Home {...props} />
         ) : folder ? (
           <Collection section={folder} allFiles={props.allFiles} />
+        ) : isTagIndex ? (
+          <TagIndex allFiles={props.allFiles} />
+        ) : tagName ? (
+          <TagCollection tag={tagName} allFiles={props.allFiles} />
         ) : dataOnly ? null : (
           <EntryHeading {...props} />
         )}
