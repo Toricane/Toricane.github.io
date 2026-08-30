@@ -13,6 +13,7 @@ import path from "node:path"
 import type { GalleryImage } from "../galleryExtractor"
 import { imageVariant } from "../imageVariant"
 import { applyLinkIconsToHast, linkIconMapFromFilenames, type LinkIconMap } from "../linkIcons"
+import { displayPeriod } from "../dates"
 import { buildProjectTimeline, type PauseRestart } from "../projectTimeline"
 
 type CoverPhoto = {
@@ -277,28 +278,8 @@ function linkFor(file: PortfolioFile) {
   return `/${cleanSlug(file)}`
 }
 
-function formatMonthYear(value: string | Date) {
-  const date = value instanceof Date ? value : new Date(value)
-  if (Number.isNaN(date.getTime())) return ""
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(date)
-}
-
 function displayDate(data: Frontmatter) {
-  if (data.when) {
-    const match = data.when.match(/^(\d{4})\/(\d{2})$/)
-    if (match) return formatMonthYear(`${match[1]}-${match[2]}-01T00:00:00Z`)
-  }
-  if (!data.date) return ""
-  const start = formatMonthYear(data.date)
-  if (!start) return ""
-  if (!data.modified) return start
-  const end = formatMonthYear(data.modified)
-  if (!end || end === start) return start
-  return `${start} – ${end}`
+  return displayPeriod(data)
 }
 
 function countLabel(section: Section, count: number) {
@@ -1178,18 +1159,41 @@ function EntryHeading({ fileData }: QuartzComponentProps) {
 
 function SiteNav({ slug }: { slug: string }) {
   const active = sections.find((section) => slug.startsWith(section))
+  const links = sections.map((section) => (
+    <a href={sectionHref(section)} aria-current={active === section ? "page" : undefined}>
+      {section}
+    </a>
+  ))
   return (
     <header class="portfolio-nav">
       <a class="portfolio-nav__brand" href="/">
         Prajwal Prashanth
       </a>
-      <nav aria-label="Primary navigation">
-        {sections.map((section) => (
-          <a href={sectionHref(section)} aria-current={active === section ? "page" : undefined}>
-            {section}
-          </a>
-        ))}
-      </nav>
+      <div class="portfolio-nav__actions">
+        <div class="portfolio-nav__search-host" data-portfolio-search-host />
+        <nav class="portfolio-nav__links" aria-label="Primary navigation">
+          {links}
+        </nav>
+        <button
+          type="button"
+          class="portfolio-nav__menu-toggle"
+          data-portfolio-menu-toggle
+          aria-expanded="false"
+          aria-controls="portfolio-nav-menu"
+          aria-label="Open menu"
+        >
+          <span class="portfolio-nav__hamburger" aria-hidden="true" />
+        </button>
+        <nav
+          id="portfolio-nav-menu"
+          class="portfolio-nav__menu"
+          data-portfolio-menu
+          aria-label="Primary navigation"
+          hidden
+        >
+          {links}
+        </nav>
+      </div>
     </header>
   )
 }
@@ -1255,6 +1259,7 @@ function SiteFooter() {
     <footer class="portfolio-footer">
       <span>© {new Date().getFullYear()} Prajwal Prashanth</span>
       <nav aria-label="Footer navigation">
+        <a href="/index.xml">RSS</a>
         <a href="https://github.com/Toricane">GitHub</a>
         <a href="https://linkedin.com/in/prajwal-prashanth">LinkedIn</a>
       </nav>

@@ -1351,6 +1351,417 @@ function enhanceHomeBioIcons() {
   enhanceInlineLinkIcons(markdown)
 }
 
+function adoptSearchIntoNav() {
+  const host = document.querySelector<HTMLElement>("[data-portfolio-search-host]")
+  const search = document.querySelector<HTMLElement>(".search")
+  if (!host || !search || host.contains(search)) return
+  host.appendChild(search)
+}
+
+function closeSearchOverlay() {
+  const root = document.querySelector<HTMLElement>(".search")
+  const container = root?.querySelector<HTMLElement>(".search-container")
+  const button = root?.querySelector<HTMLButtonElement>(".search-button")
+  const input = root?.querySelector<HTMLInputElement>(".search-bar")
+  const layout = root?.querySelector<HTMLElement>(".search-layout")
+  const results = root?.querySelector<HTMLElement>(".results-container")
+  const preview = root?.querySelector<HTMLElement>(".preview-container")
+  container?.classList.remove("active")
+  button?.setAttribute("aria-expanded", "false")
+  layout?.classList.remove("display-results")
+  if (input) input.value = ""
+  results?.replaceChildren()
+  preview?.replaceChildren()
+}
+
+function currentSearchQuery(): string {
+  const raw = document.querySelector<HTMLInputElement>(".search-bar")?.value ?? ""
+  return raw
+    .split(/\s+/)
+    .filter((part) => part && !part.startsWith("#"))
+    .join(" ")
+    .trim()
+}
+
+/** Highlight query terms in preview text. Skips single letters (they mark every match); digits OK. */
+function highlightSearchMatches(root: HTMLElement, query: string) {
+  if (!query) return
+  const terms = query
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter((term) => term.length >= 2 || /^\d$/.test(term))
+    .sort((a, b) => b.length - a.length)
+  if (!terms.length) return
+  const escaped = terms.map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")
+  if (!escaped) return
+  const re = new RegExp(escaped, "gi")
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  const nodes: Text[] = []
+  let node = walker.nextNode()
+  while (node) {
+    nodes.push(node)
+    node = walker.nextNode()
+  }
+
+  for (const textNode of nodes) {
+    // Don't highlight inside UI chrome (toolbar / expand control).
+    if (textNode.parentElement?.closest(".portfolio-search-preview__toolbar")) continue
+    const value = textNode.nodeValue ?? ""
+    re.lastIndex = 0
+    if (!re.test(value)) continue
+    re.lastIndex = 0
+    const frag = document.createDocumentFragment()
+    let last = 0
+    let match: RegExpExecArray | null
+    while ((match = re.exec(value)) !== null) {
+      if (match.index > last) {
+        frag.appendChild(document.createTextNode(value.slice(last, match.index)))
+      }
+      const mark = document.createElement("span")
+      mark.className = "highlight"
+      mark.textContent = match[0]
+      frag.appendChild(mark)
+      last = match.index + match[0].length
+    }
+    if (last < value.length) {
+      frag.appendChild(document.createTextNode(value.slice(last)))
+    }
+    textNode.parentNode?.replaceChild(frag, textNode)
+  }
+}
+
+function scrollPreviewToHighlight(preview: HTMLElement) {
+  const highlights = Array.from(preview.getElementsByClassName("highlight")) as HTMLElement[]
+  if (!highlights.length) return
+  highlights.sort((a, b) => (b.textContent?.length ?? 0) - (a.textContent?.length ?? 0))
+  highlights[0]?.scrollIntoView({ block: "center", inline: "nearest" })
+}
+
+function openSearchPreviewPage(href: string) {
+  const query = currentSearchQuery()
+  if (query) sessionStorage.setItem("search-term", query)
+  closeSearchOverlay()
+  // Navigate after the overlay closes so SPA swap isn't painted under an open search.
+  queueMicrotask(() => {
+    const spaNavigate = (window as CleanupWindow).spaNavigate
+    if (spaNavigate) {
+      void spaNavigate(new URL(href, location.origin))
+    } else {
+      location.assign(href)
+    }
+  })
+}
+
+/**
+ * Portfolio modal-style search preview in our own pane.
+ * Quartz keeps writing to `.preview-container` on hover — we hide that node and
+ * never mount into it, so it can't flash or fight our scroll position.
+ */
+function wireSearchPortfolioPreview() {
+  const search = document.querySelector<HTMLElement>(".search")
+  if (!search || search.dataset.portfolioPreview === "true") return
+  search.dataset.portfolioPreview = "true"
+
+  let requestId = 0
+  let activeHref = ""
+  let activeQuery = ""
+  let loadingHref = ""
+  let savedScrollTop = 0
+  /** Raw entry HTML from fetchEntryContent — re-highlight when the query changes. */
+  const htmlCache = new Map<string, string>()
+
+  const cardHref = (card: Element | null): string | null => {
+    if (!(card instanceof HTMLAnchorElement) || card.classList.contains("no-match")) return null
+    return card.getAttribute("href") || (card.id ? `/${card.id}` : "") || null
+  }
+
+  /** Focused card, else first match — keeps preview in sync when the query changes. */
+  const preferredResultHref = (): string | null =>
+    cardHref(search.querySelector(".result-card.focus:not(.no-match)")) ??
+    cardHref(search.querySelector(".result-card:not(.no-match)"))
+
+  /**
+   * Sibling pane Quartz does not own. Wait until Quartz has created both columns,
+   * then keep order: results → preview-container (hidden) → our pane.
+   * Inserting earlier makes us the first flex child (empty left / results right).
+   */
+  const ensurePane = (): HTMLElement | null => {
+    const layout = search.querySelector<HTMLElement>(".search-layout")
+    if (!layout) return null
+
+    const results = layout.querySelector<HTMLElement>(".results-container")
+    const quartzPreview = layout.querySelector<HTMLElement>(".preview-container")
+    if (!results || !quartzPreview) return null
+
+    layout.dataset.portfolioPreviewOwned = "true"
+
+    let pane = layout.querySelector<HTMLElement>("[data-portfolio-search-preview-pane]")
+    if (!pane) {
+      pane = document.createElement("div")
+      pane.className = "portfolio-search-preview-pane"
+      pane.dataset.portfolioSearchPreviewPane = "true"
+      pane.addEventListener(
+        "scroll",
+        () => {
+          savedScrollTop = pane!.scrollTop
+        },
+        { passive: true },
+      )
+    }
+
+    // Re-assert order every call — Quartz may recreate/reorder columns.
+    if (layout.firstElementChild !== results) layout.prepend(results)
+    if (results.nextElementSibling !== quartzPreview) results.after(quartzPreview)
+    if (quartzPreview.nextElementSibling !== pane) quartzPreview.after(pane)
+
+    return pane
+  }
+
+  const buildWrap = (entryHref: string, html: string, query: string): HTMLElement => {
+    const wrap = document.createElement("div")
+    wrap.className = "portfolio-search-preview"
+    wrap.dataset.portfolioPreviewHref = entryHref
+    wrap.dataset.portfolioPreviewQuery = query
+
+    const toolbar = document.createElement("div")
+    toolbar.className = "portfolio-search-preview__toolbar"
+    const expand = document.createElement("a")
+    expand.className = "portfolio-search-preview__expand"
+    expand.href = entryHref
+    expand.setAttribute("aria-label", "Open full page")
+    expand.innerHTML = `<span aria-hidden="true">↗</span><span>Open full page</span>`
+    expand.addEventListener("click", (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      openSearchPreviewPage(entryHref)
+    })
+    toolbar.append(expand)
+
+    const shell = document.createElement("div")
+    shell.className = "portfolio-modal__content"
+    shell.innerHTML = html
+    highlightSearchMatches(shell, query)
+    wrap.replaceChildren(toolbar, shell)
+    enhanceEntryContent(shell)
+    return wrap
+  }
+
+  const show = (pane: HTMLElement, wrap: HTMLElement, scrollToMatch: boolean) => {
+    pane.replaceChildren(wrap)
+    if (scrollToMatch) {
+      pane.scrollTop = 0
+      requestAnimationFrame(() => {
+        scrollPreviewToHighlight(pane)
+        savedScrollTop = pane.scrollTop
+      })
+      return
+    }
+    pane.scrollTop = savedScrollTop
+  }
+
+  const render = async (rawHref: string) => {
+    const entry = normalizeEntryPath(rawHref)
+    const pane = ensurePane()
+    if (!pane) return
+
+    if (!entry) {
+      activeHref = ""
+      loadingHref = ""
+      pane.replaceChildren()
+      return
+    }
+
+    const query = currentSearchQuery()
+    const painted = pane.querySelector<HTMLElement>("[data-portfolio-preview-href]")
+    if (
+      painted?.dataset.portfolioPreviewHref === entry.href &&
+      painted.dataset.portfolioPreviewQuery === query
+    ) {
+      activeHref = entry.href
+      activeQuery = query
+      return
+    }
+
+    // Already fetching this entry — don't start parallel loads (observer re-entry).
+    if (loadingHref === entry.href && activeQuery === query) return
+
+    const id = ++requestId
+    const hrefChanged = activeHref !== entry.href
+    const queryChanged = activeQuery !== query
+    activeHref = entry.href
+    activeQuery = query
+
+    const mountFromHtml = (html: string) => {
+      loadingHref = ""
+      const wrap = buildWrap(entry.href, html, query)
+      show(pane, wrap, hrefChanged || queryChanged)
+    }
+
+    const cachedHtml = htmlCache.get(entry.href)
+    if (cachedHtml) {
+      mountFromHtml(cachedHtml)
+      return
+    }
+
+    loadingHref = entry.href
+    const loading = document.createElement("div")
+    loading.className = "portfolio-search-preview"
+    loading.dataset.portfolioPreviewHref = entry.href
+    loading.dataset.portfolioPreviewQuery = query
+    loading.dataset.loading = "true"
+    loading.innerHTML = `<p class="portfolio-search-preview__status">Loading…</p>`
+    pane.replaceChildren(loading)
+
+    try {
+      const content = await fetchEntryContent(entry.href)
+      if (id !== requestId || activeHref !== entry.href) return
+      htmlCache.set(entry.href, content.html)
+      mountFromHtml(content.html)
+    } catch {
+      if (id === requestId) {
+        activeHref = ""
+        loadingHref = ""
+        pane.replaceChildren()
+      }
+    }
+  }
+
+  const onResultsInteract = (event: Event) => {
+    const card = (event.target as Element | null)?.closest?.(".result-card")
+    const href = cardHref(card ?? null)
+    if (!href) return
+    void render(href)
+  }
+
+  /** Follow the current results list (not the previously opened entry). */
+  const syncToResults = () => {
+    const href = preferredResultHref()
+    if (href) {
+      void render(href)
+      return
+    }
+    // No matches — clear the stale preview and cancel in-flight mounts.
+    requestId += 1
+    activeHref = ""
+    activeQuery = ""
+    loadingHref = ""
+    ensurePane()?.replaceChildren()
+  }
+
+  let syncTimer = 0
+  const scheduleSyncToResults = () => {
+    window.clearTimeout(syncTimer)
+    // Let Quartz finish replacing cards / applying `.focus` before we read them.
+    syncTimer = window.setTimeout(syncToResults, 0)
+  }
+
+  const onSearchInput = () => {
+    scheduleSyncToResults()
+  }
+
+  /** Only watch the results list — never the preview pane (that caused a freeze loop). */
+  let resultsObserver: MutationObserver | null = null
+  const watchResults = () => {
+    const results = search.querySelector(".results-container")
+    if (!results || results.dataset.portfolioPreviewWatch === "true") return
+    results.dataset.portfolioPreviewWatch = "true"
+    resultsObserver?.disconnect()
+    resultsObserver = new MutationObserver(() => {
+      scheduleSyncToResults()
+    })
+    // childList only — subtree would re-fire on every highlight rewrite inside cards.
+    resultsObserver.observe(results, { childList: true })
+  }
+
+  // search-layout / results-container are created lazily when search opens.
+  // Stay attached until both Quartz columns exist — early disconnect left the pane
+  // as the first flex child and skipped the results observer (page freeze / empty left).
+  const layoutObserver = new MutationObserver(() => {
+    const pane = ensurePane()
+    watchResults()
+    const watching = search.querySelector(".results-container")?.dataset.portfolioPreviewWatch === "true"
+    if (!pane || !watching) return
+    layoutObserver.disconnect()
+    scheduleSyncToResults()
+  })
+  layoutObserver.observe(search, { childList: true, subtree: true })
+
+  search.addEventListener("mouseover", onResultsInteract)
+  search.addEventListener("focusin", onResultsInteract)
+  search.querySelector(".search-bar")?.addEventListener("input", onSearchInput)
+  ensurePane()
+  watchResults()
+
+  ;(window as CleanupWindow).addCleanup?.(() => {
+    window.clearTimeout(syncTimer)
+    layoutObserver.disconnect()
+    resultsObserver?.disconnect()
+    search.removeEventListener("mouseover", onResultsInteract)
+    search.removeEventListener("focusin", onResultsInteract)
+    search.querySelector(".search-bar")?.removeEventListener("input", onSearchInput)
+    search.querySelector(".results-container")?.removeAttribute("data-portfolio-preview-watch")
+    search.querySelector(".search-layout")?.removeAttribute("data-portfolio-preview-owned")
+    search.querySelector("[data-portfolio-search-preview-pane]")?.remove()
+    search.dataset.portfolioPreview = "false"
+    activeHref = ""
+    activeQuery = ""
+    loadingHref = ""
+    savedScrollTop = 0
+    htmlCache.clear()
+  })
+}
+
+function closeNavMenu() {
+  const toggle = document.querySelector<HTMLButtonElement>("[data-portfolio-menu-toggle]")
+  const menu = document.querySelector<HTMLElement>("[data-portfolio-menu]")
+  if (!toggle || !menu) return
+  menu.hidden = true
+  toggle.setAttribute("aria-expanded", "false")
+  toggle.setAttribute("aria-label", "Open menu")
+}
+
+function wireNavMenu() {
+  const toggle = document.querySelector<HTMLButtonElement>("[data-portfolio-menu-toggle]")
+  const menu = document.querySelector<HTMLElement>("[data-portfolio-menu]")
+  const actions = toggle?.closest(".portfolio-nav__actions")
+  if (!toggle || !menu || !actions || toggle.dataset.menuWired === "true") return
+  toggle.dataset.menuWired = "true"
+
+  const setOpen = (open: boolean) => {
+    menu.hidden = !open
+    toggle.setAttribute("aria-expanded", open ? "true" : "false")
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu")
+  }
+
+  const onToggle = (event: Event) => {
+    event.stopPropagation()
+    setOpen(menu.hidden)
+  }
+  const onDocClick = (event: MouseEvent) => {
+    if (!actions.contains(event.target as Node)) closeNavMenu()
+  }
+  const onKeydown = (event: KeyboardEvent) => {
+    if (event.key === "Escape") closeNavMenu()
+  }
+  const onSearchOpen = () => {
+    if (document.querySelector(".search-container.active")) closeNavMenu()
+  }
+
+  toggle.addEventListener("click", onToggle)
+  document.addEventListener("click", onDocClick)
+  document.addEventListener("keydown", onKeydown)
+  document.addEventListener("click", onSearchOpen, true)
+
+  ;(window as CleanupWindow).addCleanup?.(() => {
+    toggle.removeEventListener("click", onToggle)
+    document.removeEventListener("click", onDocClick)
+    document.removeEventListener("keydown", onKeydown)
+    document.removeEventListener("click", onSearchOpen, true)
+    toggle.dataset.menuWired = "false"
+    closeNavMenu()
+  })
+}
+
 function initializePortfolio() {
   // Fresh page render from SPA clears modal chrome; reset stack.
   if (!document.querySelector("[data-portfolio-modal]:not([hidden])")) {
@@ -1360,6 +1771,10 @@ function initializePortfolio() {
     closeLightbox()
   }
   redirectLegacyHash()
+  adoptSearchIntoNav()
+  wireSearchPortfolioPreview()
+  wireNavMenu()
+  closeNavMenu()
   wireReel()
   wireTimelineGroups()
   wireProjectTimeline()

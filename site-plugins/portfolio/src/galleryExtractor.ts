@@ -1,3 +1,5 @@
+import { applyPortfolioDates } from "./dates"
+
 type HastNode = {
   type?: string
   tagName?: string
@@ -55,6 +57,15 @@ function collectGalleryImages(tree: HastNode): GalleryImage[] {
 export default function GalleryExtractor() {
   return {
     name: "GalleryExtractor",
+    markdownPlugins() {
+      return [
+        () => {
+          return (_tree: unknown, file: { data: Record<string, unknown> }) => {
+            applyPortfolioDates(file.data)
+          }
+        },
+      ]
+    },
     htmlPlugins() {
       return [
         () => {

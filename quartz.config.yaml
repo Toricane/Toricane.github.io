@@ -3,7 +3,7 @@ configuration:
   pageTitle: Prajwal Prashanth
   pageTitleSuffix: " · Prajwal's Portfolio"
   enableSPA: true
-  enablePopovers: false
+  enablePopovers: true
   analytics:
     provider: goatcounter
     websiteId: prajwal
@@ -108,7 +108,12 @@ plugins:
   - source: "@quartz-community/favicon"
     enabled: true
   - source: "@quartz-community/og-image"
-    enabled: false
+    enabled: true
+    options:
+      colorScheme: darkMode
+      width: 1200
+      height: 630
+      excludeRoot: false
   - source: "@quartz-community/cname"
     enabled: true
   - source: "@quartz-community/content-page"
@@ -120,6 +125,17 @@ plugins:
       showSubfolders: false
   - source: "@quartz-community/tag-page"
     enabled: true
+  - source: "@quartz-community/search"
+    enabled: true
+    options:
+      enablePreview: true
+      fieldPriority:
+        - title
+        - content
+        - tags
+    layout:
+      position: header
+      priority: 20
   - source: ./site-plugins/portfolio
     enabled: true
     order: 55

@@ -55,6 +55,7 @@ body {
 .page > #quartz-body .center.full-width,
 .page[data-frame="full-width"] > #quartz-body .center.full-width,
 .center.full-width {
+  position: relative;
   box-sizing: border-box;
   width: min(100% - (2 * var(--portfolio-gutter)), var(--portfolio-page-max));
   max-width: var(--portfolio-page-max);
@@ -111,7 +112,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--portfolio-space-6);
+  gap: var(--portfolio-space-4);
   margin: 0;
   padding: var(--portfolio-space-2) 0;
   border-bottom: 1px solid var(--portfolio-rule);
@@ -131,19 +132,32 @@ body {
   color: var(--portfolio-copper-soft);
 }
 
-.portfolio-nav nav {
+.portfolio-nav__actions {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
-.portfolio-nav nav a {
-  min-height: 40px;
+.portfolio-nav__search-host {
+  display: flex;
+  align-items: center;
+}
+
+.portfolio-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.portfolio-nav__links a {
+  min-height: 36px;
   display: inline-flex;
   align-items: center;
-  padding-inline: var(--portfolio-space-3);
+  padding: 0 var(--portfolio-space-3);
   color: var(--portfolio-steel);
-  border-bottom: 2px solid transparent;
+  border-radius: 6px;
   font-family: var(--codeFont);
   font-size: 0.75rem;
   font-weight: 500;
@@ -151,13 +165,400 @@ body {
   text-transform: uppercase;
 }
 
-.portfolio-nav nav a:hover,
-.portfolio-nav nav a[aria-current="page"] {
+.portfolio-nav__links a:hover,
+.portfolio-nav__links a[aria-current="page"] {
   color: var(--portfolio-frost);
-  border-bottom-color: var(--portfolio-copper);
+  background: color-mix(in srgb, var(--portfolio-copper) 12%, transparent);
+}
+
+.portfolio-nav__menu-toggle {
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: var(--portfolio-panel);
+  border: 1px solid var(--portfolio-rule);
+  border-radius: var(--portfolio-radius);
+  color: var(--portfolio-steel);
+  cursor: pointer;
+}
+
+.portfolio-nav__menu-toggle:hover,
+.portfolio-nav__menu-toggle[aria-expanded="true"] {
+  color: var(--portfolio-frost);
+  border-color: var(--portfolio-copper);
+}
+
+.portfolio-nav__hamburger {
+  position: relative;
+  display: block;
+  width: 14px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.portfolio-nav__hamburger::before,
+.portfolio-nav__hamburger::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 14px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.portfolio-nav__hamburger::before {
+  top: -5px;
+}
+
+.portfolio-nav__hamburger::after {
+  top: 5px;
+}
+
+.portfolio-nav__menu-toggle[aria-expanded="true"] .portfolio-nav__hamburger {
+  background: transparent;
+}
+
+.portfolio-nav__menu-toggle[aria-expanded="true"] .portfolio-nav__hamburger::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+.portfolio-nav__menu-toggle[aria-expanded="true"] .portfolio-nav__hamburger::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+.portfolio-nav__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  min-width: 11rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--portfolio-space-2);
+  background: var(--portfolio-panel);
+  border: 1px solid var(--portfolio-rule);
+  border-radius: var(--portfolio-radius);
+  box-shadow: 0 12px 32px rgba(4, 8, 12, 0.45);
+}
+
+.portfolio-nav__menu[hidden] {
+  display: none !important;
+}
+
+.portfolio-nav__menu a {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--portfolio-space-3);
+  color: var(--portfolio-steel);
+  border-radius: 6px;
+  font-family: var(--codeFont);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.portfolio-nav__menu a:hover,
+.portfolio-nav__menu a[aria-current="page"] {
+  color: var(--portfolio-frost);
+  background: color-mix(in srgb, var(--portfolio-copper) 12%, transparent);
+}
+
+/* Quartz Search lives in the header slot until JS moves it into the nav. */
+.center.full-width > .page-header > header:has(.search) {
+  position: absolute;
+  width: 0;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.center.full-width > .page-header > header:not(:has(.search)) {
+  display: none;
+}
+
+.search {
+  --search-z-index: 1000;
+  min-width: 0;
+  max-width: none;
+}
+
+.search > .search-button {
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  justify-content: center;
+  background: var(--portfolio-panel);
+  border: 1px solid var(--portfolio-rule);
+  border-radius: var(--portfolio-radius);
+  color: var(--portfolio-steel);
+}
+
+.search > .search-button > p {
+  display: none;
+}
+
+.search > .search-button svg {
+  margin: 0;
+  width: 16px;
+  min-width: 16px;
+}
+
+.search > .search-button svg .search-path {
+  stroke: var(--portfolio-steel);
+}
+
+.search > .search-button:hover {
+  border-color: var(--portfolio-copper);
+}
+
+.search > .search-button:hover svg .search-path {
+  stroke: var(--portfolio-copper-soft);
+}
+
+.search > .search-container > .search-space > input,
+.search > .search-container > .search-space > .search-layout,
+.search > .search-container > .search-space > *:not(.ghost-text):not(.tag-suggestions) {
+  background: var(--portfolio-panel);
+  border-color: var(--portfolio-rule);
+  color: var(--portfolio-frost);
+}
+
+.search > .search-container > .search-space {
+  width: min(92vw, 72rem);
+  margin-top: 6vh;
+}
+
+.search > .search-container > .search-space > input {
+  color: var(--portfolio-frost);
+}
+
+.search > .search-container > .search-space > .ghost-text {
+  color: var(--portfolio-steel);
+}
+
+.search > .search-container > .search-space > .search-layout > div {
+  height: min(72vh, 48rem);
+}
+
+.search > .search-container > .search-space > .search-layout[data-preview] > .results-container {
+  flex: 0 0 min(24%, 20rem);
+}
+
+.search > .search-container > .search-space > .search-layout > .preview-container {
+  padding: 0 1.25rem;
+  color: var(--portfolio-frost);
+}
+
+/* Quartz still writes here on hover — never show it; we use our own pane. */
+.search > .search-container > .search-space > .search-layout[data-portfolio-preview-owned] > .preview-container {
+  display: none !important;
+  order: 2;
+}
+
+.search > .search-container > .search-space > .search-layout[data-portfolio-preview-owned] > .results-container {
+  order: 1;
+}
+
+.search > .search-container > .search-space > .search-layout > .portfolio-search-preview-pane {
+  order: 3;
+  flex-grow: 1;
+  display: block;
+  overflow: hidden;
+  overflow-y: auto;
+  padding: 0 1.25rem;
+  color: var(--portfolio-frost);
+  font-family: inherit;
+  line-height: 1.5em;
+}
+
+.search > .search-container > .search-space > .search-layout .highlight {
+  background: color-mix(in srgb, var(--portfolio-copper) 48%, transparent);
+  color: var(--portfolio-frost);
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--portfolio-copper) 55%, transparent);
+  scroll-margin-block: 4rem;
+}
+
+.search > .search-container > .search-space > .search-layout > .results-container .result-card {
+  color: var(--portfolio-frost);
+  border-bottom-color: var(--portfolio-rule);
+}
+
+.search > .search-container > .search-space > .search-layout > .results-container .result-card:hover,
+.search > .search-container > .search-space > .search-layout > .results-container .result-card:focus,
+.search > .search-container > .search-space > .search-layout > .results-container .result-card.focus {
+  background: color-mix(in srgb, var(--portfolio-copper) 16%, var(--portfolio-panel));
+}
+
+.search > .search-container > .search-space > .search-layout > .results-container .result-card > h3 {
+  color: var(--portfolio-copper-soft);
+}
+
+.search > .search-container > .search-space > .search-layout > .results-container .result-card > p {
+  color: var(--portfolio-steel);
+}
+
+.search > .search-container > .search-space > .search-layout > .results-container .result-card > ul > li > p {
+  background-color: color-mix(in srgb, var(--portfolio-copper) 18%, transparent);
+  color: var(--portfolio-copper-soft);
+}
+
+.search > .search-container > .search-space > .search-layout > .results-container .result-card > ul > li > p.match-tag {
+  background-color: color-mix(in srgb, var(--portfolio-copper) 32%, transparent);
+  color: var(--portfolio-frost);
+}
+
+.search > .search-container > .search-space > .tag-suggestions {
+  background: var(--portfolio-panel);
+  border-color: var(--portfolio-rule);
+}
+
+.search > .search-container > .search-space > .tag-suggestions > .tag-suggestion-item {
+  color: var(--portfolio-frost);
+}
+
+.search > .search-container > .search-space > .tag-suggestions > .tag-suggestion-item:hover,
+.search > .search-container > .search-space > .tag-suggestions > .tag-suggestion-item.active {
+  background: color-mix(in srgb, var(--portfolio-copper) 16%, var(--portfolio-panel));
+  color: var(--portfolio-copper-soft);
+}
+
+@media all and (max-width: 800px) {
+  .search > .search-container > .search-space {
+    width: 94%;
+    margin-top: 4vh;
+  }
+
+  .search > .search-container > .search-space > .search-layout {
+    flex-direction: column;
+  }
+
+  .search > .search-container > .search-space > .search-layout > .preview-container {
+    display: none !important;
+  }
+
+  .search > .search-container > .search-space > .search-layout > .portfolio-search-preview-pane {
+    display: block !important;
+    flex: 0 0 auto;
+    height: auto;
+    max-height: 38vh;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--portfolio-rule);
+  }
+
+  .search > .search-container > .search-space > .search-layout[data-preview] > .results-container {
+    width: 100%;
+    height: auto;
+    max-height: 34vh;
+    flex: 0 0 auto;
+  }
+
+  .search > .search-container > .search-space > .search-layout > div {
+    height: auto;
+  }
+
+  .search > .search-container > .search-space > .search-layout[data-preview] .result-card > p.card-description {
+    display: block;
+    color: var(--portfolio-steel);
+  }
+}
+
+.popover-inner .portfolio-nav,
+.popover-inner .portfolio-footer,
+.popover-inner .portfolio-modal,
+.popover-inner .portfolio-lightbox,
+.popover-inner .portfolio-home-shell,
+.popover-inner .portfolio-collection,
+.search-layout .preview-inner .portfolio-nav,
+.search-layout .preview-inner .portfolio-footer,
+.search-layout .preview-inner .portfolio-modal,
+.search-layout .preview-inner .portfolio-lightbox,
+.search-layout .preview-inner .portfolio-home-shell,
+.search-layout .preview-inner .portfolio-collection {
+  display: none;
+}
+
+.popover-inner .portfolio-entry-cover img {
+  max-height: 8rem;
+}
+
+.portfolio-search-preview {
+  box-sizing: border-box;
+  padding-bottom: var(--portfolio-space-4);
+}
+
+.portfolio-search-preview__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--portfolio-space-2);
+  margin: 0 -0.25rem 0.75rem;
+  padding: 0.65rem 0.25rem 0.75rem;
+  background: linear-gradient(
+    to bottom,
+    var(--portfolio-panel) 70%,
+    color-mix(in srgb, var(--portfolio-panel) 0%, transparent)
+  );
+}
+
+.portfolio-search-preview__expand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding: 0 0.85rem;
+  color: var(--portfolio-frost);
+  background: color-mix(in srgb, var(--portfolio-panel) 88%, #101820);
+  border: 1px solid var(--portfolio-rule);
+  border-radius: 999px;
+  font-family: var(--codeFont);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.portfolio-search-preview__expand:hover {
+  color: var(--portfolio-ink);
+  background: var(--portfolio-copper);
+  border-color: var(--portfolio-copper);
+}
+
+.portfolio-search-preview__status {
+  margin: 1.5rem 0;
+  color: var(--portfolio-steel);
+  font-family: var(--codeFont);
+  font-size: 0.8rem;
+}
+
+.search-layout .portfolio-search-preview .portfolio-modal__content {
+  padding-bottom: var(--portfolio-space-4);
+}
+
+.search-layout .portfolio-search-preview .portfolio-entry-cover img {
+  max-height: 220px;
 }
 
 .portfolio-nav a:active,
+.portfolio-nav__menu-toggle:active,
+.search > .search-button:active,
 .portfolio-section-links a:active,
 .portfolio-card > a:active,
 .portfolio-coverflow__item:active,
@@ -172,6 +573,8 @@ body {
 }
 
 .portfolio-nav a:focus-visible,
+.portfolio-nav__menu-toggle:focus-visible,
+.search > .search-button:focus-visible,
 .portfolio-section-links a:focus-visible,
 .portfolio-card > a:focus-visible,
 .portfolio-coverflow__item:focus-visible,
@@ -2521,16 +2924,22 @@ a.internal.portfolio-bookmark {
     text-overflow: ellipsis;
   }
 
-  .portfolio-nav nav {
-    gap: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
+  .portfolio-nav__links {
+    display: none;
   }
 
-  .portfolio-nav nav a {
+  .portfolio-nav__menu-toggle {
+    display: inline-flex;
+  }
+
+  .portfolio-nav__menu-toggle,
+  .search > .search-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .portfolio-nav__menu a {
     min-height: 44px;
-    padding-inline: var(--portfolio-space-2);
-    font-size: 0.625rem;
   }
 
   .portfolio-home-shell {
