@@ -54,9 +54,32 @@ type TimelineGroup = {
 }
 
 const sections = ["projects", "hackathons", "awards"] as const
+const RESUME_HREF = "https://prajwal.is-a.dev/resume/"
 
 function sectionHref(section: Section) {
   return `/${section}/`
+}
+
+function ResumeLink({ children = "resume" }: { children?: string }) {
+  return (
+    <a href={RESUME_HREF} data-router-ignore>
+      {children}
+    </a>
+  )
+}
+
+function primaryNavLinks(slug: string) {
+  const active = sections.find((section) => slug.startsWith(section))
+  return (
+    <>
+      {sections.map((section) => (
+        <a href={sectionHref(section)} aria-current={active === section ? "page" : undefined}>
+          {section}
+        </a>
+      ))}
+      <ResumeLink />
+    </>
+  )
 }
 
 function frontmatter(file: PortfolioFile): Frontmatter {
@@ -1304,12 +1327,6 @@ function EntryHeading({ fileData }: QuartzComponentProps) {
 }
 
 function SiteNav({ slug }: { slug: string }) {
-  const active = sections.find((section) => slug.startsWith(section))
-  const links = sections.map((section) => (
-    <a href={sectionHref(section)} aria-current={active === section ? "page" : undefined}>
-      {section}
-    </a>
-  ))
   return (
     <header class="portfolio-nav">
       <a class="portfolio-nav__brand" href="/">
@@ -1318,7 +1335,7 @@ function SiteNav({ slug }: { slug: string }) {
       <div class="portfolio-nav__actions">
         <div class="portfolio-nav__search-host" data-portfolio-search-host />
         <nav class="portfolio-nav__links" aria-label="Primary navigation">
-          {links}
+          {primaryNavLinks(slug)}
         </nav>
         <button
           type="button"
@@ -1337,7 +1354,7 @@ function SiteNav({ slug }: { slug: string }) {
           aria-label="Primary navigation"
           hidden
         >
-          {links}
+          {primaryNavLinks(slug)}
         </nav>
       </div>
     </header>
@@ -1406,6 +1423,7 @@ function SiteFooter() {
       <span>© {new Date().getFullYear()} Prajwal Prashanth</span>
       <nav aria-label="Footer navigation">
         <a href="/index.xml">RSS</a>
+        <ResumeLink>Resume</ResumeLink>
         <a href="https://github.com/Toricane">GitHub</a>
         <a href="https://linkedin.com/in/prajwal-prashanth">LinkedIn</a>
       </nav>
