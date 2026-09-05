@@ -1306,6 +1306,7 @@ function EntryHeading({ fileData }: QuartzComponentProps) {
         </p>
       )}
       <TagList tags={data.tags} compact linked />
+      {data.description && <p class="portfolio-entry-heading__description">{data.description}</p>}
       {(data.role || data.outcome) && (
         <dl class="portfolio-entry-facts">
           {data.role && (

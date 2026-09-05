@@ -9,8 +9,6 @@ tags:
   - In-Person
 ---
 
-Interactive AI game resembling Pokémon with real‑world items; placed 2nd among 100+ participants.
-
 ## Gallery
 
 ![Itémon 2nd Place](/assets/tab-panels/scrapyard_hackathon.webp)

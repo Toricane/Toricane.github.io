@@ -13,7 +13,7 @@ tags:
 
 ## Overview
 
-Chrome extension integrating Gemini with Google Calendar to plan weeks & schedule events via natural language; demoed at Vancouver AI Community Meetup.
+> [Replace with: a longer entry-only intro — context, motivation, or what this is — not the card description.]
 
 ## Role and constraints
 

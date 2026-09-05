@@ -9,8 +9,6 @@ tags:
   - Contest
 ---
 
-Top 20% internationally.
-
 ## Gallery
 
 ![Chem 13 News Distinction Certificate](/assets/tab-panels/chem_13_news_distinction.webp)

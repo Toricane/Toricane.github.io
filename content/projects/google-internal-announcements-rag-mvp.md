@@ -15,7 +15,7 @@ tags:
 
 ## Overview
 
-Personalized announcements + question answering by integrating Gemini with internal docs (RAG) for sales teams; selected top 3/100+ & ranked #1 in final judging by the Global Head of Partnerships with Google Canada.
+> [Replace with: a longer entry-only intro — context, motivation, or what this is — not the card description.]
 
 ## Role and constraints
 

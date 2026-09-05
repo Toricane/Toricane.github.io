@@ -9,8 +9,6 @@ tags:
   - Academic
 ---
 
-Highest Grade 11 math while in Gr.10.
-
 ## Gallery
 
 ![Top Math 11 (Gr.10) Award Certificate](/assets/tab-panels/top_math_11_g10.webp)

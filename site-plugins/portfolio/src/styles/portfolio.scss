@@ -562,6 +562,7 @@ body {
 .portfolio-section-links a:active,
 .portfolio-card > a:active,
 .portfolio-coverflow__item:active,
+.portfolio-inline-image:active,
 .newsletter-card a:active,
 .portfolio-coverflow__controls button:active,
 .portfolio-filter-toggle:active,
@@ -578,6 +579,7 @@ body {
 .portfolio-section-links a:focus-visible,
 .portfolio-card > a:focus-visible,
 .portfolio-coverflow__item:focus-visible,
+.portfolio-inline-image:focus-visible,
 .newsletter-card a:focus-visible,
 .portfolio-coverflow__controls button:focus-visible,
 .portfolio-coverflow__viewport:focus-visible,
@@ -2609,6 +2611,13 @@ body[data-slug="coverflow"] .portfolio-footer {
   text-transform: uppercase;
 }
 
+.portfolio-entry-heading__description {
+  margin: var(--portfolio-space-4) 0 0;
+  color: var(--portfolio-frost);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
 .portfolio-entry-facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2697,6 +2706,28 @@ body[data-slug="coverflow"] .portfolio-footer {
   border: 1px solid var(--portfolio-rule);
   border-radius: 6px;
   object-fit: contain;
+}
+
+.portfolio-inline-image {
+  margin: 0 0 var(--portfolio-space-5);
+  cursor: pointer;
+}
+
+.portfolio-inline-image img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+.portfolio-inline-image figcaption {
+  margin-top: var(--portfolio-space-2);
+  color: var(--portfolio-frost);
+  font-family: var(--codeFont);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-align: center;
 }
 
 body:has(.portfolio-home-shell) .center.full-width > article.portfolio-home,
@@ -2867,6 +2898,11 @@ body:has(.portfolio-collection) .center.full-width > .popover-hint,
 
 .portfolio-modal__content article img {
   max-height: 280px;
+}
+
+.portfolio-modal__content .portfolio-inline-image,
+.center.full-width > article .portfolio-inline-image {
+  margin-top: var(--portfolio-space-3);
 }
 
 .portfolio-modal__content .portfolio-coverflow,

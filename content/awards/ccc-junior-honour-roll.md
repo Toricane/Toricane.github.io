@@ -9,8 +9,6 @@ tags:
   - Contest
 ---
 
-Score 66/75 (Group 3).
-
 ## Links
 
 - [https://cemc.uwaterloo.ca/sites/default/files/documents/2024/2024CCCResults.pdf](https://cemc.uwaterloo.ca/sites/default/files/documents/2024/2024CCCResults.pdf)

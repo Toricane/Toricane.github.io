@@ -8,8 +8,6 @@ tags:
   - Service
 ---
 
-60+ service hours (2023–24).
-
 ## Gallery
 
 ![Level 2 Service Award Certificate](/assets/tab-panels/level_2_g11.webp)

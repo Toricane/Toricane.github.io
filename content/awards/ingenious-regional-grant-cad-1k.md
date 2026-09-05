@@ -9,8 +9,6 @@ tags:
   - AI
 ---
 
-Funding for JARVIS project.
-
 ## Gallery
 
 ![Photo with Lieutenant Governor of BC](/assets/tab-panels/ingenious_plus_photo.webp)

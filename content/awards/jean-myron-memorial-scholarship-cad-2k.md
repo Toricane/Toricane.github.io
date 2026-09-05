@@ -8,8 +8,6 @@ tags:
   - Scholarship
 ---
 
-Scholarship for outstanding achievement 2024–25.
-
 ## Gallery
 
 ![Scholarship Certificate](/assets/tab-panels/jean_myron.webp)

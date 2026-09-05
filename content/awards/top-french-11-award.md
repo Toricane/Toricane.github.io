@@ -9,8 +9,6 @@ tags:
   - Academic
 ---
 
-Highest French 11 marks.
-
 ## Gallery
 
 ![Top French 11 Award Certificate](/assets/tab-panels/top_french_g11.webp)

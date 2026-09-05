@@ -10,7 +10,7 @@ tags:
 
 ## Overview
 
-One-line blurb for cards and timeline.
+> [Replace with: a longer entry-only intro — context, motivation, or what this is — not the card description.]
 
 ## Role and constraints
 

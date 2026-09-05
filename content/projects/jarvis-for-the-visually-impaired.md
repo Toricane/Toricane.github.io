@@ -14,7 +14,7 @@ tags:
 
 ## Overview
 
-Portable wearable AI assistant (camera, mic, speaker) giving low‑latency scene descriptions & Q/A; core translated to microcontroller (C++ + Edge Impulse).
+> [Replace with: a longer entry-only intro — context, motivation, or what this is — not the card description.]
 
 ## Role and constraints
 

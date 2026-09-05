@@ -9,8 +9,6 @@ tags:
   - Leadership
 ---
 
-Chosen to deliver farewell speech (GPA 96.43%).
-
 ## Gallery
 
 ![I'm giving the Valedictorian speech!](/assets/tab-panels/valedictorian_speech.webp)

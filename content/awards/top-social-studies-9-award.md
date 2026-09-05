@@ -9,8 +9,6 @@ tags:
   - Social-Studies
 ---
 
-Highest Social Studies 9 marks.
-
 ## Gallery
 
 ![Top Social Studies 9 Award Certificate](/assets/tab-panels/top_socials_9.webp)

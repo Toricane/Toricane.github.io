@@ -9,8 +9,6 @@ tags:
   - Citizenship
 ---
 
-Highest award: academics & contribution.
-
 ## Gallery
 
 ![Top Raven Trophy](/assets/tab-panels/top_raven_g10_trophy.webp)

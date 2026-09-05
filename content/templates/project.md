@@ -19,7 +19,7 @@ tags:
 
 ## Overview
 
-One-line blurb for cards and timeline.
+> [Replace with: a longer entry-only intro — context, motivation, or what this is — not the card description.]
 
 ## Role and constraints
 
@@ -39,6 +39,7 @@ One-line blurb for cards and timeline.
 
 ## Gallery
 
+<!-- Images outside this section stay in place: one as-is with caption, consecutive as a coverflow. -->
 ![Caption](/assets/tab-panels/example.webp)
 
 ## Links

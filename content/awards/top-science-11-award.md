@@ -9,8 +9,6 @@ tags:
   - Academic
 ---
 
-Chem 100%, Phys 99% (Gr.11).
-
 ## Gallery
 
 ![Top Science 11 Award Certificate](/assets/tab-panels/top_science_11.webp)

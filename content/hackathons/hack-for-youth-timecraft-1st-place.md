@@ -9,8 +9,6 @@ tags:
   - In-Person
 ---
 
-Calendar + AI chatbot for intelligent time management integrating Google Calendar.
-
 ## Gallery
 
 ![TimeCraft 1st Place](/assets/tab-panels/hack4youth_hackathon.webp)

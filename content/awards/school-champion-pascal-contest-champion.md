@@ -9,8 +9,6 @@ tags:
   - Contest
 ---
 
-Top 25% & school champion Pascal.
-
 ## Gallery
 
 ![Pascal School Champion Medal](/assets/tab-panels/pascal_champion.webp)

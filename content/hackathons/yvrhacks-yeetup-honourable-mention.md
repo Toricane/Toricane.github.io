@@ -9,8 +9,6 @@ tags:
   - In-Person
 ---
 
-AI‑first natural language interface to discover youth events & meetups (Groq).
-
 ## Gallery
 
 ![yeetup Honourable Mention](/assets/tab-panels/yvrhacks_hackathon.webp)

@@ -9,8 +9,6 @@ tags:
   - Contest
 ---
 
-Top 25% Canadian Senior Mathematics Contest.
-
 ## Gallery
 
 ![CSMC Certificate](/assets/tab-panels/csmc_distinction.webp)

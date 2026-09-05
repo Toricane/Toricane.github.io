@@ -9,8 +9,6 @@ tags:
   - Academic
 ---
 
-Highest French 10 marks.
-
 ## Gallery
 
 ![Top French 10 Award Certificate](/assets/tab-panels/top_french_g10.webp)

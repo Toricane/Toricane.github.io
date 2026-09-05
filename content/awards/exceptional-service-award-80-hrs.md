@@ -8,8 +8,6 @@ tags:
   - Service
 ---
 
-80+ service hours (2022–23).
-
 ## Gallery
 
 ![Exceptional Service Award Certificate](/assets/tab-panels/exceptional_service_g10.webp)

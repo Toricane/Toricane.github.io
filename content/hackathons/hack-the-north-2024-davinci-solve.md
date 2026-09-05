@@ -8,8 +8,6 @@ tags:
   - In-Person
 ---
 
-AI interview simulation app for CS majors (Gradio, Groq, OpenAI).
-
 ## Gallery
 
 ![Won MASV Challenge 2nd place with Leonardo Zhou!](/assets/tab-panels/hackthenorth_hackathon.webp)

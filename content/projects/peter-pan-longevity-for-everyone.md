@@ -13,7 +13,7 @@ tags:
 
 ## Overview
 
-Researched mitochondrial theory of aging; built MVP system to help stabilize blood glucose for accessible lifespan improvement; pitched to 3 VCs.
+> [Replace with: a longer entry-only intro — context, motivation, or what this is — not the card description.]
 
 ## Role and constraints
 

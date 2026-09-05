@@ -9,8 +9,6 @@ tags:
   - Academic
 ---
 
-AP Chem 97%, Chem 12 97%, Physics 12 96%.
-
 ## Gallery
 
 ![Top Science 12 Certificate](/assets/tab-panels/top_science_12.webp)

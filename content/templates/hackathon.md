@@ -8,10 +8,9 @@ tags:
   - In-Person
 ---
 
-One-line blurb for cards and timeline.
-
 ## Gallery
 
+<!-- Images outside this section stay in place: one as-is with caption, consecutive as a coverflow. -->
 ![Caption](/assets/tab-panels/example.webp)
 
 ## Links

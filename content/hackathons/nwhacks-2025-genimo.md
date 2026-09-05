@@ -8,8 +8,6 @@ tags:
   - In-Person
 ---
 
-AI + animation tool converting user text into educational animations (Generate + Manim).
-
 ## Gallery
 
 ![My teammates Jacob Lacsamana and Eric Chen!](/assets/tab-panels/nwhacks_hackathon.webp)

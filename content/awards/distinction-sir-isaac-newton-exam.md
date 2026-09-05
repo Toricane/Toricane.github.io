@@ -9,8 +9,6 @@ tags:
   - Contest
 ---
 
-282/3077 worldwide; 3rd school (Gr.11).
-
 ## Gallery
 
 ![Sir Isaac Newton Exam Distinction Certificate](/assets/tab-panels/sin_certificate_g11.webp)

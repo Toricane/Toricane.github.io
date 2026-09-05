@@ -23,7 +23,7 @@ This repo is a **Quartz 5** portfolio fork. Site-specific UI lives in the local 
 - New notes: `content/templates/` (ignored by Quartz; use from Obsidian)
 - Static assets: `content/assets/`
 
-Create new collection notes from `content/templates/{award,hackathon,project}.md`. Keep YAML keys in the template order.
+Create new collection notes from `content/templates/{award,hackathon,project}.md`. Keep YAML keys in the template order. Projects include `## Overview` as a longer entry-only intro — leave the `[Replace with: …]` placeholder until the copy is distinct from `description`.
 
 ### Frontmatter schema
 
@@ -32,7 +32,7 @@ Shared on every entry:
 | Field | Meaning |
 |-------|---------|
 | `title` | Card / timeline / entry heading |
-| `description` | Card and timeline blurb |
+| `description` | Card, timeline, and entry heading blurb. Injected into the entry — do not repeat it as `## Overview`. |
 | `from` | Source / host / affiliation — who issued it or where it lived, not a restatement of the title or the outcome |
 | `significance` | Always set: `impactful` (gold), `notable` (silver), `minor` (normal). `minor` is YAML-only — the UI never shows a pill or `data-significance="minor"` |
 | `tags` | The only chip list. Awards: topic. Hackathons: placement/format. Projects: stack/topic |
@@ -87,7 +87,9 @@ For `assets/tab-panels/` images, keep three sizes with the **same basename**:
 | Small | `assets/tab-panels/small/{name}.webp` | 800px wide | Gallery cards + coverflows |
 | Preview | `assets/tab-panels/preview/{name}.webp` | 256px wide | Timeline thumbs |
 
-Content should reference the **full** path in `## Gallery`. The plugin rewrites to `small/` or `preview/` at render time via `imageVariant()`.
+Content should reference the **full** path in `## Gallery` and in any in-body images. The plugin rewrites to `small/` or `preview/` at render time via `imageVariant()`.
+
+Images **outside** `## Gallery` stay where they are written and are not added to cards, timeline thumbs, or the Gallery coverflow. A single `![caption](/assets/tab-panels/foo.webp)` shows as-is with the caption; consecutive image-only blocks become the same coverflow as Gallery.
 
 `npm run images` (`scripts/generate-image-variants.mjs`) creates **missing** `small/` and `preview/` WebPs only. Existing files are not overwritten unless you pass `--force`. This is **not** part of `npx quartz build` or GitHub Actions.
 

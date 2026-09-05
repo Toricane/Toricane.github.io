@@ -9,8 +9,6 @@ tags:
   - Academic
 ---
 
-Excellence & potential in senior sciences.
-
 ## Gallery
 
 ![Top Senior Science Student Trophy](/assets/tab-panels/top_senior_science_trophy.webp)

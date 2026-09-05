@@ -9,8 +9,6 @@ tags:
   - Contest
 ---
 
-Top 25% Fermat contest.
-
 ## Gallery
 
 ![Fermat Distinction Certificate](/assets/tab-panels/fermat_certificate.webp)

@@ -9,8 +9,6 @@ tags:
   - Contest
 ---
 
-Top 25% Cayley math contest.
-
 ## Gallery
 
 ![Cayley Distinction Certificate](/assets/tab-panels/cayley_certificate.webp)

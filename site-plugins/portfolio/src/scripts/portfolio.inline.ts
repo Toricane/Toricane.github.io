@@ -184,30 +184,29 @@ function linkHostname(href: string) {
   }
 }
 
-function enhanceEntryGallery(root: ParentNode) {
-  const article = root.querySelector("article")
-  if (!article) return
+type EntryImage = { src: string; alt: string }
 
-  const galleryHeading = [...article.querySelectorAll("h2")].find(
-    (heading) => headingText(heading) === "gallery",
-  )
-  if (!galleryHeading || galleryHeading.dataset.coverflowReady === "true") return
+function entryImageFrom(img: Element): EntryImage | null {
+  const src = img.getAttribute("src") ?? ""
+  if (!src) return null
+  return {
+    src,
+    alt: img.getAttribute("alt")?.trim() || img.getAttribute("title")?.trim() || "",
+  }
+}
 
-  const sectionNodes = collectSectionNodes(galleryHeading)
-  const images = sectionNodes
-    .flatMap((node) =>
-      [...node.querySelectorAll("img")].map((img) => ({
-        src: img.getAttribute("src") ?? "",
-        alt: img.getAttribute("alt")?.trim() || img.getAttribute("title")?.trim() || "",
-      })),
-    )
-    .filter((image) => image.src)
+function imagesIn(node: Element): EntryImage[] {
+  if (node.tagName === "IMG") {
+    const image = entryImageFrom(node)
+    return image ? [image] : []
+  }
+  return [...node.querySelectorAll("img")].map(entryImageFrom).filter((image): image is EntryImage => image !== null)
+}
 
-  if (!images.length) return
-
+function buildCoverflow(images: EntryImage[], ariaLabel: string) {
   const coverflow = document.createElement("section")
   coverflow.className = "portfolio-coverflow"
-  coverflow.setAttribute("aria-label", "Gallery")
+  coverflow.setAttribute("aria-label", ariaLabel)
 
   const controls = document.createElement("div")
   controls.className = "portfolio-coverflow__controls"
@@ -247,9 +246,102 @@ function enhanceEntryGallery(root: ParentNode) {
   })
 
   coverflow.append(controls, viewport)
-  galleryHeading.insertAdjacentElement("afterend", coverflow)
+  return coverflow
+}
+
+function buildInlineFigure(image: EntryImage) {
+  const figure = document.createElement("figure")
+  figure.className = "portfolio-inline-image"
+  figure.dataset.portfolioLightbox = ""
+  figure.dataset.lightboxSrc = imageVariant(image.src, "full")
+  figure.dataset.lightboxCaption = image.alt
+  figure.setAttribute("role", "button")
+  figure.tabIndex = 0
+  figure.setAttribute("aria-label", image.alt ? `Expand ${image.alt}` : "Expand photo")
+
+  const img = document.createElement("img")
+  img.src = imageVariant(image.src, "small")
+  img.alt = image.alt
+  img.loading = "lazy"
+  img.decoding = "async"
+  figure.append(img)
+  if (image.alt) {
+    const caption = document.createElement("figcaption")
+    caption.textContent = image.alt
+    figure.append(caption)
+  }
+  return figure
+}
+
+function isImageOnlyBlock(el: Element) {
+  if (
+    el.classList.contains("portfolio-coverflow") ||
+    el.classList.contains("portfolio-inline-image") ||
+    el.classList.contains("portfolio-coverflow__item") ||
+    el.classList.contains("portfolio-entry-links") ||
+    /^H[1-6]$/.test(el.tagName)
+  ) {
+    return false
+  }
+  if (el.tagName === "IMG") return true
+
+  const images = el.querySelectorAll("img")
+  if (!images.length) return false
+
+  const clone = el.cloneNode(true) as Element
+  for (const img of clone.querySelectorAll("img")) img.remove()
+  for (const caption of clone.querySelectorAll("figcaption")) caption.remove()
+  return (clone.textContent?.replace(/\s+/g, "") ?? "") === ""
+}
+
+function enhanceEntryGallery(root: ParentNode) {
+  const article = root.querySelector("article")
+  if (!article) return
+
+  const galleryHeading = [...article.querySelectorAll("h2")].find(
+    (heading) => headingText(heading) === "gallery",
+  )
+  if (!galleryHeading || galleryHeading.dataset.coverflowReady === "true") return
+
+  const sectionNodes = collectSectionNodes(galleryHeading)
+  const images = sectionNodes.flatMap(imagesIn)
+  if (!images.length) return
+
+  galleryHeading.insertAdjacentElement("afterend", buildCoverflow(images, "Gallery"))
   for (const node of sectionNodes) node.remove()
   galleryHeading.dataset.coverflowReady = "true"
+}
+
+function entryMarkdownHost(article: Element) {
+  const heading = [...article.querySelectorAll("h2")].find((node) => headingText(node) !== "")
+  return heading?.parentElement ?? article
+}
+
+function enhanceInlineImages(root: ParentNode) {
+  const article = root.querySelector("article")
+  if (!article) return
+
+  const host = entryMarkdownHost(article)
+  const groups: Element[][] = []
+  let current: Element[] = []
+  for (const el of [...host.children]) {
+    if (isImageOnlyBlock(el)) {
+      current.push(el)
+      continue
+    }
+    if (current.length) groups.push(current)
+    current = []
+  }
+  if (current.length) groups.push(current)
+
+  for (const group of groups) {
+    const images = group.flatMap(imagesIn)
+    if (!images.length) continue
+    const replacement =
+      images.length === 1 ? buildInlineFigure(images[0]) : buildCoverflow(images, "Photos")
+    group[0].replaceWith(replacement)
+    for (const extra of group.slice(1)) extra.remove()
+  }
 }
 
 function enhanceEntryLinks(root: ParentNode) {
@@ -322,6 +414,7 @@ function enhanceEntryLinks(root: ParentNode) {
 
 function enhanceEntryContent(root: ParentNode = document) {
   enhanceEntryGallery(root)
+  enhanceInlineImages(root)
   enhanceEntryLinks(root)
   enhanceInlineLinkIcons(root)
   wireReel(root)

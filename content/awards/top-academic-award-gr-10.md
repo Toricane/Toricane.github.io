@@ -8,8 +8,6 @@ tags:
   - Academic
 ---
 
-95.5% average over 8 courses.
-
 ## Gallery
 
 ![Top Academic Award Trophy](/assets/tab-panels/top_academic_g10_trophy.webp)
