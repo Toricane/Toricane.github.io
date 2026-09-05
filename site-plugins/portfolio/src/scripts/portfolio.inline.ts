@@ -17,6 +17,12 @@ const TAP_STICKY_DISMISS_KEY = "portfolio:tap-sticky-dismissed"
 const TAP_LINKEDIN_FALLBACK = "https://linkedin.com/in/prajwal-prashanth"
 const TAP_PLACE_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} '\-]{0,39}$/u
 const TAP_MODEL_HINT_MS = 200
+const SESSION_GAP_MS = 10 * 60 * 1000
+const SESSION_HEARTBEAT_MS = 30 * 1000
+const SESSION_WHILE_MS = 7 * 24 * 60 * 60 * 1000
+const VISIT_SESSION_KEY = "portfolio:sessions:visit"
+const TAP_SESSION_KEY = "portfolio:sessions:tap"
+const DEFAULT_HELLO = "Hello there!"
 
 type ModalFrame = {
   slug: string
@@ -1913,6 +1919,20 @@ function coarseDeviceLabel(ua: string) {
   return null
 }
 
+function modelFromUserAgent(ua: string) {
+  const linux = ua.match(/\(Linux;\s*Android\s+[\d.]+;\s*([^;)]+?)(?:\s+Build\/[^;)]*)?\)/i)
+  if (linux) {
+    const cleaned = sanitizeModel(linux[1])
+    if (cleaned) return cleaned
+  }
+  const gecko = ua.match(/\(Android\s+[\d.]+;\s*(?:Mobile|Tablet);\s*(?!rv:)([^;)]+)/i)
+  if (gecko) {
+    const cleaned = sanitizeModel(gecko[1])
+    if (cleaned) return cleaned
+  }
+  return null
+}
+
 function pickDeviceLabel(model: string | undefined, platform: string | undefined, fallback: string | null) {
   const fromModel = model ? sanitizeModel(model) : null
   if (fromModel) return fromModel
@@ -1923,17 +1943,198 @@ function pickDeviceLabel(model: string | undefined, platform: string | undefined
 }
 
 async function deviceLabel(fallback: string | null) {
+  const fromUa = modelFromUserAgent(navigator.userAgent)
   const uaData = (navigator as Navigator & { userAgentData?: TapNavigatorUAData }).userAgentData
-  if (!uaData?.getHighEntropyValues) return fallback
+  if (!uaData?.getHighEntropyValues) return fromUa ?? fallback
   try {
     const high = await Promise.race([
       uaData.getHighEntropyValues(["model", "platform"]),
       new Promise<null>((resolve) => window.setTimeout(() => resolve(null), TAP_MODEL_HINT_MS)),
     ])
-    if (!high) return fallback
-    return pickDeviceLabel(high.model, high.platform, fallback)
+    if (!high) return fromUa ?? fallback
+    return pickDeviceLabel(high.model, high.platform, fromUa ?? fallback)
   } catch {
-    return fallback
+    return fromUa ?? fallback
+  }
+}
+
+type SessionRecord = {
+  count: number
+  lastSeenAt: number
+  sessionStartedAt: number
+  previousStartedAt: number
+  activeMs: number
+}
+
+let sessionHeartbeat: number | null = null
+
+function emptySession(): SessionRecord {
+  return { count: 0, lastSeenAt: 0, sessionStartedAt: 0, previousStartedAt: 0, activeMs: 0 }
+}
+
+function readSession(key: string): SessionRecord {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return emptySession()
+    const parsed = JSON.parse(raw) as Partial<SessionRecord>
+    return {
+      count: Number(parsed.count) || 0,
+      lastSeenAt: Number(parsed.lastSeenAt) || 0,
+      sessionStartedAt: Number(parsed.sessionStartedAt) || 0,
+      previousStartedAt: Number(parsed.previousStartedAt) || 0,
+      activeMs: Number(parsed.activeMs) || 0,
+    }
+  } catch {
+    return emptySession()
+  }
+}
+
+function writeSession(key: string, record: SessionRecord) {
+  try {
+    localStorage.setItem(key, JSON.stringify(record))
+  } catch {
+    // Private mode or blocked storage.
+  }
+}
+
+function touchSession(key: string, now = Date.now(), accumulate = false): SessionRecord {
+  const record = readSession(key)
+  const stale = !record.lastSeenAt || now - record.lastSeenAt > SESSION_GAP_MS
+  if (stale) {
+    record.previousStartedAt = record.sessionStartedAt
+    record.count += 1
+    record.sessionStartedAt = now
+  } else if (accumulate && record.lastSeenAt) {
+    record.activeMs += Math.max(0, now - record.lastSeenAt)
+  }
+  record.lastSeenAt = now
+  writeSession(key, record)
+  return record
+}
+
+function tapQueryActive() {
+  return new URLSearchParams(location.search).get("tap") === "true"
+}
+
+function stampSessionHidden(key: string, now: number) {
+  const record = readSession(key)
+  if (!record.count) return
+  record.lastSeenAt = now
+  writeSession(key, record)
+}
+
+function pulseSessions() {
+  if (document.visibilityState !== "visible") return
+  const now = Date.now()
+  touchSession(VISIT_SESSION_KEY, now, true)
+  if (tapQueryActive()) touchSession(TAP_SESSION_KEY, now, true)
+}
+
+function wireSessionHeartbeat() {
+  if (sessionHeartbeat != null) return
+  sessionHeartbeat = window.setInterval(pulseSessions, SESSION_HEARTBEAT_MS)
+  const onVisibility = () => {
+    const now = Date.now()
+    if (document.visibilityState === "hidden") {
+      stampSessionHidden(VISIT_SESSION_KEY, now)
+      if (tapQueryActive()) stampSessionHidden(TAP_SESSION_KEY, now)
+      return
+    }
+    pulseSessions()
+  }
+  document.addEventListener("visibilitychange", onVisibility)
+  ;(window as CleanupWindow).addCleanup?.(() => {
+    if (sessionHeartbeat != null) {
+      window.clearInterval(sessionHeartbeat)
+      sessionHeartbeat = null
+    }
+    document.removeEventListener("visibilitychange", onVisibility)
+  })
+}
+
+function ordinal(n: number) {
+  const teens = n % 100
+  if (teens >= 11 && teens <= 13) return `${n}th`
+  switch (n % 10) {
+    case 1:
+      return `${n}st`
+    case 2:
+      return `${n}nd`
+    case 3:
+      return `${n}rd`
+    default:
+      return `${n}th`
+  }
+}
+
+function beenAWhile(record: SessionRecord, now = Date.now()) {
+  return Boolean(record.previousStartedAt) && now - record.previousStartedAt >= SESSION_WHILE_MS
+}
+
+function visitPhrase(count: number, longAbsence: boolean) {
+  if (count < 2) return null
+  const base =
+    count === 2
+      ? "Welcome back"
+      : count === 3
+        ? "Good to see you again"
+        : count === 4
+          ? "Still here, I see"
+          : count === 5
+            ? "Making this a habit"
+            : `Back for the ${ordinal(count)} time, eh`
+  return longAbsence ? `${base} — it's been a while!` : `${base}!`
+}
+
+function tapCountPhrase(count: number) {
+  if (count === 2) return "Second tap!"
+  if (count === 3) return "Third tap!"
+  if (count === 4) return "Fourth tap!"
+  if (count === 5) return "Fifth tap!"
+  return `${ordinal(count)} tap!`
+}
+
+function composeTapGreeting(
+  visit: SessionRecord,
+  tap: SessionRecord,
+  time: string,
+  device: string | null,
+  place: string | null,
+) {
+  const meet = tapGreeting(time, device, place)
+  const returning = visitPhrase(visit.count, beenAWhile(visit))
+  if (!returning) return `${meet}!`
+  if (tap.count < 2) return `${returning} ${meet}!`
+  return `${returning} ${tapCountPhrase(tap.count)}`
+}
+
+function applyVisitHello(phrase: string) {
+  const paragraph = document.querySelector(".portfolio-home-markdown > p")
+  if (!paragraph) return
+  const existing = paragraph.querySelector("[data-portfolio-visit-hello]")
+  if (existing) {
+    existing.textContent = phrase
+    return
+  }
+  if (phrase === DEFAULT_HELLO) return
+
+  const walker = document.createTreeWalker(paragraph, NodeFilter.SHOW_TEXT)
+  let node = walker.nextNode()
+  while (node) {
+    const value = node.nodeValue ?? ""
+    const index = value.indexOf(DEFAULT_HELLO)
+    if (index !== -1) {
+      const span = document.createElement("span")
+      span.dataset.portfolioVisitHello = ""
+      span.textContent = phrase
+      const parent = node.parentNode
+      if (!parent) return
+      if (index > 0) parent.insertBefore(document.createTextNode(value.slice(0, index)), node)
+      parent.insertBefore(span, node)
+      node.nodeValue = value.slice(index + DEFAULT_HELLO.length)
+      return
+    }
+    node = walker.nextNode()
   }
 }
 
@@ -1946,9 +2147,10 @@ function tapGreeting(time: string, device: string | null, place: string | null) 
 }
 
 function fillTapBanner(banner: HTMLAnchorElement, greeting: string) {
-  banner.setAttribute("aria-label", `${greeting}! Connect on LinkedIn`)
+  const line = greeting.endsWith("!") ? greeting : `${greeting}!`
+  banner.setAttribute("aria-label", `${line} Connect on LinkedIn`)
   const greetingNode = banner.querySelector("[data-tap-greeting]")
-  if (greetingNode) greetingNode.textContent = `${greeting}!`
+  if (greetingNode) greetingNode.textContent = line
 }
 
 function clearTapMode() {
@@ -2066,22 +2268,29 @@ function mountTapBanner(href: string, greeting: string) {
   return banner
 }
 
-async function initTapMode() {
-  const params = new URLSearchParams(location.search)
+async function initHomeGreetings() {
+  const visit = touchSession(VISIT_SESSION_KEY)
+  wireSessionHeartbeat()
+
   const home = document.querySelector(".portfolio-home-shell")
-  if (params.get("tap") !== "true" || !home) {
+  const isTap = tapQueryActive()
+  if (!isTap || !home) {
     clearTapMode()
+    if (home) applyVisitHello(visitPhrase(visit.count, beenAWhile(visit)) ?? DEFAULT_HELLO)
     return
   }
 
+  applyVisitHello(DEFAULT_HELLO)
+
+  const tap = touchSession(TAP_SESSION_KEY)
   const generation = ++tapModeGeneration
   document.documentElement.dataset.tap = "true"
 
   const href = linkedInHref()
   const time = timeOfDayPhrase()
-  const place = placeFromSearch(params)
-  const coarse = coarseDeviceLabel(navigator.userAgent)
-  const banner = mountTapBanner(href, tapGreeting(time, coarse, place))
+  const place = placeFromSearch(new URLSearchParams(location.search))
+  const coarse = modelFromUserAgent(navigator.userAgent) ?? coarseDeviceLabel(navigator.userAgent)
+  const banner = mountTapBanner(href, composeTapGreeting(visit, tap, time, coarse, place))
   mountTapSticky(href)
   if (banner) wireTapStickyVisibility(banner)
 
@@ -2092,7 +2301,7 @@ async function initTapMode() {
   const device = await deviceLabel(coarse)
   if (generation !== tapModeGeneration) return
   if (device !== coarse) {
-    mountTapBanner(href, tapGreeting(time, device, place))
+    mountTapBanner(href, composeTapGreeting(visit, tap, time, device, place))
   }
 }
 
@@ -2123,7 +2332,7 @@ function initializePortfolio() {
   styleHomeProfileLinks()
   enhanceHomeBioIcons()
   void loadNewsletter()
-  void initTapMode()
+  void initHomeGreetings()
 }
 
 document.addEventListener("nav", initializePortfolio)
