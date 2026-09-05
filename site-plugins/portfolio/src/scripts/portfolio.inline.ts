@@ -577,7 +577,7 @@ function itemMatchesFilters(
   tags: string[],
 ): boolean {
   if (significance !== "all") {
-    const value = item.dataset.filterSignificance || "minor"
+    const value = item.dataset.filterSignificance || "standard"
     if (value !== significance) return false
   }
 

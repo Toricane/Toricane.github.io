@@ -3,7 +3,7 @@ title: Hack the North 2024 – DaVinci Solve
 description: "AI interview simulation app for CS majors (Gradio, Groq, OpenAI)."
 when: "2024/09"
 from: Hack the North
-significance: notable
+significance: featured
 tags:
   - In-Person
 ---

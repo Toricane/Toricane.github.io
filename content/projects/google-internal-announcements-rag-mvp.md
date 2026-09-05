@@ -6,7 +6,7 @@ pause: 2023-12-20
 restart: 2024-08-01
 modified: 2024-08-06
 from: Google Canada Challenge
-significance: notable
+significance: featured
 tags:
   - LLM
   - RAG

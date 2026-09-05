@@ -3,7 +3,7 @@ title: Level 2 Service Award (60+ hrs)
 description: 60+ service hours (2023–24).
 when: "2024/06"
 from: MacNeill Secondary
-significance: minor
+significance: standard
 tags:
   - Service
 ---

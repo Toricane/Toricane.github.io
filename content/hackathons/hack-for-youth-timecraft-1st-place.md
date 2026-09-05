@@ -3,7 +3,7 @@ title: Hack For Youth – TimeCraft (1st Place)
 description: Calendar + AI chatbot for intelligent time management integrating Google Calendar.
 when: "2024/11"
 from: Hack For Youth
-significance: impactful
+significance: spotlight
 tags:
   - Winner
   - In-Person

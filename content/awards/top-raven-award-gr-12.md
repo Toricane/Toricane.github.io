@@ -3,7 +3,7 @@ title: Top Raven Award (Gr.12)
 description: "Highest award: academics, citizenship, school spirit."
 when: "2025/06"
 from: MacNeill Secondary
-significance: impactful
+significance: spotlight
 tags:
   - Academic
   - Citizenship

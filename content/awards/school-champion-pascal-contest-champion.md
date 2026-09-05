@@ -3,7 +3,7 @@ title: School Champion – Pascal Contest (Champion)
 description: "Top 25% & school champion Pascal."
 when: "2022/06"
 from: "CEMC, University of Waterloo"
-significance: notable
+significance: featured
 tags:
   - Math
   - Contest

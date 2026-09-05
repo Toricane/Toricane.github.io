@@ -3,7 +3,7 @@ title: Top Mathematics 12 Award
 description: Top marks AP Calc AB + self‑studied BC.
 when: "2025/06"
 from: MacNeill Secondary
-significance: notable
+significance: featured
 tags:
   - Math
   - Academic

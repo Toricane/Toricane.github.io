@@ -3,7 +3,7 @@ title: Jean Myron Memorial Scholarship (CAD$2K)
 description: Scholarship for outstanding achievement 2024–25.
 when: "2025/06"
 from: "Richmond Retired Teachers' Association"
-significance: minor
+significance: standard
 tags:
   - Scholarship
 ---

@@ -23,7 +23,7 @@ type CoverPhoto = {
   link?: string
 }
 
-type VisibleSignificance = "impactful" | "notable"
+type VisibleSignificance = "spotlight" | "featured"
 
 type Frontmatter = {
   title?: string
@@ -31,7 +31,7 @@ type Frontmatter = {
   date?: string | Date
   modified?: string | Date
   tags?: string[]
-  significance?: VisibleSignificance | "minor"
+  significance?: VisibleSignificance | "standard"
   from?: string
   role?: string
   outcome?: string
@@ -208,13 +208,13 @@ function isExternalLink(href: string) {
 }
 
 function significanceRank(value: Frontmatter["significance"]) {
-  if (value === "impactful") return 0
-  if (value === "notable") return 1
+  if (value === "spotlight") return 0
+  if (value === "featured") return 1
   return 2
 }
 
 function visibleSignificance(value: Frontmatter["significance"]): VisibleSignificance | undefined {
-  if (value === "impactful" || value === "notable") return value
+  if (value === "spotlight" || value === "featured") return value
   return undefined
 }
 
@@ -316,7 +316,7 @@ function tagList(tags: Frontmatter["tags"]): string[] {
 }
 
 function filterSignificance(value: Frontmatter["significance"]): string {
-  return value === "impactful" || value === "notable" || value === "minor" ? value : "minor"
+  return value === "spotlight" || value === "featured" || value === "standard" ? value : "standard"
 }
 
 /** Searchable blob + filter/sort keys for client-side collection controls. */
@@ -504,18 +504,18 @@ function CollectionFilters({ tags }: { tags: string[] }) {
         <div
           class="portfolio-filters__group portfolio-filters__group--significance"
           role="group"
-          aria-label="Significance"
+          aria-label="Highlights"
         >
-          <span class="portfolio-filters__label">Significance</span>
+          <span class="portfolio-filters__label">Highlights</span>
           <div class="portfolio-filters__chips">
             <button type="button" data-filter-significance="all" aria-pressed="true">
               All
             </button>
-            <button type="button" data-filter-significance="impactful" aria-pressed="false">
-              Impactful
+            <button type="button" data-filter-significance="spotlight" aria-pressed="false">
+              Spotlight
             </button>
-            <button type="button" data-filter-significance="notable" aria-pressed="false">
-              Notable
+            <button type="button" data-filter-significance="featured" aria-pressed="false">
+              Featured
             </button>
           </div>
         </div>
@@ -930,11 +930,11 @@ function TimelineWhenLabel({ when }: { when?: string }) {
 }
 
 function TimelineGroupRow({ group, section }: { group: TimelineGroup; section: Section }) {
-  const hasImpactful = group.items.some((file) => frontmatter(file).significance === "impactful")
-  const hasNotable = group.items.some((file) => frontmatter(file).significance === "notable")
+  const hasSpotlight = group.items.some((file) => frontmatter(file).significance === "spotlight")
+  const hasFeatured = group.items.some((file) => frontmatter(file).significance === "featured")
   const category =
-    hasImpactful || hasNotable
-      ? ` portfolio-timeline__group--${hasImpactful ? "impactful" : "notable"}`
+    hasSpotlight || hasFeatured
+      ? ` portfolio-timeline__group--${hasSpotlight ? "spotlight" : "featured"}`
       : ""
   if (group.items.length === 1) {
     return <TimelineRow file={group.items[0]} section={section} />
@@ -944,7 +944,7 @@ function TimelineGroupRow({ group, section }: { group: TimelineGroup; section: S
     <li
       class={`portfolio-timeline__group${category}`}
       data-timeline-group
-      data-significance={hasImpactful ? "impactful" : hasNotable ? "notable" : undefined}
+      data-significance={hasSpotlight ? "spotlight" : hasFeatured ? "featured" : undefined}
     >
       <TimelineWhenLabel when={group.when} />
       <div class="portfolio-timeline__rail" aria-hidden="true">
@@ -1061,7 +1061,7 @@ function Collection({ section, allFiles }: { section: Section; allFiles: Portfol
           <div class="portfolio-heading__toggles">
             <div class="portfolio-view-toggle" role="group" aria-label="Sort order" data-sort-toggle>
               <button type="button" data-sort-mode="significance" aria-pressed="true">
-                Significance
+                Highlights
               </button>
               <button type="button" data-sort-mode="date" aria-pressed="false">
                 Date

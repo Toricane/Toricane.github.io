@@ -4,7 +4,7 @@ description: "Portable wearable AI assistant (camera, mic, speaker) giving lowâ€
 date: 2024-01-01
 modified: 2024-12-19
 from: Independent / TKS
-significance: impactful
+significance: spotlight
 tags:
   - AI
   - Edge

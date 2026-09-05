@@ -3,7 +3,7 @@ title: Top Raven Award (Gr.10)
 description: "Highest award: academics & contribution."
 when: "2023/06"
 from: MacNeill Secondary
-significance: impactful
+significance: spotlight
 tags:
   - Academic
   - Citizenship

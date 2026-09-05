@@ -3,7 +3,7 @@ title: Top Science 10 Award
 description: Highest Grade 10 science marks.
 when: "2023/06"
 from: MacNeill Secondary
-significance: notable
+significance: featured
 tags:
   - Science
   - Academic

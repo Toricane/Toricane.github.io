@@ -3,7 +3,7 @@ title: Distinction – Sir Isaac Newton Exam
 description: 282/3077 worldwide; 3rd school (Gr.11).
 when: "2024/05"
 from: University of Waterloo Faculty of Science
-significance: minor
+significance: standard
 tags:
   - Physics
   - Contest

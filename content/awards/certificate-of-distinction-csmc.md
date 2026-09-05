@@ -3,7 +3,7 @@ title: Certificate of Distinction – CSMC
 description: "Top 25% Canadian Senior Mathematics Contest."
 when: "2025/06"
 from: "CEMC, University of Waterloo"
-significance: minor
+significance: standard
 tags:
   - Math
   - Contest

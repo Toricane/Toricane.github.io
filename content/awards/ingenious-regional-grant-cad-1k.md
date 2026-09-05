@@ -3,7 +3,7 @@ title: Ingenious+ Regional Grant (CAD$1K)
 description: Funding for JARVIS project.
 when: "2024/04"
 from: Ingenious+
-significance: impactful
+significance: spotlight
 tags:
   - Grant
   - AI

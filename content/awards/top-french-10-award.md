@@ -3,7 +3,7 @@ title: Top French 10 Award
 description: Highest French 10 marks.
 when: "2023/06"
 from: MacNeill Secondary
-significance: notable
+significance: featured
 tags:
   - Language
   - Academic

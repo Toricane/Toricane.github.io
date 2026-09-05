@@ -34,7 +34,7 @@ Shared on every entry:
 | `title` | Card / timeline / entry heading |
 | `description` | Card, timeline, and entry heading blurb. Injected into the entry — do not repeat it as `## Overview`. |
 | `from` | Source / host / affiliation — who issued it or where it lived, not a restatement of the title or the outcome |
-| `significance` | Always set: `impactful` (gold), `notable` (silver), `minor` (normal). `minor` is YAML-only — the UI never shows a pill or `data-significance="minor"` |
+| `significance` | Always set: `spotlight` (gold), `featured` (silver), `standard` (normal). `standard` is YAML-only — the UI never shows a pill or `data-significance="standard"` |
 | `tags` | The only chip list. Awards: topic. Hackathons: placement/format. Projects: stack/topic |
 
 Card / timeline / entry hero images come from the note’s `## Gallery` (first image). Do **not** set a `cover` frontmatter field.
@@ -53,7 +53,7 @@ Projects also use:
 
 Gallery (all collections) sorts by `significance` then recency (`when` for awards/hackathons, `modified ?? date` for projects). Award/hackathon timelines stay month-grouped; the projects timeline is a vertical Git-style lane graph (packed start/end/pause/node months from `date`/`modified`/`pause*`/`restart*`/`node*`, compact gap markers for empty stretches, dashed hiatus segments, optional `parent`/`series` curves — not a linear calendar scale).
 
-Collection pages include client-side **filters**: text search (title / from / description), significance chips, and tag chips (intersection). Filters apply to both Gallery and Timeline views. Gallery also has a **Sort** toggle: significance-then-date (default) or date-then-significance.
+Collection pages include client-side **filters**: text search (title / from / description), Highlights chips (Spotlight / Featured), and tag chips (intersection). Filters apply to both Gallery and Timeline views. Gallery also has a **Sort** toggle: Highlights-then-date (default) or date-then-Highlights.
 
 **Keep `projects/`, `hackathons/`, and `awards/` as separate collections.** Do not merge hackathons into projects unless filters still leave the split feeling redundant — different time models (`date`/`modified` ranges vs `when` points) drive different timeline UIs. Related builds can use `parent` / `series` or shared tags instead.
 

@@ -3,7 +3,7 @@ title: Award title
 description: One-line blurb for cards and timeline.
 when: "YYYY/MM"
 from: Issuing organization
-significance: minor # impactful | notable | minor
+significance: standard # spotlight | featured | standard
 tags:
   - Topic
 ---

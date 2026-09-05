@@ -3,7 +3,7 @@ title: Exceptional Service Award (80+ hrs)
 description: 80+ service hours (2022–23).
 when: "2023/06"
 from: MacNeill Secondary
-significance: minor
+significance: standard
 tags:
   - Service
 ---

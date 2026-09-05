@@ -3,7 +3,7 @@ title: Top Senior Science Student
 description: "Excellence & potential in senior sciences."
 when: "2025/06"
 from: MacNeill Secondary
-significance: notable
+significance: featured
 tags:
   - Science
   - Academic

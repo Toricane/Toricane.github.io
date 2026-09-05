@@ -3,7 +3,7 @@ title: Top Math 11 (Gr.10)
 description: Highest Grade 11 math while in Gr.10.
 when: "2023/06"
 from: MacNeill Secondary
-significance: impactful
+significance: spotlight
 tags:
   - Math
   - Academic

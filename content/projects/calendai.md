@@ -4,7 +4,7 @@ description: "Chrome extension integrating Gemini with Google Calendar to plan w
 date: 2024-06-01
 modified: 2024-07-01
 from: buildspace
-significance: impactful
+significance: spotlight
 tags:
   - Chrome-Ext
   - AI

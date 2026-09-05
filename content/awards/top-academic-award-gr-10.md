@@ -3,7 +3,7 @@ title: Top Academic Award (Gr.10)
 description: "95.5% average over 8 courses."
 when: "2023/06"
 from: MacNeill Secondary
-significance: impactful
+significance: spotlight
 tags:
   - Academic
 ---

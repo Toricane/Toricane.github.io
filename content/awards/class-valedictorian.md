@@ -3,7 +3,7 @@ title: Class Valedictorian
 description: "Chosen to deliver farewell speech (GPA 96.43%)."
 when: "2025/06"
 from: MacNeill Secondary
-significance: impactful
+significance: spotlight
 tags:
   - Academic
   - Leadership

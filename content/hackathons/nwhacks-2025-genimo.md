@@ -3,7 +3,7 @@ title: nwHacks 2025 – Genimo
 description: AI + animation tool converting user text into educational animations (Generate + Manim).
 when: "2025/01"
 from: nwHacks
-significance: minor
+significance: standard
 tags:
   - In-Person
 ---

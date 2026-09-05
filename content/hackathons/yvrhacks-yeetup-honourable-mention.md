@@ -3,7 +3,7 @@ title: yvrHacks – yeetup (Honourable Mention)
 description: "AI‑first natural language interface to discover youth events & meetups (Groq)."
 when: "2024/09"
 from: yvrHacks
-significance: notable
+significance: featured
 tags:
   - Honourable-Mention
   - In-Person

@@ -3,7 +3,7 @@ title: Top Mathematics 12 (Gr.11)
 description: Highest Pre‑Calculus 12 while in Gr.11.
 when: "2024/06"
 from: MacNeill Secondary
-significance: notable
+significance: featured
 tags:
   - Math
   - Academic

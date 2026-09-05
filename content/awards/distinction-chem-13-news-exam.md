@@ -3,7 +3,7 @@ title: Distinction – Chem 13 News Exam
 description: "Top 20% internationally."
 when: "2025/05"
 from: "CEMC, University of Waterloo"
-significance: minor
+significance: standard
 tags:
   - Chemistry
   - Contest
