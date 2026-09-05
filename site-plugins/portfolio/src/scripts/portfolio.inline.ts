@@ -13,6 +13,10 @@ const CACHE_KEY = "portfolio:newsletter:v2"
 const CACHE_TTL = 6 * 60 * 60 * 1000
 const ENTRY_PATTERN = /^\/(projects|hackathons|awards)\/([^/]+)\/?$/
 const NEWSLETTER_PREVIEW_CHARS = 300
+const TAP_STICKY_DISMISS_KEY = "portfolio:tap-sticky-dismissed"
+const TAP_LINKEDIN_FALLBACK = "https://linkedin.com/in/prajwal-prashanth"
+const TAP_PLACE_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} '\-]{0,39}$/u
+const TAP_MODEL_HINT_MS = 200
 
 type ModalFrame = {
   slug: string
@@ -1762,6 +1766,243 @@ function wireNavMenu() {
   })
 }
 
+type TapNavigatorUAData = {
+  getHighEntropyValues?: (hints: string[]) => Promise<{
+    model?: string
+    platform?: string
+  }>
+}
+
+let tapModeGeneration = 0
+let tapBannerObserver: IntersectionObserver | null = null
+
+function linkedInHref() {
+  const fromPage = document.querySelector<HTMLAnchorElement>(
+    ".portfolio-home-markdown a[href*='linkedin.com']",
+  )
+  return fromPage?.href || TAP_LINKEDIN_FALLBACK
+}
+
+function timeOfDayPhrase(date = new Date()) {
+  const hour = date.getHours()
+  if (hour < 5) return "tonight"
+  if (hour < 12) return "this morning"
+  if (hour < 17) return "this afternoon"
+  if (hour < 21) return "this evening"
+  return "tonight"
+}
+
+function placeFromSearch(params: URLSearchParams) {
+  const raw = params.get("at")?.trim() ?? ""
+  if (!raw || raw.length > 40 || !TAP_PLACE_PATTERN.test(raw)) return null
+  return raw
+}
+
+function isGenericPlatform(value: string) {
+  return /^(android|ios|iphone|linux|windows|mac(?:os|intosh)?|chrome os)$/i.test(value.trim())
+}
+
+function looksLikeHardwareSku(model: string) {
+  return /^(SM-|LM-|XT\d)/i.test(model) || /^[A-Z0-9._-]{8,}$/i.test(model)
+}
+
+function sanitizeModel(model: string) {
+  const trimmed = model.trim()
+  if (!trimmed || trimmed === "K" || trimmed.length > 40) return null
+  if (!/^[\p{L}\p{N}][\p{L}\p{N} .'+-]{0,39}$/u.test(trimmed)) return null
+  if (isGenericPlatform(trimmed) || looksLikeHardwareSku(trimmed)) return null
+  return trimmed
+}
+
+function coarseDeviceLabel(ua: string) {
+  if (/iPhone/i.test(ua)) return "iPhone"
+  if (/Android/i.test(ua)) return "Android"
+  return null
+}
+
+function pickDeviceLabel(model: string | undefined, platform: string | undefined, fallback: string | null) {
+  const fromModel = model ? sanitizeModel(model) : null
+  if (fromModel) return fromModel
+  if (fallback) return fallback
+  if (platform && /android/i.test(platform)) return "Android"
+  if (platform && /iphone|ios/i.test(platform)) return "iPhone"
+  return null
+}
+
+async function deviceLabel(fallback: string | null) {
+  const uaData = (navigator as Navigator & { userAgentData?: TapNavigatorUAData }).userAgentData
+  if (!uaData?.getHighEntropyValues) return fallback
+  try {
+    const high = await Promise.race([
+      uaData.getHighEntropyValues(["model", "platform"]),
+      new Promise<null>((resolve) => window.setTimeout(() => resolve(null), TAP_MODEL_HINT_MS)),
+    ])
+    if (!high) return fallback
+    return pickDeviceLabel(high.model, high.platform, fallback)
+  } catch {
+    return fallback
+  }
+}
+
+function tapGreeting(time: string, device: string | null, place: string | null) {
+  const head = `Nice to meet you ${time}`
+  if (device && place) return `${head}, ${device} user, at ${place}`
+  if (device) return `${head}, ${device} user`
+  if (place) return `${head} at ${place}`
+  return head
+}
+
+function fillTapBanner(banner: HTMLAnchorElement, greeting: string) {
+  banner.setAttribute("aria-label", `${greeting}! Connect on LinkedIn`)
+  const greetingNode = banner.querySelector("[data-tap-greeting]")
+  if (greetingNode) greetingNode.textContent = `${greeting}!`
+}
+
+function clearTapMode() {
+  tapModeGeneration += 1
+  tapBannerObserver?.disconnect()
+  tapBannerObserver = null
+  document.documentElement.removeAttribute("data-tap")
+  document.documentElement.removeAttribute("data-tap-bar")
+  document.querySelector("[data-portfolio-tap-banner]")?.remove()
+  document.querySelector("[data-portfolio-tap-bar]")?.remove()
+}
+
+function stickyDismissed() {
+  try {
+    return sessionStorage.getItem(TAP_STICKY_DISMISS_KEY) === "1"
+  } catch {
+    return false
+  }
+}
+
+function setTapBarVisible(visible: boolean) {
+  if (stickyDismissed() || !visible) {
+    document.documentElement.setAttribute("data-tap-bar", "hidden")
+    return
+  }
+  document.documentElement.setAttribute("data-tap-bar", "shown")
+}
+
+function dismissTapSticky() {
+  try {
+    sessionStorage.setItem(TAP_STICKY_DISMISS_KEY, "1")
+  } catch {
+    // Private mode can throw; still hide for this page.
+  }
+  tapBannerObserver?.disconnect()
+  tapBannerObserver = null
+  setTapBarVisible(false)
+}
+
+function wireTapStickyVisibility(banner: Element) {
+  tapBannerObserver?.disconnect()
+  if (stickyDismissed()) {
+    setTapBarVisible(false)
+    return
+  }
+
+  tapBannerObserver = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (!entry) return
+      setTapBarVisible(!entry.isIntersecting)
+    },
+    { threshold: 0 },
+  )
+  tapBannerObserver.observe(banner)
+}
+
+function mountTapSticky(href: string) {
+  if (stickyDismissed()) {
+    setTapBarVisible(false)
+    return
+  }
+  if (document.querySelector("[data-portfolio-tap-bar]")) return
+
+  const bar = document.createElement("div")
+  bar.className = "portfolio-tap-bar"
+  bar.dataset.portfolioTapBar = ""
+
+  const cta = document.createElement("a")
+  cta.className = "portfolio-tap-bar__cta"
+  cta.href = href
+  cta.rel = "noopener noreferrer"
+  cta.textContent = "Connect on LinkedIn"
+
+  const dismiss = document.createElement("button")
+  dismiss.type = "button"
+  dismiss.className = "portfolio-tap-bar__dismiss"
+  dismiss.setAttribute("aria-label", "Dismiss connect bar")
+  dismiss.textContent = "×"
+  dismiss.addEventListener("click", dismissTapSticky)
+
+  bar.append(cta, dismiss)
+  document.body.append(bar)
+  setTapBarVisible(false)
+}
+
+function mountTapBanner(href: string, greeting: string) {
+  const home = document.querySelector(".portfolio-home-copy")
+  const heading = home?.querySelector("h1")
+  if (!home || !heading) return null
+
+  const existing = document.querySelector<HTMLAnchorElement>("[data-portfolio-tap-banner]")
+  if (existing) {
+    fillTapBanner(existing, greeting)
+    return existing
+  }
+
+  const banner = document.createElement("a")
+  banner.className = "portfolio-tap-banner"
+  banner.dataset.portfolioTapBanner = ""
+  banner.href = href
+  banner.rel = "noopener noreferrer"
+
+  const greetingNode = document.createElement("span")
+  greetingNode.dataset.tapGreeting = ""
+  greetingNode.className = "portfolio-tap-banner__greeting"
+
+  const action = document.createElement("span")
+  action.className = "portfolio-tap-banner__action"
+  action.textContent = "connect on LinkedIn"
+
+  banner.append(greetingNode, action)
+  fillTapBanner(banner, greeting)
+  heading.insertAdjacentElement("afterend", banner)
+  return banner
+}
+
+async function initTapMode() {
+  const params = new URLSearchParams(location.search)
+  const home = document.querySelector(".portfolio-home-shell")
+  if (params.get("tap") !== "true" || !home) {
+    clearTapMode()
+    return
+  }
+
+  const generation = ++tapModeGeneration
+  document.documentElement.dataset.tap = "true"
+
+  const href = linkedInHref()
+  const time = timeOfDayPhrase()
+  const place = placeFromSearch(params)
+  const coarse = coarseDeviceLabel(navigator.userAgent)
+  const banner = mountTapBanner(href, tapGreeting(time, coarse, place))
+  mountTapSticky(href)
+  if (banner) wireTapStickyVisibility(banner)
+
+  ;(window as CleanupWindow).addCleanup?.(() => {
+    if (generation === tapModeGeneration) clearTapMode()
+  })
+
+  const device = await deviceLabel(coarse)
+  if (generation !== tapModeGeneration) return
+  if (device !== coarse) {
+    mountTapBanner(href, tapGreeting(time, device, place))
+  }
+}
+
 function initializePortfolio() {
   // Fresh page render from SPA clears modal chrome; reset stack.
   if (!document.querySelector("[data-portfolio-modal]:not([hidden])")) {
@@ -1789,6 +2030,7 @@ function initializePortfolio() {
   styleHomeProfileLinks()
   enhanceHomeBioIcons()
   void loadNewsletter()
+  void initTapMode()
 }
 
 document.addEventListener("nav", initializePortfolio)

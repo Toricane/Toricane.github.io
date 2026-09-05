@@ -635,6 +635,177 @@ body {
   margin-bottom: 0;
 }
 
+.portfolio-tap-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--portfolio-space-3);
+  margin: 0;
+  padding: var(--portfolio-space-3) var(--portfolio-space-4);
+  color: var(--portfolio-frost);
+  background: color-mix(in srgb, var(--portfolio-copper) 12%, var(--portfolio-panel));
+  border: 1px solid color-mix(in srgb, var(--portfolio-copper) 55%, var(--portfolio-rule));
+  border-radius: var(--portfolio-radius);
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--portfolio-copper) 28%, transparent);
+  animation: portfolio-tap-pulse 1.15s ease-in-out 2;
+}
+
+.portfolio-tap-banner:hover,
+.portfolio-tap-banner:focus-visible {
+  color: var(--portfolio-frost);
+  border-color: var(--portfolio-copper);
+  background: color-mix(in srgb, var(--portfolio-copper) 18%, var(--portfolio-panel));
+}
+
+.portfolio-tap-banner__greeting {
+  color: var(--portfolio-frost);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.portfolio-tap-banner__action,
+.portfolio-tap-bar__cta {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 1.35rem;
+  color: var(--portfolio-ink);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--portfolio-copper-soft) 72%, white) 0%,
+    var(--portfolio-copper-soft) 36%,
+    var(--portfolio-copper) 100%
+  );
+  border: 2px solid color-mix(in srgb, var(--portfolio-copper) 28%, var(--portfolio-ink));
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--portfolio-copper-soft) 65%, white),
+    0 6px 14px rgba(0, 0, 0, 0.42);
+  font-family: var(--codeFont);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--portfolio-copper-soft) 55%, white);
+}
+
+.portfolio-tap-banner:hover .portfolio-tap-banner__action,
+.portfolio-tap-banner:focus-visible .portfolio-tap-banner__action,
+.portfolio-tap-bar__cta:hover,
+.portfolio-tap-bar__cta:focus-visible {
+  color: var(--portfolio-ink);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--portfolio-copper-soft) 55%, white) 0%,
+    var(--portfolio-copper-soft) 40%,
+    color-mix(in srgb, var(--portfolio-copper) 78%, var(--portfolio-copper-soft)) 100%
+  );
+  border-color: color-mix(in srgb, var(--portfolio-copper) 28%, var(--portfolio-ink));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--portfolio-copper-soft) 80%, white),
+    0 8px 18px rgba(0, 0, 0, 0.48);
+}
+
+.portfolio-tap-banner .external-icon {
+  display: none !important;
+}
+
+.portfolio-tap-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--portfolio-space-3);
+  padding: var(--portfolio-space-3) var(--portfolio-gutter);
+  padding-bottom: calc(var(--portfolio-space-3) + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--portfolio-panel) 92%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--portfolio-copper) 45%, var(--portfolio-rule));
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  visibility: hidden;
+  transform: translateY(100%);
+  transition: transform 220ms ease, visibility 220ms ease;
+}
+
+html[data-tap-bar="shown"] .portfolio-tap-bar {
+  pointer-events: auto;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.portfolio-tap-bar__cta {
+  flex: 1 1 auto;
+  min-height: 44px;
+  font-size: 0.8rem;
+}
+
+.portfolio-tap-bar__cta .external-icon {
+  display: none !important;
+}
+
+.portfolio-tap-bar__dismiss {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--portfolio-frost);
+  background: color-mix(in srgb, var(--portfolio-ink) 35%, transparent);
+  border: 1px solid var(--portfolio-rule);
+  border-radius: 999px;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.portfolio-tap-bar__dismiss:hover,
+.portfolio-tap-bar__dismiss:focus-visible {
+  color: var(--portfolio-ink);
+  background: var(--portfolio-copper);
+  border-color: var(--portfolio-copper);
+}
+
+html[data-tap="true"][data-tap-bar="shown"] body {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+html.portfolio-modal-open .portfolio-tap-bar,
+html.portfolio-lightbox-open .portfolio-tap-bar {
+  display: none;
+}
+
+@keyframes portfolio-tap-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--portfolio-copper) 28%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--portfolio-copper) 30%, transparent),
+      0 0 22px color-mix(in srgb, var(--portfolio-copper) 38%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-tap-banner {
+    animation: none;
+  }
+
+  .portfolio-tap-bar {
+    transition: none;
+  }
+}
+
 .portfolio-home-markdown {
   max-width: 58ch;
 }
