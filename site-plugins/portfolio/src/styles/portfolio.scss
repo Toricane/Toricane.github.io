@@ -2108,7 +2108,8 @@ body[data-slug="coverflow"] .portfolio-footer {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
+  /* Keep in sync with buildRowMetrics stackGap in projectTimeline.ts. */
+  gap: 8px;
   box-sizing: border-box;
   min-height: 0;
   height: 100%;

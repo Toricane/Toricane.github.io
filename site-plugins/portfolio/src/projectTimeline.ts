@@ -51,7 +51,7 @@ export type ProjectTimelineTrack = {
 export type ProjectTimelineGeometry = {
   /** Base height for a single-card event month row. */
   rowHeight: number
-  /** Per-row heights (event months expand for multi-start; gaps stay compact). */
+  /** Per-row heights (marker-only months shrink; card stacks expand; gaps stay compact). */
   rowHeights: number[]
   /** Y offset of the top of each row. */
   rowOffsets: number[]
@@ -98,8 +98,10 @@ export type ProjectTimelineModel = {
   branches: ProjectTimelineBranch[]
 }
 
-/** ~2× the prior compact row so TimelineRow-level cards fit. */
+/** Base space per card, including the slot's vertical padding. */
 const DEFAULT_ROW_HEIGHT = 72
+/** Endpoints, hiatus boundaries, and milestones need less space than cards. */
+const DEFAULT_MARKER_ROW_HEIGHT = 36
 /** Compact spacer for collapsed empty calendar stretches. */
 const DEFAULT_GAP_ROW_HEIGHT = 20
 /** Narrow lanes so the graph column stays roughly half the prior width. */
@@ -378,13 +380,14 @@ function rowY(row: number, geometry: ProjectTimelineGeometry): number {
   return offset + height / 2
 }
 
-/** Event months expand for multi-start; gap rows stay compact. */
+/** Size months by their cards, keeping marker-only months and gaps compact. */
 function buildRowMetrics(
   months: ProjectTimelineMonth[],
   tracks: ProjectTimelineTrack[],
   baseHeight: number,
   gapHeight = DEFAULT_GAP_ROW_HEIGHT,
-  stackGap = 4,
+  // Keep in sync with .portfolio-project-timeline__card-slot gap.
+  stackGap = 8,
 ): { rowHeights: number[]; rowOffsets: number[]; svgHeight: number } {
   const starts = new Array(months.length).fill(0)
   for (const track of tracks) {
@@ -394,7 +397,8 @@ function buildRowMetrics(
   const rowHeights = months.map((month, index) => {
     if (month.kind === "gap") return gapHeight
     const count = starts[index]
-    if (count <= 1) return baseHeight
+    if (count === 0) return Math.min(baseHeight, DEFAULT_MARKER_ROW_HEIGHT)
+    if (count === 1) return baseHeight
     return count * baseHeight + (count - 1) * stackGap
   })
 
