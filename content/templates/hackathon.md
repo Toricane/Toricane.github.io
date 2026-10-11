@@ -5,6 +5,7 @@ when: "YYYY/MM"
 from: Event name
 significance: standard # spotlight | featured | standard
 tags:
+  - hackathon
   - In-Person
 ---
 

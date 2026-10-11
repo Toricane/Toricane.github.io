@@ -1,6 +1,6 @@
 ---
 title: Coverflow
-# Optional per-photo `link` opens an entry modal (e.g. /hackathons/nwhacks-2025-genimo)
+# Optional per-photo `link` opens an entry modal (e.g. /projects/nwhacks-2025-genimo)
 # or an external URL. Without `link`, click expands a full-image lightbox.
 photos:
   - src: assets/tab-panels/small/vanaimay.webp

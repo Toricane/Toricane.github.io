@@ -17,7 +17,7 @@ This repo is a **Quartz 5** portfolio fork. Site-specific UI lives in the local 
 ## Content layout
 
 - Home: `content/index.md`
-- Collections: `content/projects/`, `content/hackathons/`, `content/awards/`
+- Collections: `content/projects/` (including hackathon builds), `content/awards/`
 - Home coverflow data: `content/coverflow.md` (`photos[]` with `src`, `caption`, optional `link`)
 - Inline link icons: drop a file in `content/assets/icons/` (e.g. `langara.webp` → `:langara:`)
 - New notes: `content/templates/` (ignored by Quartz; use from Obsidian)
@@ -39,11 +39,11 @@ Shared on every entry:
 
 Card / timeline / entry hero images come from the note’s `## Gallery` (first image). Do **not** set a `cover` frontmatter field.
 
-Awards and hackathons also use:
+Awards and month-only hackathon projects also use:
 
-- `when` — quoted `"YYYY/MM"`. Timeline grouping and sort. **Do not** set `date`.
+- `when` — quoted `"YYYY/MM"`. Award grouping, project point placement, and sort. **Do not** set `date` alongside it.
 
-Projects also use:
+Projects with known date ranges use:
 
 - `date` / `modified` — real `YYYY-MM-DD` start and end. The plugin formats the display range. **Do not** set `when` or a handwritten `period`. Omit `modified` for an ongoing project (open-ended lane).
 - `pause` / `restart` (optional) — hiatus bounds (`YYYY-MM-DD`). Timeline draws a dashed lane between them; solid work continues on either side. Extra pairs: `pause1`/`restart1`, `pause2`/`restart2`, …
@@ -51,31 +51,31 @@ Projects also use:
 - `parent` (optional) — project slug to draw a Git-style branch curve from (e.g. `jarvis-for-the-visually-impaired` or `projects/jarvis-for-the-visually-impaired`). Overlap alone never invents branches.
 - `series` (optional) — soft group name; later projects in the same series branch from the previous one when `parent` is omitted.
 
-Gallery (all collections) sorts by `significance` then recency (`when` for awards/hackathons, `modified ?? date` for projects). Award/hackathon timelines stay month-grouped; the projects timeline is a vertical Git-style lane graph (packed start/end/pause/node months from `date`/`modified`/`pause*`/`restart*`/`node*`, compact gap markers for empty stretches, dashed hiatus segments, optional `parent`/`series` curves — not a linear calendar scale).
+Gallery (all collections) sorts by `significance` then recency (`when` for awards/month-only projects, `modified ?? date` for ranged projects). Award timelines stay month-grouped; the projects timeline is a vertical Git-style lane graph (packed start/end/pause/node months from `date`/`modified`/`pause*`/`restart*`/`node*`, compact gap markers for empty stretches, dashed hiatus segments, optional `parent`/`series` curves — not a linear calendar scale).
 
 Collection pages include client-side **filters**: text search (title / from / description), Highlights chips (Spotlight / Featured), and tag chips (intersection). Filters apply to both Gallery and Timeline views. Gallery also has a **Sort** toggle: Highlights-then-date (default) or date-then-Highlights.
 
-**Keep `projects/`, `hackathons/`, and `awards/` as separate collections.** Do not merge hackathons into projects unless filters still leave the split feeling redundant — different time models (`date`/`modified` ranges vs `when` points) drive different timeline UIs. Related builds can use `parent` / `series` or shared tags instead.
+**Keep `projects/` and `awards/` as separate collections.** Hackathon builds live in `projects/` with the `hackathon` tag. Use `content/templates/hackathon.md` for month-only builds: `when` preserves the known month and renders a completed point in the project timeline. Use the normal project date range schema only when real start/end dates are known. Related builds can use `parent` / `series` or shared tags. Keep old hackathon entry URLs as `aliases` on migrated notes.
 
 Optional, unused until filled: `role`, `outcome` (entry facts). Do not invent copy.
 
-**Do not use:** `cover` on any collection entry. Also do not use `groupSummary`, `badges`, `tools`, `featured`, `period`, or `date` on awards/hackathons.
+**Do not use:** `cover`, `groupSummary`, `badges`, `tools`, `featured`, or `period` on collection entries. Do not use `date` on awards or month-only hackathon projects.
 
 `from` conventions:
 
 - Awards: issuing organization (`MacNeill Secondary`, `CEMC, University of Waterloo`)
-- Hackathons: event name **without year** (year lives in `when`)
+- Hackathon projects: event name **without year** (year lives in `when` or project dates)
 - Projects: affiliation only (`Independent / TKS`, `Google Canada Challenge`)
 
-Month group summaries live on the collection folder note, not on entries. Only months with 2+ items need a key:
+Month group summaries live on the collection folder note, not on entries. Only award months with 2+ items need a key:
 
 ```yaml
-# content/awards/index.md (same idea on content/hackathons/index.md)
+# content/awards/index.md
 groups:
   "2025/06": Graduation awards and academic achievements
 ```
 
-Collection listing URLs use a trailing slash (`/awards/`, `/projects/`, `/hackathons/`). Entry URLs do not (`/awards/class-valedictorian`). Use `sectionHref()` in the plugin; do not add a slash to `linkFor()`.
+Collection listing URLs use a trailing slash (`/awards/`, `/projects/`). Entry URLs do not (`/awards/class-valedictorian`). Use `sectionHref()` in the plugin; do not add a slash to `linkFor()`.
 
 ## Image variants
 
@@ -125,7 +125,7 @@ In `content/coverflow.md`:
 photos:
   - src: assets/coverflow/example.webp
     caption: Example
-    link: /hackathons/some-slug   # optional — opens entry modal
+    link: /projects/some-slug   # optional — opens entry modal
 ```
 
 - With an internal portfolio `link` → entry modal (same as cards)
@@ -172,4 +172,4 @@ Other scripts: `npm run images` · `npm run images -- --force` · `npm run check
 
 ## Content debt (intentional)
 
-Some project pages and the home bio still contain `[Replace with: …]` prompts. Leave them unless the user provides verified copy.
+Some project pages and the home bio still contain `[Replace with: …]` prompts. Leave them unless the user provides verified copy. The portfolio transformer hides these prompts, template example links, and empty section headings from the published output; real content makes the section visible automatically.

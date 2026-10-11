@@ -10,7 +10,7 @@ Prajwal is an engineering transfer graduate (Langara College → UBC Engineering
 
 - [Home](https://prajwal.is-a.dev/): Personal overview and featured work
 - [Projects](https://prajwal.is-a.dev/projects/): Project case studies
-- [Hackathons](https://prajwal.is-a.dev/hackathons/): Hackathon projects and results
+- [Hackathon projects](https://prajwal.is-a.dev/tags/hackathon): Hackathon builds and results within Projects
 - [Awards](https://prajwal.is-a.dev/awards/): Academic and community awards
 
 ## Contact and profiles

@@ -2,7 +2,7 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import type { FilePath, QuartzEmitterPlugin } from "@quartz-community/types"
 
-const SECTIONS = ["projects", "hackathons", "awards"] as const
+const SECTIONS = ["projects", "awards"] as const
 const RSS_LIMIT = 20
 
 type DateBucket = {
@@ -51,7 +51,7 @@ function joinUrl(base: string, slug: string) {
 }
 
 /**
- * RSS feed of portfolio entries only (projects / hackathons / awards).
+ * RSS feed of portfolio entries only (projects / awards).
  * Replaces Quartz ContentIndex RSS, which ranked empty tag pages first.
  */
 export default (() => {
@@ -99,7 +99,7 @@ export default (() => {
   <channel>
     <title>${escapeHTML(pageTitle)}</title>
     <link>${joinUrl(base, "")}</link>
-    <description>Recent projects, hackathons, and awards on ${escapeHTML(pageTitle)}</description>
+    <description>Recent projects and awards on ${escapeHTML(pageTitle)}</description>
     <generator>Quartz -- prajwal.is-a.dev</generator>
     ${xmlItems}
   </channel>

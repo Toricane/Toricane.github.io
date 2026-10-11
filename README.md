@@ -8,7 +8,7 @@ Built with [Quartz 5](https://quartz.jzhao.xyz/) and deployed as a static site o
 content/                  # Markdown pages + assets (the CMS)
   index.md                # Home bio
   coverflow.md            # Home photo reel
-  projects|hackathons|awards/
+  projects|awards/
   assets/
     tab-panels/           # Full-size entry images
       small/              # 800px-wide gallery / coverflow thumbs
@@ -27,11 +27,12 @@ There is no separate content sync step or generated data file. Collection listin
 ## Update content
 
 - Edit Markdown under `content/`.
-- Add a project in `content/projects/`, a hackathon in `content/hackathons/`, or an award in `content/awards/`.
-- Put the full image in `content/assets/tab-panels/` and set `cover: assets/tab-panels/….webp`. Collection pages are `/awards/` (trailing slash); entries are `/awards/some-slug` (no slash).
+- Add a project in `content/projects/`, a hackathon project in `content/projects/` with the `hackathon` tag, or an award in `content/awards/`.
+- Put the full image in `content/assets/tab-panels/` and reference it in `## Gallery`. Collection pages are `/awards/` (trailing slash); entries are `/awards/some-slug` (no slash).
 - Missing `small/` and `preview/` files are created on commit (after `npm run hooks`), or anytime with `npm run images`. Existing variants are left alone unless you run `npm run images -- --force`.
 - Home coverflow: edit `photos` in `content/coverflow.md`. Optional `link` opens an entry modal (e.g. `/awards/class-valedictorian`); omit `link` for a full-image lightbox.
-- Project pages may still contain `[Replace with: …]` prompts — replace only when you have verified copy.
+- Hackathon projects use `content/templates/hackathon.md` and a quoted `when: "YYYY/MM"` for a completed month-only timeline event. Existing hackathon URLs redirect to their project pages.
+- Project pages may still contain `[Replace with: …]` prompts — replace only when you have verified copy. The build hides prompts, template example links, and empty section headings until actual content is added.
 
 ### Image sizing convention
 

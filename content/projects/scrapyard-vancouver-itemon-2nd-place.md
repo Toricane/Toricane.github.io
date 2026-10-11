@@ -5,8 +5,11 @@ when: "2025/03"
 from: Scrapyard Vancouver
 significance: spotlight
 tags:
+  - hackathon
   - Second-Place
   - In-Person
+aliases:
+  - hackathons/scrapyard-vancouver-itemon-2nd-place
 ---
 
 ## Gallery

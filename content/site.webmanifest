@@ -42,7 +42,7 @@
             "name": "Hackathons",
             "short_name": "Hackathons",
             "description": "Browse hackathon entries",
-            "url": "/#hackathons"
+            "url": "/tags/hackathon"
         },
         {
             "name": "Awards",

@@ -13,7 +13,7 @@ import path from "node:path"
 import type { GalleryImage } from "../galleryExtractor"
 import { imageVariant } from "../imageVariant"
 import { applyLinkIconsToHast, linkIconMapFromFilenames, type LinkIconMap } from "../linkIcons"
-import { displayPeriod } from "../dates"
+import { displayPeriod, projectDateBounds } from "../dates"
 import { buildProjectTimeline, type PauseRestart } from "../projectTimeline"
 
 type CoverPhoto = {
@@ -53,7 +53,7 @@ type TimelineGroup = {
   items: PortfolioFile[]
 }
 
-const sections = ["projects", "hackathons", "awards"] as const
+const sections = ["projects", "awards"] as const
 const RESUME_HREF = "https://prajwal.is-a.dev/resume/"
 
 function sectionHref(section: Section) {
@@ -236,7 +236,12 @@ function compareByRecency(a: PortfolioFile, b: PortfolioFile, section?: string) 
   }
   const aData = frontmatter(a)
   const bData = frontmatter(b)
-  return timestamp(bData.modified ?? bData.date) - timestamp(aData.modified ?? aData.date)
+  return projectRecency(bData) - projectRecency(aData)
+}
+
+function projectRecency(data: Frontmatter) {
+  const { start, end } = projectDateBounds(data)
+  return timestamp(end ?? start)
 }
 
 function compareByTitle(a: PortfolioFile, b: PortfolioFile) {
@@ -288,7 +293,7 @@ function groupTimelineEntries(
   for (const group of sorted) {
     group.items.sort((a, b) => compareGallery(a, b, section))
     if (!group.summary) {
-      const noun = section === "awards" ? "award" : "hackathon"
+      const noun = "award"
       const count = group.items.length
       group.summary = `${count} ${noun}${count === 1 ? "" : "s"}`
     }
@@ -307,7 +312,6 @@ function displayDate(data: Frontmatter) {
 
 function countLabel(section: Section, count: number) {
   if (section === "awards") return count === 1 ? "1 award" : `${count} awards`
-  if (section === "hackathons") return count === 1 ? "1 hackathon" : `${count} hackathons`
   return count === 1 ? "1 item" : `${count} items`
 }
 
@@ -338,7 +342,7 @@ function filterDataset(
     .toLowerCase()
   const recency =
     section === "projects"
-      ? timestamp(data.modified ?? data.date)
+      ? projectRecency(data)
       : whenSortValue(whenKey(data.when))
   return {
     "data-filter-text": text,
@@ -401,9 +405,9 @@ function fileMatchesTag(file: PortfolioFile, targetSlug: string) {
 function entryRecency(file: PortfolioFile) {
   const data = frontmatter(file)
   const section = sectionOf(file)
-  if (section === "projects") return timestamp(data.modified ?? data.date)
-  if (section === "hackathons" || section === "awards") return whenSortValue(whenKey(data.when))
-  return Math.max(timestamp(data.modified ?? data.date), whenSortValue(whenKey(data.when)))
+  if (section === "projects") return projectRecency(data)
+  if (section === "awards") return whenSortValue(whenKey(data.when))
+  return Math.max(projectRecency(data), whenSortValue(whenKey(data.when)))
 }
 
 function compareTagGallery(a: PortfolioFile, b: PortfolioFile) {
@@ -598,7 +602,7 @@ function TimelineThumb({ image }: { image?: GalleryImage }) {
 
 function CollectionCard({ file, section }: { file: PortfolioFile; section: Section }) {
   const data = frontmatter(file)
-  const type = section === "projects" ? "project" : section === "hackathons" ? "hackathon" : "award"
+  const type = section === "projects" ? "project" : "award"
   const images = cardImages(file)
   const shown = visibleSignificance(data.significance)
   const filters = filterDataset(data, section)
@@ -715,11 +719,12 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
   const model = buildProjectTimeline(
     files.map((file) => {
       const data = frontmatter(file)
+      const { start, end } = projectDateBounds(data)
       return {
         slug: cleanSlug(file),
         title: data.title ?? cleanSlug(file),
-        start: data.date ?? "",
-        end: data.modified,
+        start: start ?? "",
+        end,
         pauses: projectPauseRestarts(file),
         nodes: projectMilestoneNodes(file),
         parent: projectParentSlug(data.parent),

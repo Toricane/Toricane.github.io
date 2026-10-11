@@ -1,4 +1,7 @@
 ---
 title: Projects
-description: Projects by Prajwal Prashanth.
+description: Projects and hackathon builds by Prajwal Prashanth.
+aliases:
+  - hackathons/index
+  - hackathons
 ---

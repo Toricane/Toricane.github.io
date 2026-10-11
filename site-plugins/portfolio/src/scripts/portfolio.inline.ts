@@ -11,7 +11,7 @@ const NEWSLETTER_ENDPOINT =
 const NEWSLETTER_URL = "https://prajwalprashanth.substack.com/"
 const CACHE_KEY = "portfolio:newsletter:v2"
 const CACHE_TTL = 6 * 60 * 60 * 1000
-const ENTRY_PATTERN = /^\/(projects|hackathons|awards)\/([^/]+)\/?$/
+const ENTRY_PATTERN = /^\/(projects|awards)\/([^/]+)\/?$/
 const NEWSLETTER_PREVIEW_CHARS = 300
 const TAP_STICKY_DISMISS_KEY = "portfolio:tap-sticky-dismissed"
 const TAP_LINKEDIN_FALLBACK = "https://linkedin.com/in/prajwal-prashanth"
@@ -50,14 +50,15 @@ function redirectLegacyHash() {
   const hash = decodeURIComponent(location.hash.slice(1))
   const detail = hash.match(/^(projects|hackathons|awards)\/(.+)$/)
   if (detail) {
-    location.replace(`/${detail[1]}/${detail[2]}`)
+    const section = detail[1] === "hackathons" ? "projects" : detail[1]
+    location.replace(`/${section}/${detail[2]}`)
     return
   }
 
   const sections: Record<string, string> = {
     content: "/projects/",
     projects: "/projects/",
-    hackathons: "/hackathons/",
+    hackathons: "/tags/hackathon",
     awards: "/awards/",
   }
   if (sections[hash]) location.replace(sections[hash])

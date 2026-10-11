@@ -5,7 +5,10 @@ when: "2025/01"
 from: nwHacks
 significance: standard
 tags:
+  - hackathon
   - In-Person
+aliases:
+  - hackathons/nwhacks-2025-genimo
 ---
 
 ## Gallery

@@ -5,8 +5,11 @@ when: "2024/11"
 from: Hack For Youth
 significance: spotlight
 tags:
+  - hackathon
   - Winner
   - In-Person
+aliases:
+  - hackathons/hack-for-youth-timecraft-1st-place
 ---
 
 ## Gallery

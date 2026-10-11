@@ -5,7 +5,10 @@ when: "2024/09"
 from: Hack the North
 significance: featured
 tags:
+  - hackathon
   - In-Person
+aliases:
+  - hackathons/hack-the-north-2024-davinci-solve
 ---
 
 ## Gallery

@@ -5,8 +5,11 @@ when: "2024/09"
 from: yvrHacks
 significance: featured
 tags:
+  - hackathon
   - Honourable-Mention
   - In-Person
+aliases:
+  - hackathons/yvrhacks-yeetup-honourable-mention
 ---
 
 ## Gallery

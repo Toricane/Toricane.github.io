@@ -1,6 +1,7 @@
 import fs from "node:fs/promises"
 import path from "node:path"
 import { applyPortfolioDates } from "./dates"
+import { hideContentDebt } from "./contentDebt"
 
 type HastNode = {
   type?: string
@@ -130,7 +131,8 @@ export default function GalleryExtractor() {
     markdownPlugins() {
       return [
         () => {
-          return (_tree: unknown, file: { data: Record<string, unknown> }) => {
+          return (tree: Parameters<typeof hideContentDebt>[0], file: { data: Record<string, unknown> }) => {
+            hideContentDebt(tree)
             applyPortfolioDates(file.data)
           }
         },

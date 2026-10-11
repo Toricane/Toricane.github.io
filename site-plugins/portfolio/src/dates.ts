@@ -38,7 +38,19 @@ function coerceDate(value: string | Date): Date | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date
 }
 
-/** Visible label: month/year for awards & hackathons; start – end for projects. */
+/** Project bounds: month-only entries are completed points, not ongoing work. */
+export function projectDateBounds(data: PortfolioFrontmatter): {
+  start?: string | Date
+  end?: string | Date
+} {
+  if (data.when) {
+    const month = lastDayOfWhenMonth(data.when)
+    if (month) return { start: month, end: month }
+  }
+  return { start: data.date, end: data.modified }
+}
+
+/** Visible label: month/year for point entries; start – end for ranged projects. */
 export function displayPeriod(data: PortfolioFrontmatter): string {
   if (data.when) {
     const match = data.when.match(WHEN_RE)
@@ -61,7 +73,7 @@ type DateBucket = {
 
 /**
  * Overwrite Quartz `file.data.dates` so scrapers / RSS / sitemap use portfolio time,
- * not git/filesystem (build day). Awards/hackathons → last day of `when` month.
+ * not git/filesystem (build day). Month-only entries → last day of `when` month.
  */
 export function applyPortfolioDates(data: {
   frontmatter?: Record<string, unknown>
