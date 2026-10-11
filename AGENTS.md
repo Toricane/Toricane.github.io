@@ -50,6 +50,7 @@ Projects with known date ranges use:
 - `node` (optional) — extra open-circle landmark on that month (`YYYY-MM-DD`), within `date`…`modified`. More: `node1`, `node2`, …
 - `parent` (optional) — project slug to draw a Git-style branch curve from (e.g. `jarvis-for-the-visually-impaired` or `projects/jarvis-for-the-visually-impaired`). Overlap alone never invents branches.
 - `series` (optional) — soft group name; later projects in the same series branch from the previous one when `parent` is omitted.
+- `timelineColor` (optional) — quoted six-digit hex (e.g. `"#6ea8ff"`) to pin the lane color for a project without a thumbnail. Normally leave it unset: the first Gallery thumbnail supplies a readable dominant color; projects without one use a 12-color palette chosen to distinguish overlapping ranges. Thumbnail colors take priority over this fallback override. Filtering preserves the assigned colors.
 
 Gallery (all collections) sorts by `significance` then recency (`when` for awards/month-only projects, `modified ?? date` for ranged projects). Award timelines stay month-grouped; the projects timeline is a vertical Git-style lane graph (packed start/end/pause/node months from `date`/`modified`/`pause*`/`restart*`/`node*`, compact gap markers for empty stretches, dashed hiatus segments, optional `parent`/`series` curves — not a linear calendar scale).
 

@@ -2,6 +2,7 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import { applyPortfolioDates } from "./dates"
 import { hideContentDebt } from "./contentDebt"
+import { loadThumbnailColor } from "./thumbnailColor"
 
 type HastNode = {
   type?: string
@@ -138,13 +139,16 @@ export default function GalleryExtractor() {
         },
       ]
     },
-    htmlPlugins() {
+    htmlPlugins(ctx: { argv: { directory: string } }) {
       return [
         () => {
           return async (tree: HastNode, file: { data: Record<string, unknown> }) => {
             const images = collectGalleryImages(tree)
             file.data.galleryImages = images
             const first = images[0]?.src
+            file.data.timelineThumbnailColor = first
+              ? await loadThumbnailColor(first, ctx.argv.directory)
+              : undefined
             file.data.ogCoverBase64 = first ? await loadOgCoverDataUrl(first) : undefined
           }
         },

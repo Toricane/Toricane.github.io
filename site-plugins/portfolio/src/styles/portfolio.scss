@@ -1505,11 +1505,11 @@ body[data-slug="coverflow"] .portfolio-footer {
 .portfolio-card[data-significance="featured"] > a {
   background: linear-gradient(
     135deg,
-    rgba(192, 192, 192, 0.1) 0%,
-    rgba(169, 169, 169, 0.04) 55%,
+    rgba(202, 218, 238, 0.2) 0%,
+    rgba(169, 188, 212, 0.09) 55%,
     var(--portfolio-panel) 100%
   );
-  border-color: rgba(192, 192, 192, 0.22);
+  border-color: rgba(202, 218, 238, 0.45);
   box-shadow: 0 6px 20px rgba(192, 192, 192, 0.04);
 }
 
@@ -1518,7 +1518,7 @@ body[data-slug="coverflow"] .portfolio-footer {
   position: absolute;
   inset: 0 0 auto;
   height: 2px;
-  background: linear-gradient(90deg, rgba(210, 210, 210, 0.65), rgba(169, 169, 169, 0.18));
+  background: linear-gradient(90deg, #e2eaf4, #9caec5);
   z-index: 2;
 }
 
@@ -1902,7 +1902,7 @@ body[data-slug="coverflow"] .portfolio-footer {
   grid-template-columns: 3.75rem var(--pt-graph-w) minmax(0, 1fr);
   /* Row tracks set inline from geometry.rowHeights (expands for multi-start months). */
   grid-template-rows: repeat(var(--pt-months), var(--pt-row-h));
-  column-gap: var(--portfolio-space-3);
+  column-gap: 0;
   align-items: stretch;
 }
 
@@ -1912,6 +1912,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-project-timeline__month {
+  padding-inline-end: var(--portfolio-space-3);
   grid-column: 1;
   display: flex;
   flex-direction: row;
@@ -2052,6 +2053,15 @@ body[data-slug="coverflow"] .portfolio-footer {
   transition: opacity 160ms ease;
 }
 
+.portfolio-project-timeline__connector {
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  opacity: 0.7;
+  transition:
+    opacity 160ms ease,
+    stroke-width 160ms ease;
+}
+
 .portfolio-project-timeline__node {
   stroke-width: 1.5;
   transition: opacity 160ms ease;
@@ -2070,37 +2080,9 @@ body[data-slug="coverflow"] .portfolio-footer {
   stroke-dasharray: 2.5 1.5;
 }
 
-.portfolio-project-timeline__color-0 {
-  color: #e2b15a;
-  stroke: #e2b15a;
-}
-.portfolio-project-timeline__color-1 {
-  color: #6ea8ff;
-  stroke: #6ea8ff;
-}
-.portfolio-project-timeline__color-2 {
-  color: #8fd4a8;
-  stroke: #8fd4a8;
-}
-.portfolio-project-timeline__color-3 {
-  color: #c7a0ff;
-  stroke: #c7a0ff;
-}
-.portfolio-project-timeline__color-4 {
-  color: #f0a07a;
-  stroke: #f0a07a;
-}
-.portfolio-project-timeline__color-5 {
-  color: #7fd3d3;
-  stroke: #7fd3d3;
-}
-.portfolio-project-timeline__color-6 {
-  color: #e58fb3;
-  stroke: #e58fb3;
-}
-.portfolio-project-timeline__color-7 {
-  color: #b7c2cf;
-  stroke: #b7c2cf;
+.portfolio-project-timeline__color {
+  color: var(--pt-color);
+  stroke: var(--pt-color);
 }
 
 .portfolio-project-timeline__card-slot {
@@ -2150,6 +2132,20 @@ body[data-slug="coverflow"] .portfolio-footer {
   border-color: var(--portfolio-copper);
 }
 
+.portfolio-project-timeline__card:not(:has(.portfolio-project-timeline__card-media)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.portfolio-project-timeline__card-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-inline-end: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 1px;
+}
+
 .portfolio-project-timeline__card[data-significance="spotlight"] {
   background: linear-gradient(
     135deg,
@@ -2173,12 +2169,8 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-project-timeline__card[data-significance="featured"] {
-  background: linear-gradient(
-    135deg,
-    rgba(192, 192, 192, 0.09) 0%,
-    rgba(169, 169, 169, 0.03) 100%
-  );
-  border-color: rgba(192, 192, 192, 0.18);
+  background: linear-gradient(135deg, rgba(202, 218, 238, 0.2) 0%, rgba(169, 188, 212, 0.09) 100%);
+  border-color: rgba(202, 218, 238, 0.45);
 }
 
 .portfolio-project-timeline__card[data-significance="featured"]::before {
@@ -2186,12 +2178,12 @@ body[data-slug="coverflow"] .portfolio-footer {
   position: absolute;
   inset: 0 auto 0 0;
   width: 3px;
-  background: linear-gradient(180deg, rgba(210, 210, 210, 0.65), rgba(169, 169, 169, 0.2));
+  background: linear-gradient(180deg, #e2eaf4, #9caec5);
   border-radius: 8px 0 0 8px;
 }
 
 .portfolio-project-timeline__card[data-significance="featured"] h2 {
-  color: rgb(210, 214, 220, 0.96);
+  color: #edf3fc;
 }
 
 .portfolio-project-timeline__card-media {
@@ -2290,14 +2282,15 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-project-timeline__board.is-focusing [data-project-slug] {
-  opacity: 0.28;
+  opacity: 0.45;
 }
 
 .portfolio-project-timeline__board.is-focusing [data-project-slug].is-active {
   opacity: 1;
 }
 
-.portfolio-project-timeline__board.is-focusing .portfolio-project-timeline__segment.is-active {
+.portfolio-project-timeline__board.is-focusing .portfolio-project-timeline__segment.is-active,
+.portfolio-project-timeline__board.is-focusing .portfolio-project-timeline__connector.is-active {
   stroke-width: 2.75;
 }
 
@@ -2400,12 +2393,8 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-timeline__item[data-significance="featured"] > a {
-  background: linear-gradient(
-    135deg,
-    rgba(192, 192, 192, 0.09) 0%,
-    rgba(169, 169, 169, 0.03) 100%
-  );
-  border-color: rgba(192, 192, 192, 0.18);
+  background: linear-gradient(135deg, rgba(202, 218, 238, 0.2) 0%, rgba(169, 188, 212, 0.09) 100%);
+  border-color: rgba(202, 218, 238, 0.45);
 }
 
 .portfolio-timeline__item[data-significance="featured"] > a::before {
@@ -2413,7 +2402,7 @@ body[data-slug="coverflow"] .portfolio-footer {
   position: absolute;
   inset: 0 0 auto;
   height: 2px;
-  background: linear-gradient(90deg, rgba(210, 210, 210, 0.55), rgba(169, 169, 169, 0.18));
+  background: linear-gradient(90deg, #e2eaf4, #9caec5);
   border-radius: var(--portfolio-radius) var(--portfolio-radius) 0 0;
 }
 
@@ -3165,7 +3154,7 @@ a.internal.portfolio-bookmark {
 
   .portfolio-project-timeline__board {
     grid-template-columns: 3.5rem var(--pt-graph-w) minmax(0, 1fr);
-    column-gap: var(--portfolio-space-2);
+    column-gap: 0;
   }
 }
 
@@ -3382,10 +3371,11 @@ a.internal.portfolio-bookmark {
 
   .portfolio-project-timeline__board {
     grid-template-columns: 2.15rem var(--pt-graph-w) minmax(0, 1fr);
-    column-gap: 4px;
+    column-gap: 0;
   }
 
   .portfolio-project-timeline__month {
+    padding-inline-end: 4px;
     flex-direction: column;
     align-items: flex-end;
     justify-content: center;

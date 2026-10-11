@@ -136,16 +136,35 @@ function wireProjectTimeline(root: ParentNode = document) {
       if (slug) setActive(slug)
     }
     const onOut = (event: PointerEvent) => {
-      const next = event.relatedTarget as Node | null
+      const next = (event.relatedTarget as Element | null)?.closest?.("[data-project-slug]")
       if (next && board.contains(next)) return
-      setActive(null)
+      const focused = board.querySelector<HTMLElement>(".portfolio-project-timeline__card:focus")
+      setActive(focused?.dataset.projectSlug ?? null)
+    }
+    const onFocusOut = (event: FocusEvent) => {
+      const next = (event.relatedTarget as Element | null)?.closest?.("[data-project-slug]")
+      setActive(next && board.contains(next) ? next.getAttribute("data-project-slug") : null)
+    }
+    // Touch feedback shares the link's normal opening gesture.
+    const onTouchEnd = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") setActive(null)
     }
 
     board.addEventListener("pointerover", onOver)
     board.addEventListener("pointerout", onOut)
+    board.addEventListener("pointerdown", onOver)
+    board.addEventListener("pointerup", onTouchEnd)
+    board.addEventListener("pointercancel", onTouchEnd)
+    board.addEventListener("focusin", onOver)
+    board.addEventListener("focusout", onFocusOut)
     ;(window as CleanupWindow).addCleanup?.(() => {
       board.removeEventListener("pointerover", onOver)
       board.removeEventListener("pointerout", onOut)
+      board.removeEventListener("pointerdown", onOver)
+      board.removeEventListener("pointerup", onTouchEnd)
+      board.removeEventListener("pointercancel", onTouchEnd)
+      board.removeEventListener("focusin", onOver)
+      board.removeEventListener("focusout", onFocusOut)
       board.dataset.wired = "false"
       setActive(null)
     })
@@ -626,6 +645,19 @@ function refreshProjectTimeline(
   board.style.display = model ? "" : "none"
   if (!model) return
 
+  // Keep each project's identifying hue when filtering changes lane packing.
+  const original = buildProjectTimeline(inputs)!
+  const colors = new Map(original.tracks.map((track) => [track.slug, track.color]))
+  for (const mark of [
+    ...model.tracks,
+    ...model.branches,
+    ...model.connectors,
+    ...model.segments,
+    ...model.nodes,
+  ]) {
+    mark.color = colors.get(mark.slug) ?? mark.color
+  }
+
   const { geometry } = model
   board.style.gridTemplateRows = geometry.rowHeights.map((height) => `${height}px`).join(" ")
   board.style.setProperty("--pt-months", String(model.months.length))
@@ -672,7 +704,14 @@ function refreshProjectTimeline(
     for (const track of model.tracks) {
       if (track.bottomRow !== row) continue
       const card = cardBySlug.get(track.slug)
-      if (card) slot.append(card)
+      if (card) {
+        card.classList.remove("is-active")
+        const dot = card.querySelector<HTMLElement>(".portfolio-project-timeline__card-dot")
+        if (dot) {
+          dot.style.setProperty("--pt-color", track.color)
+        }
+        slot.append(card)
+      }
     }
     slots.append(slot)
   })
@@ -689,28 +728,39 @@ function refreshProjectTimeline(
     for (const [key, value] of Object.entries(attributes)) mark.setAttribute(key, String(value))
     svg.append(mark)
   }
+  for (const connector of model.connectors) {
+    addMark(
+      "path",
+      connector.slug,
+      "portfolio-project-timeline__connector portfolio-project-timeline__color",
+      { d: connector.path, fill: "none", style: `--pt-color: ${connector.color}` },
+    )
+  }
   for (const branch of model.branches) {
     addMark(
       "path",
       branch.slug,
-      `portfolio-project-timeline__branch portfolio-project-timeline__color-${branch.colorIndex}`,
-      { d: branch.path, fill: "none" },
+      "portfolio-project-timeline__branch portfolio-project-timeline__color",
+      { d: branch.path, fill: "none", style: `--pt-color: ${branch.color}` },
     )
   }
   for (const segment of model.segments) {
     addMark(
       "line",
       segment.slug,
-      `portfolio-project-timeline__segment portfolio-project-timeline__segment--${segment.style} portfolio-project-timeline__color-${segment.colorIndex}`,
-      { x1: segment.x, y1: segment.y1, x2: segment.x, y2: segment.y2 },
+      `portfolio-project-timeline__segment portfolio-project-timeline__segment--${segment.style} portfolio-project-timeline__color`,
+      {
+        x1: segment.x, y1: segment.y1, x2: segment.x, y2: segment.y2,
+        style: `--pt-color: ${segment.color}`,
+      },
     )
   }
   for (const node of model.nodes) {
     addMark(
       "circle",
       node.slug,
-      `portfolio-project-timeline__node portfolio-project-timeline__node--${node.kind} portfolio-project-timeline__color-${node.colorIndex}`,
-      { cx: node.x, cy: node.y, r: geometry.nodeRadius },
+      `portfolio-project-timeline__node portfolio-project-timeline__node--${node.kind} portfolio-project-timeline__color`,
+      { cx: node.x, cy: node.y, r: geometry.nodeRadius, style: `--pt-color: ${node.color}` },
     )
   }
 }

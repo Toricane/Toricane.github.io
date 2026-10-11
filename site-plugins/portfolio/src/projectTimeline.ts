@@ -1,3 +1,5 @@
+import { assignTimelineColors } from "./timelineColors"
+
 /** Layout math for the vertical Git-style projects timeline. */
 
 export type PauseRestart = {
@@ -16,6 +18,8 @@ export type ProjectTimelineInput = {
   nodes?: Array<string | Date>
   parent?: string
   series?: string
+  thumbnailColor?: string
+  timelineColor?: string
 }
 
 export type ProjectTimelineMonth = {
@@ -33,7 +37,7 @@ export type ProjectTimelineTrack = {
   slug: string
   title: string
   lane: number
-  colorIndex: number
+  color: string
   /** Inclusive absolute month of overall start. */
   startAbsolute: number
   /** Inclusive absolute month of overall end (tip when ongoing). */
@@ -65,7 +69,7 @@ export type ProjectTimelineGeometry = {
 export type ProjectTimelineSegment = {
   slug: string
   lane: number
-  colorIndex: number
+  color: string
   x: number
   y1: number
   y2: number
@@ -76,7 +80,7 @@ export type ProjectTimelineSegment = {
 export type ProjectTimelineNode = {
   slug: string
   lane: number
-  colorIndex: number
+  color: string
   x: number
   y: number
   kind: "start" | "end" | "ongoing"
@@ -84,7 +88,7 @@ export type ProjectTimelineNode = {
 
 export type ProjectTimelineBranch = {
   slug: string
-  colorIndex: number
+  color: string
   path: string
 }
 
@@ -96,6 +100,7 @@ export type ProjectTimelineModel = {
   segments: ProjectTimelineSegment[]
   nodes: ProjectTimelineNode[]
   branches: ProjectTimelineBranch[]
+  connectors: ProjectTimelineBranch[]
 }
 
 /** Base space per card, including the slot's vertical padding. */
@@ -487,9 +492,10 @@ export function buildProjectTimeline(
     svgWidth: 0,
     svgHeight: 0,
   }
-  geometry.svgWidth = geometry.padX * 2 + Math.max(1, laneCount) * geometry.laneWidth
+  // Leave some breathing room between the lanes and the cards.
+  geometry.svgWidth = geometry.padX * 2 + Math.max(1, laneCount) * geometry.laneWidth + 20
 
-  const tracks: ProjectTimelineTrack[] = projects.map((project, index) => {
+  const tracks: ProjectTimelineTrack[] = projects.map((project) => {
     const lane = laneOf.get(project.slug) ?? 0
     const topRow = rowIndex.get(project.endAbsolute) ?? 0
     const bottomRow = rowIndex.get(project.startAbsolute) ?? topRow
@@ -500,7 +506,7 @@ export function buildProjectTimeline(
       slug: project.slug,
       title: project.title,
       lane,
-      colorIndex: index % 8,
+      color: "",
       startAbsolute: project.startAbsolute,
       endAbsolute: project.endAbsolute,
       ongoing: project.ongoing,
@@ -511,13 +517,8 @@ export function buildProjectTimeline(
     }
   })
 
-  // Stable color by start order so lane pack reorder doesn't reshuffle hues.
-  const colorOrder = [...tracks].sort(
-    (a, b) => a.startAbsolute - b.startAbsolute || a.slug.localeCompare(b.slug),
-  )
-  colorOrder.forEach((track, index) => {
-    track.colorIndex = index % 8
-  })
+  const colors = assignTimelineColors(tracks, inputs)
+  for (const track of tracks) track.color = colors.get(track.slug)!
 
   const metrics = buildRowMetrics(months, tracks, baseRowHeight)
   geometry.rowHeights = metrics.rowHeights
@@ -528,6 +529,44 @@ export function buildProjectTimeline(
   const segments: ProjectTimelineSegment[] = []
   const nodes: ProjectTimelineNode[] = []
   const branches: ProjectTimelineBranch[] = []
+  const connectors: ProjectTimelineBranch[] = []
+  const startYBySlug = new Map<string, number>()
+
+  for (let row = 0; row < months.length; row++) {
+    const stack = tracks.filter((track) => track.bottomRow === row)
+    if (!stack.length) continue
+    // Match card-slot's 3px vertical padding, 8px gap, and equal flex heights.
+    const cardHeight = (geometry.rowHeights[row] - 6 - (stack.length - 1) * 8) / stack.length
+    stack.forEach((track, index) => {
+      const x = laneX(track.lane, geometry)
+      const cardY = geometry.rowOffsets[row] + 3 + index * (cardHeight + 8) + cardHeight / 2
+      const middle = (stack.length - 1) / 2
+      // Keep starts clustered around the month label regardless of card height.
+      // Small offsets separate horizontal leaders; cap the entire cluster at 16px.
+      const startY =
+        rowY(row, geometry) + (index - middle) * Math.min(6, 16 / Math.max(1, stack.length - 1))
+      startYBySlug.set(track.slug, startY)
+      // Outer cards turn earlier. Mirrored bends occupy disjoint vertical spans,
+      // letting the leaders fan outward without crossing each other in the gutter.
+      const elbowX = geometry.svgWidth - 6 - (Math.abs(index - middle) / Math.max(1, middle)) * 8
+      connectors.push({
+        slug: track.slug,
+        color: track.color,
+        path:
+          stack.length === 1
+            ? `M ${x} ${startY} H ${geometry.svgWidth}`
+            : `M ${x} ${startY} H ${elbowX} V ${cardY} H ${geometry.svgWidth}`,
+      })
+    })
+  }
+
+  // A project's first event sits in the month cluster. Other events remain
+  // centered on their months. Use the same coordinates everywhere
+  // so lane ends and parent curves still meet their dots after stacking/filtering.
+  const eventY = (project: NormalizedProject, absolute: number): number =>
+    absolute === project.startAbsolute
+      ? startYBySlug.get(project.slug)!
+      : rowY(rowIndex.get(absolute)!, geometry)
 
   for (const project of projects) {
     const track = trackBySlug.get(project.slug)
@@ -546,10 +585,10 @@ export function buildProjectTimeline(
       segments.push({
         slug: track.slug,
         lane: track.lane,
-        colorIndex: track.colorIndex,
+        color: track.color,
         x,
-        y1: rowY(topRow, geometry),
-        y2: rowY(bottomRow, geometry),
+        y1: eventY(project, span.endAbsolute),
+        y2: eventY(project, span.startAbsolute),
         style: span.kind === "pause" ? "pause" : isOngoingTip ? "ongoing" : "solid",
       })
     }
@@ -577,9 +616,9 @@ export function buildProjectTimeline(
       nodes.push({
         slug: track.slug,
         lane: track.lane,
-        colorIndex: track.colorIndex,
+        color: track.color,
         x,
-        y: rowY(row, geometry),
+        y: eventY(project, absolute),
         kind,
       })
     }
@@ -601,12 +640,12 @@ export function buildProjectTimeline(
       const anchorRow = rowIndex.get(anchorAbsolute)
       if (anchorRow === undefined) continue
       const fromX = laneX(track.branchFromLane, geometry)
-      const fromY = rowY(anchorRow, geometry)
-      const y2 = rowY(track.bottomRow, geometry)
+      const fromY = eventY(parent, anchorAbsolute)
+      const y2 = eventY(project, project.startAbsolute)
       if (fromX === x && fromY === y2) continue
       branches.push({
         slug: track.slug,
-        colorIndex: track.colorIndex,
+        color: track.color,
         path: branchPath(fromX, fromY, x, y2, geometry.laneWidth),
       })
     }
@@ -620,6 +659,7 @@ export function buildProjectTimeline(
     segments,
     nodes,
     branches,
+    connectors,
   }
 }
 

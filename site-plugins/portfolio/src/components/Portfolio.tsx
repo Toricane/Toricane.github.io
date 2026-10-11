@@ -40,6 +40,7 @@ type Frontmatter = {
   parent?: string
   /** Optional series name; later entries branch from the previous in the series. */
   series?: string
+  timelineColor?: string
   photos?: CoverPhoto[]
   groups?: Record<string, string>
 }
@@ -678,7 +679,7 @@ function projectParentSlug(value: string | undefined): string | undefined {
   return `projects/${trimmed}`
 }
 
-function ProjectTimelineCard({ file }: { file: PortfolioFile }) {
+function ProjectTimelineCard({ file, color }: { file: PortfolioFile; color: string }) {
   const data = frontmatter(file)
   const thumb = timelineThumbImage(file)
   const shown = visibleSignificance(data.significance)
@@ -694,11 +695,20 @@ function ProjectTimelineCard({ file }: { file: PortfolioFile }) {
       data-significance={shown}
       {...filters}
     >
-      <div class="portfolio-project-timeline__card-media">
-        {thumb && <TimelineThumb image={thumb} />}
-      </div>
+      {thumb && (
+        <div class="portfolio-project-timeline__card-media">
+          <TimelineThumb image={thumb} />
+        </div>
+      )}
       <div class="portfolio-project-timeline__card-body">
-        <h2>{data.title}</h2>
+        <h2>
+          <span
+            class="portfolio-project-timeline__card-dot portfolio-project-timeline__color"
+            style={{ "--pt-color": color }}
+            aria-hidden="true"
+          />
+          {data.title}
+        </h2>
         {(data.from || (Array.isArray(data.tags) && data.tags.length > 0)) && (
           <div class="portfolio-project-timeline__card-meta">
             {data.from && <p class="portfolio-card__from">{data.from}</p>}
@@ -725,6 +735,8 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
       nodes: projectMilestoneNodes(file),
       parent: projectParentSlug(data.parent),
       series: typeof data.series === "string" ? data.series : undefined,
+      thumbnailColor: (file as unknown as { timelineThumbnailColor?: string }).timelineThumbnailColor,
+      timelineColor: data.timelineColor,
     }
   })
   const model = buildProjectTimeline(inputs)
@@ -832,9 +844,19 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
             viewBox={`0 0 ${geometry.svgWidth} ${geometry.svgHeight}`}
             role="presentation"
           >
+            {model.connectors.map((connector) => (
+              <path
+                class="portfolio-project-timeline__connector portfolio-project-timeline__color"
+                style={{ "--pt-color": connector.color }}
+                data-project-slug={connector.slug}
+                d={connector.path}
+                fill="none"
+              />
+            ))}
             {model.branches.map((branch) => (
               <path
-                class={`portfolio-project-timeline__branch portfolio-project-timeline__color-${branch.colorIndex}`}
+                class="portfolio-project-timeline__branch portfolio-project-timeline__color"
+                style={{ "--pt-color": branch.color }}
                 data-project-slug={branch.slug}
                 d={branch.path}
                 fill="none"
@@ -842,7 +864,8 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
             ))}
             {model.segments.map((segment) => (
               <line
-                class={`portfolio-project-timeline__segment portfolio-project-timeline__segment--${segment.style} portfolio-project-timeline__color-${segment.colorIndex}`}
+                class={`portfolio-project-timeline__segment portfolio-project-timeline__segment--${segment.style} portfolio-project-timeline__color`}
+                style={{ "--pt-color": segment.color }}
                 data-project-slug={segment.slug}
                 x1={segment.x}
                 y1={segment.y1}
@@ -852,7 +875,8 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
             ))}
             {model.nodes.map((node) => (
               <circle
-                class={`portfolio-project-timeline__node portfolio-project-timeline__node--${node.kind} portfolio-project-timeline__color-${node.colorIndex}`}
+                class={`portfolio-project-timeline__node portfolio-project-timeline__node--${node.kind} portfolio-project-timeline__color`}
+                style={{ "--pt-color": node.color }}
                 data-project-slug={node.slug}
                 cx={node.x}
                 cy={node.y}
@@ -873,7 +897,7 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
                 {tracks.map((track) => {
                   const file = fileBySlug.get(track.slug)
                   if (!file) return null
-                  return <ProjectTimelineCard file={file} />
+                  return <ProjectTimelineCard file={file} color={track.color} />
                 })}
               </div>
             )
