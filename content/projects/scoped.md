@@ -4,7 +4,7 @@ description: "Browser extension for collecting UBC SCOPE job listings and explor
 date: "2026-10-09"
 modified: "2026-10-10"
 from: "Independent"
-significance: featured
+significance: standard
 tags:
   - TypeScript
   - Browser-Extension

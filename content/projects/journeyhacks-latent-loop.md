@@ -3,7 +3,7 @@ title: "Latent Loop"
 description: "Live voice notes that revise relevant Markdown sections as a conversation returns to earlier topics."
 when: "2026/01"
 from: "JourneyHacks"
-significance: featured
+significance: standard
 tags:
   - hackathon
   - In-Person

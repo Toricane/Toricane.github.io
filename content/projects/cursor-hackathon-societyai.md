@@ -3,7 +3,7 @@ title: "SocietyAI"
 description: "Multi-agent civic simulation where generated citizens debate policy questions and revise their stances over successive rounds."
 when: "2026/05"
 from: "Cursor Hackathon Vancouver"
-significance: featured
+significance: standard
 tags:
   - hackathon
   - In-Person
