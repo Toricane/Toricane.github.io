@@ -1,5 +1,5 @@
 ---
-title: "Data Intelligence for Smarter Communities – cell-safe (1st Place)"
+title: "cell-safe (1st Place)"
 description: "Emergency-response scenario prototype using synthetic cellular activity to explore transport, shelter, and supply needs at Waterfront Station."
 when: "2026/09"
 from: "Data Intelligence for Smarter Communities"

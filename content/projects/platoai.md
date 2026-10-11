@@ -1,5 +1,5 @@
 ---
-title: "Vancouver AI Data Storytelling – PlatoAI"
+title: "PlatoAI"
 description: "Source-grounded Socratic dialogues exploring more than 1,000 survey responses about music, discovery, and AI creativity."
 when: "2025/10"
 from: "Vancouver AI Data Storytelling Hackathon"

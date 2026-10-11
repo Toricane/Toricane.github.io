@@ -1,5 +1,5 @@
 ---
-title: yvrHacks – yeetup (Honourable Mention)
+title: "yeetup (Honourable Mention)"
 description: "AI‑first natural language interface to discover youth events & meetups (Groq)."
 when: "2024/09"
 from: yvrHacks

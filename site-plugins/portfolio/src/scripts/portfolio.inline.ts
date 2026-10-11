@@ -1,4 +1,5 @@
 import { imageVariant } from "../imageVariant"
+import { buildProjectTimeline, type ProjectTimelineInput } from "../projectTimeline"
 import { linkIconShortcodeRegex, type LinkIconMap } from "../linkIcons"
 
 type CleanupWindow = Window & {
@@ -585,7 +586,7 @@ function itemMatchesFilters(
 ): boolean {
   if (significance !== "all") {
     const value = item.dataset.filterSignificance || "standard"
-    if (value !== significance) return false
+    if (significance === "highlights" && value !== "spotlight" && value !== "featured") return false
   }
 
   // Tag chips use OR: match if the item has any selected tag.
@@ -600,6 +601,118 @@ function itemMatchesFilters(
   if (query && !fuzzyMatch(item.dataset.filterText || "", query)) return false
 
   return true
+}
+
+function refreshProjectTimeline(
+  board: HTMLElement,
+  cards: HTMLElement[],
+  matchedSlugs: Set<string>,
+) {
+  const inputs: ProjectTimelineInput[] = JSON.parse(board.dataset.timelineInputs || "[]")
+  const model = buildProjectTimeline(inputs.filter((input) => matchedSlugs.has(input.slug)))
+  const months = board.querySelector<HTMLElement>(".portfolio-project-timeline__months")!
+  const slots = board.querySelector<HTMLElement>(".portfolio-project-timeline__cards")!
+  const svg = board.querySelector<SVGSVGElement>("svg")!
+  const cardBySlug = new Map(cards.map((card) => [card.dataset.projectSlug, card]))
+  // Retain unmatched cards for later filter changes without allocating grid rows.
+  const hiddenCards = document.createElement("div")
+  hiddenCards.style.display = "none"
+  for (const card of cards) hiddenCards.append(card)
+  slots.replaceChildren(hiddenCards)
+  months.replaceChildren()
+  svg.replaceChildren()
+  board.classList.remove("is-focusing")
+  board.hidden = !model
+  board.style.display = model ? "" : "none"
+  if (!model) return
+
+  const { geometry } = model
+  board.style.gridTemplateRows = geometry.rowHeights.map((height) => `${height}px`).join(" ")
+  board.style.setProperty("--pt-months", String(model.months.length))
+  board.style.setProperty("--pt-lanes", String(model.laneCount))
+  board.style.setProperty("--pt-graph-w", `${geometry.svgWidth}px`)
+  svg.setAttribute("width", String(geometry.svgWidth))
+  svg.setAttribute("height", String(geometry.svgHeight))
+  svg.setAttribute("viewBox", `0 0 ${geometry.svgWidth} ${geometry.svgHeight}`)
+
+  let previousYear: number | undefined
+  model.months.forEach((month, row) => {
+    const label = document.createElement("div")
+    label.className = "portfolio-project-timeline__month"
+    label.dataset.month = month.key
+    label.style.gridRow = String(row + 1)
+    const text = document.createElement("span")
+    if (month.kind === "gap") {
+      label.classList.add("portfolio-project-timeline__month--gap")
+      text.className = "portfolio-project-timeline__gap-label"
+      text.textContent = month.label
+    } else {
+      label.dataset.season = ["winter", "spring", "summer", "fall"][
+        Math.floor((month.month % 12) / 3)
+      ]
+      label.dataset.yearDigit = String(month.year % 10)
+      if (previousYear !== month.year) {
+        const year = document.createElement("span")
+        year.className = "portfolio-project-timeline__year"
+        year.textContent = String(month.year)
+        label.append(year)
+      }
+      previousYear = month.year
+      text.className = "portfolio-project-timeline__month-label"
+      text.textContent = new Date(Date.UTC(month.year, month.month - 1, 1))
+        .toLocaleDateString("en-US", { month: "short", timeZone: "UTC" })
+        .toUpperCase()
+    }
+    label.append(text)
+    months.append(label)
+    const slot = document.createElement("div")
+    slot.className = "portfolio-project-timeline__card-slot"
+    slot.dataset.month = month.key
+    slot.style.gridRow = String(row + 1)
+    for (const track of model.tracks) {
+      if (track.bottomRow !== row) continue
+      const card = cardBySlug.get(track.slug)
+      if (card) slot.append(card)
+    }
+    slots.append(slot)
+  })
+
+  const addMark = (
+    tag: string,
+    slug: string,
+    className: string,
+    attributes: Record<string, string | number>,
+  ) => {
+    const mark = document.createElementNS("http://www.w3.org/2000/svg", tag)
+    mark.setAttribute("class", className)
+    mark.setAttribute("data-project-slug", slug)
+    for (const [key, value] of Object.entries(attributes)) mark.setAttribute(key, String(value))
+    svg.append(mark)
+  }
+  for (const branch of model.branches) {
+    addMark(
+      "path",
+      branch.slug,
+      `portfolio-project-timeline__branch portfolio-project-timeline__color-${branch.colorIndex}`,
+      { d: branch.path, fill: "none" },
+    )
+  }
+  for (const segment of model.segments) {
+    addMark(
+      "line",
+      segment.slug,
+      `portfolio-project-timeline__segment portfolio-project-timeline__segment--${segment.style} portfolio-project-timeline__color-${segment.colorIndex}`,
+      { x1: segment.x, y1: segment.y1, x2: segment.x, y2: segment.y2 },
+    )
+  }
+  for (const node of model.nodes) {
+    addMark(
+      "circle",
+      node.slug,
+      `portfolio-project-timeline__node portfolio-project-timeline__node--${node.kind} portfolio-project-timeline__color-${node.colorIndex}`,
+      { cx: node.x, cy: node.y, r: geometry.nodeRadius },
+    )
+  }
 }
 
 function wireCollectionFilters() {
@@ -746,14 +859,11 @@ function wireCollectionFilters() {
       "[data-project-timeline] .portfolio-project-timeline__board",
     )
     if (projectBoard) {
-      const filtersActive = Boolean(query.trim()) || significance !== "all" || tags.length > 0
-      for (const mark of projectBoard.querySelectorAll<SVGElement | HTMLElement>("[data-project-slug]")) {
-        if (mark.matches(".portfolio-project-timeline__card")) continue
-        const slug = mark.getAttribute("data-project-slug")
-        if (!slug) continue
-        // SVG elements ignore `hidden`; use visibility so lanes stay aligned.
-        mark.style.visibility = !filtersActive || matchedSlugs.has(slug) ? "" : "hidden"
-      }
+      refreshProjectTimeline(
+        projectBoard,
+        items.filter((item) => item.matches(".portfolio-project-timeline__card")),
+        matchedSlugs,
+      )
     }
 
     for (const group of collection.querySelectorAll<HTMLElement>("[data-timeline-group]")) {

@@ -1,5 +1,5 @@
 ---
-title: "Hack the North – Deaf Leppard"
+title: "Deaf Leppard"
 description: "Wearable accessibility prototype combining speaker-attributed captions in AR glasses with directional haptic alerts."
 when: "2026/09"
 from: "Hack the North"

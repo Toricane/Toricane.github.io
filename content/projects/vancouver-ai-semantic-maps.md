@@ -1,5 +1,5 @@
 ---
-title: "Vancouver AI Data Storytelling – What’s Next for Canada?"
+title: "What’s Next for Canada?"
 description: "Interactive 3D semantic maps of 1,000 Canadians’ survey responses, using embeddings, t-SNE, and clustered themes."
 when: "2025/06"
 from: "Vancouver AI Data Storytelling Hackathon"

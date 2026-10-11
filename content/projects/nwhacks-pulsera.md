@@ -1,5 +1,5 @@
 ---
-title: "nwHacks – Pulsera"
+title: "Pulsera"
 description: "Webcam-based heart-rate estimation prototype with a conversational voice interface and a dashboard for trends."
 when: "2026/01"
 from: "nwHacks"

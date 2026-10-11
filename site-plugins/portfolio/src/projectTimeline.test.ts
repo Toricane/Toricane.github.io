@@ -2,6 +2,24 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import { buildProjectTimeline, type ProjectTimelineModel } from "./projectTimeline"
 
+test("filtering a card stack repacks rows and removes unrelated event months", () => {
+  const projects = [
+    { slug: "keep", title: "Keep", start: "2025-01-01", end: "2025-03-01", nodes: ["2025-02-01"] },
+    { slug: "hide", title: "Hide", start: "2025-01-01", end: "2025-06-01" },
+  ]
+  const all = buildProjectTimeline(projects)!
+  const filtered = buildProjectTimeline(projects.filter((project) => project.slug === "keep"))!
+  assert.ok(filtered.geometry.svgHeight < all.geometry.svgHeight)
+  assert.deepEqual(filtered.months.map((month) => month.key), ["2025/03", "2025/02", "2025/01"])
+  assert.deepEqual(filtered.geometry.rowHeights, [36, 36, 72])
+  for (const node of filtered.nodes) {
+    assert.ok(filtered.months.some((month) => node.y === monthY(filtered, month.key)))
+  }
+  assert.equal(buildProjectTimeline([]), null)
+  // Clearing the filter restores the original geometry.
+  assert.deepEqual(buildProjectTimeline(projects), all)
+})
+
 function monthY(model: ProjectTimelineModel, key: string): number {
   const row = model.months.findIndex((month) => month.key === key)
   assert.ok(row >= 0)

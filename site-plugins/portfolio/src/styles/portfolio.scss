@@ -3170,6 +3170,9 @@ a.internal.portfolio-bookmark {
 }
 
 @media (max-width: 720px) {
+  .portfolio-tags {
+    display: none;
+  }
   :root {
     --portfolio-gutter: 12px;
     --portfolio-nav-height: 48px;
@@ -3430,7 +3433,7 @@ a.internal.portfolio-bookmark {
   }
 
   .portfolio-project-timeline__card-meta .portfolio-tags {
-    justify-content: flex-start;
+    display: none;
   }
 
   .portfolio-project-timeline__card-body > p {

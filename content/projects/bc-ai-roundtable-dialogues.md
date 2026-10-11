@@ -1,5 +1,5 @@
 ---
-title: "Vancouver AI Data Storytelling – BC AI Roundtables"
+title: "BC AI Roundtables"
 description: "Semantic maps and narrated multi-voice dialogues exploring 1,001 British Columbians’ perspectives on AI."
 when: "2025/08"
 from: "Vancouver AI Data Storytelling Hackathon"

@@ -1,5 +1,5 @@
 ---
-title: "Web Summit Vancouver – Pack Coordinator"
+title: "Pack Coordinator"
 description: "Conference group-planning prototype with shared-interest views, a day timeline, status screens, and a venue map."
 when: "2026/05"
 from: "Web Summit Vancouver Hackathon"

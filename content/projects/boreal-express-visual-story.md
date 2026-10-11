@@ -1,5 +1,5 @@
 ---
-title: "The Boreal Express – Wildfire Journey Story"
+title: "Wildfire Journey Story"
 description: "Visual storytelling website documenting a train hackathon interrupted by the 2024 Jasper wildfire."
 when: "2024/07"
 from: "The Boreal Express"

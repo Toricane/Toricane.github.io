@@ -1,5 +1,5 @@
 ---
-title: "StormHacks – Pet Maker"
+title: "Pet Maker"
 description: "Turns a pet photo into a rigged 3D companion that responds to webcam-tracked hands, petting, and a game of fetch."
 when: "2026/10"
 from: "StormHacks"

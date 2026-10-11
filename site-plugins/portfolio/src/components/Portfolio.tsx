@@ -515,11 +515,8 @@ function CollectionFilters({ tags }: { tags: string[] }) {
             <button type="button" data-filter-significance="all" aria-pressed="true">
               All
             </button>
-            <button type="button" data-filter-significance="spotlight" aria-pressed="false">
-              Spotlight
-            </button>
-            <button type="button" data-filter-significance="featured" aria-pressed="false">
-              Featured
+            <button type="button" data-filter-significance="highlights" aria-pressed="false">
+              Highlights
             </button>
           </div>
         </div>
@@ -716,22 +713,21 @@ function ProjectTimelineCard({ file }: { file: PortfolioFile }) {
 
 function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
   const fileBySlug = new Map(files.map((file) => [cleanSlug(file), file]))
-  const model = buildProjectTimeline(
-    files.map((file) => {
-      const data = frontmatter(file)
-      const { start, end } = projectDateBounds(data)
-      return {
-        slug: cleanSlug(file),
-        title: data.title ?? cleanSlug(file),
-        start: start ?? "",
-        end,
-        pauses: projectPauseRestarts(file),
-        nodes: projectMilestoneNodes(file),
-        parent: projectParentSlug(data.parent),
-        series: typeof data.series === "string" ? data.series : undefined,
-      }
-    }),
-  )
+  const inputs = files.map((file) => {
+    const data = frontmatter(file)
+    const { start, end } = projectDateBounds(data)
+    return {
+      slug: cleanSlug(file),
+      title: data.title ?? cleanSlug(file),
+      start: start ?? "",
+      end,
+      pauses: projectPauseRestarts(file),
+      nodes: projectMilestoneNodes(file),
+      parent: projectParentSlug(data.parent),
+      series: typeof data.series === "string" ? data.series : undefined,
+    }
+  })
+  const model = buildProjectTimeline(inputs)
 
   if (!model) {
     return (
@@ -782,6 +778,7 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
       </ul>
       <div
         class="portfolio-project-timeline__board"
+        data-timeline-inputs={JSON.stringify(inputs)}
         style={
           {
             "--pt-months": String(model.months.length),
