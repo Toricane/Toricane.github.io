@@ -15,3 +15,6 @@ quartz/cli/tui/dist/
 .env
 .env.*
 site-plugins/*/dist/
+
+linkedin_export/
+resume.md

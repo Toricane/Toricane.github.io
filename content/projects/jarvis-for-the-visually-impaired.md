@@ -14,23 +14,23 @@ tags:
 
 ## Overview
 
-> [Replace with: a longer entry-only intro — context, motivation, or what this is — not the card description.]
+I built JARVIS to explore how a wearable assistant could describe what is in front of a user and answer spoken questions. The first prototype mounted a Raspberry Pi, camera, microphone, earphones, button, and battery on a hat; later work focused on a smaller standalone form factor.
 
 ## Role and constraints
 
-> [Replace with: what you personally owned, who you worked with, and the practical constraints.]
+I developed the assistant and worked on moving wake-word detection and speech-to-text onto a Seeed Studio XIAO ESP32S3 Sense with C++ and Edge Impulse.
 
 ## Process
 
-> [Replace with: the research, prototypes, failed approaches, and decisions that led to the result.]
+The first demonstrated version combined Gemini vision, Groq text generation, Azure speech services, and web retrieval. Button and wake-word activation started the interaction. I iterated toward the microcontroller prototype while gathering feedback at Vancouver AI meetups.
 
 ## Result
 
-> [Replace with: the verified outcome, impact, demonstrations, usage, or measurable result.]
+Secured a $1,000 Ingenious+ Regional Award grant, presented at four Vancouver AI Community Meetups, and demonstrated JARVIS at the TKS Showcase. The resume records spoken output beginning in under two seconds.
 
 ## Reflection
 
-> [Replace with: what you learned, what you would change, and what you would test next.]
+Live demos exposed microphone transcription problems, search errors, and fragile hardware mounting. I fixed the search behavior, adapted how I used the microphone, and sought connections to organizations serving visually impaired people for further feedback.
 
 ## Gallery
 
@@ -54,3 +54,6 @@ tags:
 - [2nd AI Meetup Demo | 2024/06/27](https://www.linkedin.com/posts/prajwal-prashanth_last-night-at-the-june-future-proof-creatives-activity-7214142470563975170-4g_L)
 - [2nd Prototype Demo | 2024/08/29](https://www.linkedin.com/posts/prajwal-prashanth_vancouverai-futureproofcreatives-healthcarerevolution-activity-7236979912601964544-gUnx)
 - [TKS Focus Showcase | 2024/12/19](https://tksworld.notion.site/JARVIS-AI-Voice-Assistant-with-Vision-for-the-Visually-Impaired-15cb825036e280a1b04bc4b23943b625)
+- [GitHub](https://github.com/Toricane/jarvis)
+
+<!-- Content enrichment sources: resume.md; linkedin_export/projects.md and posts.md; linked repository README and/or Devpost story. -->

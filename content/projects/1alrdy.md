@@ -4,13 +4,16 @@ description: 3D-printed rubber band-powered car
 date: 2025-09-15
 modified: 2025-12-06
 from: Langara
-significance: spotlight
+significance: featured
 tags:
+  - Mechanical-Engineering
+  - 3D-Printing
+  - Prototyping
 ---
 
 ## Overview
 
-> [Replace with: a longer entry-only intro — context, motivation, or what this is — not the card description.]
+Our six-person engineering team designed a rubber-band-powered car for two separate competitions: reaching three metres quickly and travelling as far as possible. The final vehicle combined a 3D-printed body with a mechanism we refined through repeated testing.
 
 ## Role and constraints
 
@@ -35,9 +38,10 @@ Due to winning both races, each individual in our team achieved a 4% bonus added
 
 ## Gallery
 
-![Car](assets/tab-panels/1alrdy.webp)
-
+![Car](/assets/tab-panels/1alrdy.webp)
 
 ## Links
 
 - [Label](https://example.com)
+
+<!-- Content enrichment sources: resume.md; linkedin_export/projects.md and posts.md; linked repository README and/or Devpost story. -->

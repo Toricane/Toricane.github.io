@@ -2,9 +2,9 @@
 title: CalendAI
 description: "Chrome extension integrating Gemini with Google Calendar to plan weeks & schedule events via natural language; demoed at Vancouver AI Community Meetup."
 date: 2024-06-01
-modified: 2024-07-01
+modified: 2024-07-10
 from: buildspace
-significance: spotlight
+significance: featured
 tags:
   - Chrome-Ext
   - AI
@@ -13,7 +13,7 @@ tags:
 
 ## Overview
 
-> [Replace with: a longer entry-only intro — context, motivation, or what this is — not the card description.]
+CalendAI grew from wanting to spend less effort manually arranging a time-blocked week. I built it during buildspace Season 5 as a conversational interface to Google Calendar.
 
 ## Role and constraints
 
@@ -21,11 +21,11 @@ tags:
 
 ## Process
 
-> [Replace with: the research, prototypes, failed approaches, and decisions that led to the result.]
+The Chrome extension integrates Gemini with Google Calendar. It can list, create, update, and delete events through a conversation, rather than requiring each change to be made in a calendar grid.
 
 ## Result
 
-> [Replace with: the verified outcome, impact, demonstrations, usage, or measurable result.]
+Built and demonstrated a scheduling prototype. Installation is through an unpacked Chrome extension, and the documented Google authentication setup requires whitelisted accounts.
 
 ## Reflection
 
@@ -45,3 +45,6 @@ tags:
 
 - [Demo Tweet](https://x.com/PrajwalP028/status/1808191827066917032)
 - [GitHub](https://github.com/Toricane/calendai)
+- [Prototype update](https://www.linkedin.com/feed/update/urn%3Ali%3AugcPost%3A7213952201885433857)
+
+<!-- Content enrichment sources: resume.md; linkedin_export/projects.md and posts.md; linked repository README and/or Devpost story. -->

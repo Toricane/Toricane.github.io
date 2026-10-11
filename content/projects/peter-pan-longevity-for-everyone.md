@@ -13,7 +13,7 @@ tags:
 
 ## Overview
 
-> [Replace with: a longer entry-only intro — context, motivation, or what this is — not the card description.]
+Our research explored the mitochondrial theory of aging and how a practical software prototype might make blood-glucose information easier to act on.
 
 ## Role and constraints
 
@@ -21,11 +21,11 @@ tags:
 
 ## Process
 
-> [Replace with: the research, prototypes, failed approaches, and decisions that led to the result.]
+I built two Gemini-powered browser prototypes: a chatbot that generates suggestions from a user’s glucose context, and an image-based interface that proposes meals from a photograph of fridge contents.
 
 ## Result
 
-> [Replace with: the verified outcome, impact, demonstrations, usage, or measurable result.]
+Built the early prototypes and pitched the broader project to three venture capitalists. No clinical validation or measured health improvement is claimed.
 
 ## Reflection
 
@@ -39,3 +39,6 @@ tags:
 
 - [Website](https://peterpan-ai.com/)
 - [GitHub](https://github.com/Toricane/peterpan-ai)
+- [Early prototypes](https://github.com/Toricane/peter-pan-ai-prototype)
+
+<!-- Content enrichment sources: resume.md; linkedin_export/projects.md and posts.md; linked repository README and/or Devpost story. -->

@@ -159,12 +159,7 @@ function monthLabel(absolute: number): string {
   }).format(date)
 }
 
-function intervalsOverlap(
-  aStart: number,
-  aEnd: number,
-  bStart: number,
-  bEnd: number,
-): boolean {
+function intervalsOverlap(aStart: number, aEnd: number, bStart: number, bEnd: number): boolean {
   return aStart <= bEnd && bStart <= aEnd
 }
 
@@ -175,7 +170,10 @@ function buildSpans(
   pauses: { pause: number; restart: number }[],
 ): AbsoluteSpan[] {
   const pairs = [...pauses]
-    .filter((pair) => pair.pause >= startAbsolute && pair.restart <= endAbsolute && pair.pause < pair.restart)
+    .filter(
+      (pair) =>
+        pair.pause >= startAbsolute && pair.restart <= endAbsolute && pair.pause < pair.restart,
+    )
     .sort((a, b) => a.pause - b.pause || a.restart - b.restart)
 
   const spans: AbsoluteSpan[] = []
@@ -195,7 +193,9 @@ function buildSpans(
   return spans
 }
 
-function normalizePausePairs(pauses: PauseRestart[] | undefined): { pause: number; restart: number }[] {
+function normalizePausePairs(
+  pauses: PauseRestart[] | undefined,
+): { pause: number; restart: number }[] {
   if (!pauses?.length) return []
   const pairs: { pause: number; restart: number }[] = []
   for (const entry of pauses) {
@@ -413,7 +413,14 @@ function branchPath(
   fromY: number,
   toX: number,
   toY: number,
+  laneWidth: number,
 ): string {
+  // A lane may be reused after the parent ends. Bow away from that lane
+  // instead of drawing a straight line through unrelated projects in the gap.
+  if (fromX === toX) {
+    const bendX = fromX + laneWidth / 2
+    return `M ${fromX} ${fromY} C ${bendX} ${fromY}, ${bendX} ${toY}, ${toX} ${toY}`
+  }
   const midY = (fromY + toY) / 2
   return `M ${fromX} ${fromY} C ${fromX} ${midY}, ${toX} ${midY}, ${toX} ${toY}`
 }
@@ -476,16 +483,14 @@ export function buildProjectTimeline(
     svgWidth: 0,
     svgHeight: 0,
   }
-  geometry.svgWidth =
-    geometry.padX * 2 + Math.max(1, laneCount) * geometry.laneWidth
+  geometry.svgWidth = geometry.padX * 2 + Math.max(1, laneCount) * geometry.laneWidth
 
   const tracks: ProjectTimelineTrack[] = projects.map((project, index) => {
     const lane = laneOf.get(project.slug) ?? 0
     const topRow = rowIndex.get(project.endAbsolute) ?? 0
     const bottomRow = rowIndex.get(project.startAbsolute) ?? topRow
     const parent = project.parent ? bySlug.get(project.parent) : undefined
-    const branchFromLane =
-      parent && laneOf.has(parent.slug) ? laneOf.get(parent.slug) : undefined
+    const branchFromLane = parent && laneOf.has(parent.slug) ? laneOf.get(parent.slug) : undefined
 
     return {
       slug: project.slug,
@@ -504,8 +509,7 @@ export function buildProjectTimeline(
 
   // Stable color by start order so lane pack reorder doesn't reshuffle hues.
   const colorOrder = [...tracks].sort(
-    (a, b) =>
-      a.startAbsolute - b.startAbsolute || a.slug.localeCompare(b.slug),
+    (a, b) => a.startAbsolute - b.startAbsolute || a.slug.localeCompare(b.slug),
   )
   colorOrder.forEach((track, index) => {
     track.colorIndex = index % 8
@@ -534,8 +538,7 @@ export function buildProjectTimeline(
       if (topRow === undefined || bottomRow === undefined) continue
       if (span.startAbsolute === span.endAbsolute) continue
 
-      const isOngoingTip =
-        project.ongoing && span.kind === "active" && span === lastActive
+      const isOngoingTip = project.ongoing && span.kind === "active" && span === lastActive
       segments.push({
         slug: track.slug,
         lane: track.lane,
@@ -577,13 +580,30 @@ export function buildProjectTimeline(
       })
     }
 
-    if (track.branchFromLane !== undefined && track.branchFromLane !== track.lane) {
+    const parent = track.branchFromSlug ? bySlug.get(track.branchFromSlug) : undefined
+    if (
+      track.branchFromLane !== undefined &&
+      parent &&
+      parent.startAbsolute <= project.startAbsolute
+    ) {
+      // Connect to actual parent work, not its former lane at the child's date.
+      // For a completed parent use its end; during a hiatus use the last
+      // active boundary before the child starts.
+      const activeParentSpan = [...parent.spans]
+        .reverse()
+        .find((span) => span.kind === "active" && span.startAbsolute <= project.startAbsolute)
+      if (!activeParentSpan) continue
+      const anchorAbsolute = Math.min(project.startAbsolute, activeParentSpan.endAbsolute)
+      const anchorRow = rowIndex.get(anchorAbsolute)
+      if (anchorRow === undefined) continue
       const fromX = laneX(track.branchFromLane, geometry)
+      const fromY = rowY(anchorRow, geometry)
       const y2 = rowY(track.bottomRow, geometry)
+      if (fromX === x && fromY === y2) continue
       branches.push({
         slug: track.slug,
         colorIndex: track.colorIndex,
-        path: branchPath(fromX, y2, x, y2),
+        path: branchPath(fromX, fromY, x, y2, geometry.laneWidth),
       })
     }
   }
