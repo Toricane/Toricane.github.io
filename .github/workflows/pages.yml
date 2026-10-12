@@ -36,6 +36,10 @@ jobs:
       - name: Build Quartz
         run: npx quartz build
 
+      # Quartz's asset emitter strips .html extensions from filenames.
+      - name: Copy Google Search Console verification file
+        run: cp content/googlef959fc9620af7cbd.html public/googlef959fc9620af7cbd.html
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
