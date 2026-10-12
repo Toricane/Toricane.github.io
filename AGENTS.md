@@ -148,6 +148,35 @@ Edit `site-plugins/portfolio/src/`:
 
 After plugin source changes, rebuild the plugin (`npm run build` in `site-plugins/portfolio`) or reinstall plugins from the repo root so Quartz picks up `dist/`.
 
+## Agent-readable output
+
+`site-plugins/portfolio/src/markdown.tsx` exports `PortfolioMarkdown`, which
+generates Markdown endpoints, `/llms.txt`, and `/search-index.json` from published
+content (including generated folder/tag pages). Examples: `/` → `/index.md`,
+`/projects/` → `/projects.md`, `/projects/cell-safe` → `/projects/cell-safe.md`.
+Named index, `.html.md`, and legacy alias forms are also supported; bare `.md` filenames are not generated.
+
+Same-site Markdown links are root-relative. Collection listings expose dates,
+highlight level, tags, and affiliation. Exported dates use `YYYY-MM`; this does
+not change the source frontmatter date schemas above. The search index has one
+record per listed canonical page, with aliases in the record and no duplicate
+alias results. Agents search its text/metadata locally and fetch `markdownUrl`.
+
+`llms.txt` is deliberately brief: a description of Prajwal and the website,
+Markdown/search instructions, and five links (About, Projects, Awards, Resume, Search
+index). Full entry and tag listings live in their own Markdown files and the
+search index. The generated files are not manually maintained under `content/`.
+
+Every Markdown page includes Home, Projects, Awards, and Resume menu links.
+Resume links to `/resume/resume.md`, served by the separate resume project. The
+portfolio build does not fetch or generate resume content. Output checks allow
+this separately managed endpoint; it is not emitted as a static snapshot.
+
+After rebuilding the plugin and Quartz, run
+`node scripts/check-markdown-output.mjs public`. The Pages workflow runs this
+check before upload. Export tests are in `src/markdown.test.ts`; see
+[the plugin README](site-plugins/portfolio/README.md) for the schema and commands.
+
 ## Dev commands
 
 Requires Node.js 22+.

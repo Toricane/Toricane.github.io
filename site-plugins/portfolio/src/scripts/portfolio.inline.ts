@@ -1663,7 +1663,8 @@ function highlightSearchMatches(root: HTMLElement, query: string) {
   const nodes: Text[] = []
   let node = walker.nextNode()
   while (node) {
-    nodes.push(node)
+    // SHOW_TEXT guarantees text nodes; TreeWalker exposes the broader Node type.
+    nodes.push(node as Text)
     node = walker.nextNode()
   }
 
@@ -1926,7 +1927,7 @@ function wireSearchPortfolioPreview() {
   /** Only watch the results list — never the preview pane (that caused a freeze loop). */
   let resultsObserver: MutationObserver | null = null
   const watchResults = () => {
-    const results = search.querySelector(".results-container")
+    const results = search.querySelector<HTMLElement>(".results-container")
     if (!results || results.dataset.portfolioPreviewWatch === "true") return
     results.dataset.portfolioPreviewWatch = "true"
     resultsObserver?.disconnect()
@@ -1943,7 +1944,7 @@ function wireSearchPortfolioPreview() {
   const layoutObserver = new MutationObserver(() => {
     const pane = ensurePane()
     watchResults()
-    const watching = search.querySelector(".results-container")?.dataset.portfolioPreviewWatch === "true"
+    const watching = search.querySelector<HTMLElement>(".results-container")?.dataset.portfolioPreviewWatch === "true"
     if (!pane || !watching) return
     layoutObserver.disconnect()
     scheduleSyncToResults()
