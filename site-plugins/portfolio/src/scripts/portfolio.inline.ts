@@ -7,10 +7,9 @@ type CleanupWindow = Window & {
   spaNavigate?: (url: URL) => Promise<void>
 }
 
-const NEWSLETTER_ENDPOINT =
-  "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fprajwalprashanth.substack.com%2Ffeed"
+const NEWSLETTER_ENDPOINT = "/newsletter.xml"
 const NEWSLETTER_URL = "https://prajwalprashanth.substack.com/"
-const CACHE_KEY = "portfolio:newsletter:v2"
+const CACHE_KEY = "portfolio:newsletter:v3"
 const CACHE_TTL = 6 * 60 * 60 * 1000
 const ENTRY_PATTERN = /^\/(projects|awards)\/([^/]+)\/?$/
 const NEWSLETTER_PREVIEW_CHARS = 300
@@ -465,9 +464,8 @@ function newsletterImageUrl(item: Record<string, unknown>) {
   )
 }
 
-function renderNewsletter(item: Record<string, unknown>) {
-  const root = document.querySelector<HTMLElement>("[data-newsletter-card]")
-  if (!root) return
+function renderNewsletter(root: HTMLElement, item: Record<string, unknown>) {
+  if (!root.isConnected) return
 
   const title = root.querySelector<HTMLElement>("[data-newsletter-title]")
   const description = root.querySelector<HTMLElement>("[data-newsletter-description]")
@@ -500,41 +498,73 @@ function renderNewsletter(item: Record<string, unknown>) {
     image.src = imageUrl
     image.alt = String(item.title ?? "Newsletter cover")
     image.hidden = false
+    image.onerror = () => { image.hidden = true }
+  } else if (image) {
+    image.hidden = true
   }
   root.dataset.state = "ready"
 }
 
+let newsletterRequest: Promise<Record<string, unknown>> | undefined
+
+function fetchNewsletter() {
+  newsletterRequest ??= (async () => {
+    const response = await fetch(NEWSLETTER_ENDPOINT, { signal: AbortSignal.timeout(8000) })
+    if (!response.ok) throw new Error(`Newsletter request failed: ${response.status}`)
+    const xml = new DOMParser().parseFromString(await response.text(), "application/xml")
+    if (xml.querySelector("parsererror")) throw new Error("Invalid newsletter feed")
+    const item = xml.querySelector("item")
+    const title = item?.querySelector("title")?.textContent?.trim()
+    const link = safeUrl(item?.querySelector("link")?.textContent, "")
+    if (!item || !title || !link) throw new Error("Newsletter returned no valid posts")
+    return {
+      title,
+      link,
+      pubDate: item.querySelector("pubDate")?.textContent ?? "",
+      description: item.querySelector("description")?.textContent ?? "",
+      content: item.getElementsByTagNameNS("http://purl.org/rss/1.0/modules/content/", "encoded")[0]?.textContent ?? "",
+      thumbnail: item.querySelector("enclosure")?.getAttribute("url") ?? "",
+    }
+  })().catch((error) => {
+    newsletterRequest = undefined
+    throw error
+  })
+  return newsletterRequest
+}
+
 async function loadNewsletter() {
   const root = document.querySelector<HTMLElement>("[data-newsletter-card]")
-  if (!root || root.dataset.loaded === "true") return
-  root.dataset.loaded = "true"
+  if (!root || root.dataset.loaded === "true" || root.dataset.loading === "true") return
+  root.dataset.loading = "true"
 
   try {
-    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) ?? "null") as {
-      savedAt?: number
-      item?: Record<string, unknown>
-    } | null
-    if (cached?.item && cached.savedAt && Date.now() - cached.savedAt < CACHE_TTL) {
-      renderNewsletter(cached.item)
-      return
-    }
-  } catch {
-    localStorage.removeItem(CACHE_KEY)
-  }
+    // Storage can be denied in private browsing. It must never block rendering.
+    try {
+      const cached = JSON.parse(localStorage.getItem(CACHE_KEY) ?? "null") as {
+        savedAt?: number
+        item?: Record<string, unknown>
+      } | null
+      if (cached?.item?.title && cached.item.link) {
+        renderNewsletter(root, cached.item)
+        if (cached.savedAt && Date.now() - cached.savedAt < CACHE_TTL) {
+          root.dataset.loaded = "true"
+          return
+        }
+      }
+    } catch { /* Keep the server-rendered verified post. */ }
 
-  const controller = new AbortController()
-  ;(window as CleanupWindow).addCleanup?.(() => controller.abort())
-
-  try {
-    const response = await fetch(NEWSLETTER_ENDPOINT, { signal: controller.signal })
-    if (!response.ok) throw new Error(`Newsletter request failed: ${response.status}`)
-    const payload = (await response.json()) as { items?: Record<string, unknown>[] }
-    const item = payload.items?.[0]
-    if (!item) throw new Error("Newsletter returned no posts")
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), item }))
-    renderNewsletter(item)
+    // Share a request across nav/render events. Navigation cannot abort another root's load.
+    const item = await fetchNewsletter()
+    renderNewsletter(root, item)
+    root.dataset.loaded = "true"
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), item }))
+    } catch { /* A cache write failure must not discard a successfully rendered post. */ }
   } catch {
-    root.dataset.state = "fallback"
+    // Keep the dated server-rendered or cached post; allow a later event to retry.
+    if (root.dataset.state !== "ready") root.dataset.state = "fallback"
+  } finally {
+    delete root.dataset.loading
   }
 }
 
@@ -571,7 +601,12 @@ function wireViewToggle() {
   }
 
   for (const button of buttons) button.addEventListener("click", onClick)
-  setMode((collection.dataset.view as "gallery" | "timeline") || "gallery")
+  const requestedView = new URLSearchParams(location.search).get("view")
+  setMode(
+    requestedView === "timeline"
+      ? "timeline"
+      : (collection.dataset.view as "gallery" | "timeline") || "gallery",
+  )
 
   ;(window as CleanupWindow).addCleanup?.(() => {
     for (const button of buttons) button.removeEventListener("click", onClick)

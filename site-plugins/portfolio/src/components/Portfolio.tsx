@@ -12,9 +12,14 @@ import fs from "node:fs"
 import path from "node:path"
 import type { GalleryImage } from "../galleryExtractor"
 import { imageVariant } from "../imageVariant"
+import { newsletterFallback } from "../newsletterFallback"
 import { applyLinkIconsToHast, linkIconMapFromFilenames, type LinkIconMap } from "../linkIcons"
-import { displayPeriod, projectDateBounds } from "../dates"
-import { buildProjectTimeline, type PauseRestart } from "../projectTimeline"
+import { displayPeriod, formatMonthYear, projectDateBounds } from "../dates"
+import {
+  buildProjectTimeline,
+  type PauseRestart,
+  type ProjectTimelineModel,
+} from "../projectTimeline"
 
 type CoverPhoto = {
   src?: string
@@ -388,7 +393,9 @@ function tagHref(tag: string) {
 
 function sectionOf(file: PortfolioFile): Section | null {
   const slug = cleanSlug(file)
-  return sections.find((section) => slug.startsWith(`${section}/`) && !slug.endsWith("/index")) ?? null
+  return (
+    sections.find((section) => slug.startsWith(`${section}/`) && !slug.endsWith("/index")) ?? null
+  )
 }
 
 function portfolioEntries(allFiles: PortfolioFile[]) {
@@ -558,12 +565,17 @@ function collageClass(count: number) {
   return "portfolio-card__collage portfolio-card__collage--many"
 }
 
-function CardMedia({ images }: { images: GalleryImage[] }) {
+function CardMedia({ images, lazy = false }: { images: GalleryImage[]; lazy?: boolean }) {
   if (!images.length) return null
   if (images.length === 1) {
     return (
       <figure class="portfolio-card__media">
-        <img src={images[0].src} alt={images[0].alt} loading="eager" decoding="async" />
+        <img
+          src={images[0].src}
+          alt={images[0].alt}
+          loading={lazy ? "lazy" : "eager"}
+          decoding="async"
+        />
       </figure>
     )
   }
@@ -598,10 +610,19 @@ function TimelineThumb({ image }: { image?: GalleryImage }) {
   return <img src={image.src} alt={image.alt || ""} loading="lazy" decoding="async" />
 }
 
-function CollectionCard({ file, section }: { file: PortfolioFile; section: Section }) {
+function CollectionCard({
+  file,
+  section,
+  preview = false,
+}: {
+  file: PortfolioFile
+  section: Section
+  preview?: boolean
+}) {
   const data = frontmatter(file)
   const type = section === "projects" ? "project" : "award"
-  const images = cardImages(file)
+  const images = preview ? cardImages(file).slice(0, 1) : cardImages(file)
+  const Heading = preview ? "h3" : "h2"
   const shown = visibleSignificance(data.significance)
   const filters = filterDataset(data, section)
   return (
@@ -612,16 +633,16 @@ function CollectionCard({ file, section }: { file: PortfolioFile; section: Secti
       {...filters}
     >
       <a href={linkFor(file)} data-portfolio-open={cleanSlug(file)}>
-        <CardMedia images={images} />
+        <CardMedia images={images} lazy={preview} />
         <div class="portfolio-card__body">
           <div class="portfolio-card__meta">
             <span>{displayDate(data)}</span>
-            {shown && <span>{shown}</span>}
+            {shown && !preview && <span>{shown}</span>}
           </div>
-          <h2>{data.title}</h2>
-          {data.from && <p class="portfolio-card__from">{data.from}</p>}
+          <Heading>{data.title}</Heading>
+          {!preview && data.from && <p class="portfolio-card__from">{data.from}</p>}
           {data.description && <p>{data.description}</p>}
-          <TagList tags={data.tags} compact />
+          <TagList tags={preview ? data.tags?.slice(0, 2) : data.tags} compact />
         </div>
       </a>
     </li>
@@ -721,9 +742,8 @@ function ProjectTimelineCard({ file, color }: { file: PortfolioFile; color: stri
   )
 }
 
-function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
-  const fileBySlug = new Map(files.map((file) => [cleanSlug(file), file]))
-  const inputs = files.map((file) => {
+function projectTimelineInputs(files: PortfolioFile[]) {
+  return files.map((file) => {
     const data = frontmatter(file)
     const { start, end } = projectDateBounds(data)
     return {
@@ -739,6 +759,78 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
       timelineColor: data.timelineColor,
     }
   })
+}
+
+function TimelineGraph({
+  model,
+  preview = false,
+}: {
+  model: ProjectTimelineModel
+  preview?: boolean
+}) {
+  const { geometry } = model
+  return (
+    <svg
+      class="portfolio-project-timeline__svg"
+      width={geometry.svgWidth}
+      height={preview ? "100%" : geometry.svgHeight}
+      viewBox={preview ? undefined : `0 0 ${geometry.svgWidth} ${geometry.svgHeight}`}
+      aria-hidden="true"
+    >
+      <svg
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${geometry.svgWidth} ${geometry.svgHeight}`}
+        preserveAspectRatio={preview ? "none" : "xMidYMid meet"}
+      >
+        {!preview &&
+          model.connectors.map((connector) => (
+            <path
+              class="portfolio-project-timeline__connector portfolio-project-timeline__color"
+              style={{ "--pt-color": connector.color }}
+              data-project-slug={connector.slug}
+              d={connector.path}
+              fill="none"
+            />
+          ))}
+        {model.branches.map((branch) => (
+          <path
+            class="portfolio-project-timeline__branch portfolio-project-timeline__color"
+            style={{ "--pt-color": branch.color }}
+            data-project-slug={branch.slug}
+            d={branch.path}
+            fill="none"
+          />
+        ))}
+        {model.segments.map((segment) => (
+          <line
+            class={`portfolio-project-timeline__segment portfolio-project-timeline__segment--${segment.style} portfolio-project-timeline__color`}
+            style={{ "--pt-color": segment.color }}
+            data-project-slug={segment.slug}
+            x1={segment.x}
+            y1={segment.y1}
+            x2={segment.x}
+            y2={segment.y2}
+          />
+        ))}
+      </svg>
+      {model.nodes.map((node) => (
+        <circle
+          class={`portfolio-project-timeline__node portfolio-project-timeline__node--${node.kind} portfolio-project-timeline__color`}
+          style={{ "--pt-color": node.color }}
+          data-project-slug={node.slug}
+          cx={preview ? `${(node.x / geometry.svgWidth) * 100}%` : node.x}
+          cy={preview ? `${(node.y / geometry.svgHeight) * 100}%` : node.y}
+          r={geometry.nodeRadius}
+        />
+      ))}
+    </svg>
+  )
+}
+
+function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
+  const fileBySlug = new Map(files.map((file) => [cleanSlug(file), file]))
+  const inputs = projectTimelineInputs(files)
   const model = buildProjectTimeline(inputs)
 
   if (!model) {
@@ -826,9 +918,7 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
                 data-year-digit={String(month.year % 10)}
                 style={{ gridRow: String(index + 1) }}
               >
-                {showYear && (
-                  <span class="portfolio-project-timeline__year">{month.year}</span>
-                )}
+                {showYear && <span class="portfolio-project-timeline__year">{month.year}</span>}
                 <span class="portfolio-project-timeline__month-label">
                   {monthLabelShort(month.month)}
                 </span>
@@ -837,53 +927,7 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
           })}
         </div>
         <div class="portfolio-project-timeline__graph" aria-hidden="true">
-          <svg
-            class="portfolio-project-timeline__svg"
-            width={geometry.svgWidth}
-            height={geometry.svgHeight}
-            viewBox={`0 0 ${geometry.svgWidth} ${geometry.svgHeight}`}
-            role="presentation"
-          >
-            {model.connectors.map((connector) => (
-              <path
-                class="portfolio-project-timeline__connector portfolio-project-timeline__color"
-                style={{ "--pt-color": connector.color }}
-                data-project-slug={connector.slug}
-                d={connector.path}
-                fill="none"
-              />
-            ))}
-            {model.branches.map((branch) => (
-              <path
-                class="portfolio-project-timeline__branch portfolio-project-timeline__color"
-                style={{ "--pt-color": branch.color }}
-                data-project-slug={branch.slug}
-                d={branch.path}
-                fill="none"
-              />
-            ))}
-            {model.segments.map((segment) => (
-              <line
-                class={`portfolio-project-timeline__segment portfolio-project-timeline__segment--${segment.style} portfolio-project-timeline__color`}
-                style={{ "--pt-color": segment.color }}
-                data-project-slug={segment.slug}
-                x1={segment.x}
-                y1={segment.y1}
-                x2={segment.x}
-                y2={segment.y2}
-              />
-            ))}
-            {model.nodes.map((node) => (
-              <circle
-                class={`portfolio-project-timeline__node portfolio-project-timeline__node--${node.kind} portfolio-project-timeline__color`}
-                style={{ "--pt-color": node.color }}
-                data-project-slug={node.slug}
-                cx={node.x}
-                cy={node.y}
-                r={geometry.nodeRadius}
-              />
-            ))}
-          </svg>
+          <TimelineGraph model={model} />
         </div>
         <div class="portfolio-project-timeline__cards">
           {model.months.map((month, row) => {
@@ -1165,9 +1209,7 @@ function PhotoCoverflow({ allFiles }: { allFiles: PortfolioFile[] }) {
 
   return (
     <section class="portfolio-coverflow" aria-label="Photo coverflow">
-      {firstSrc && (
-        <link rel="preload" as="image" href={firstSrc} fetchpriority="high" />
-      )}
+      {firstSrc && <link rel="preload" as="image" href={firstSrc} fetchpriority="high" />}
       <div class="portfolio-coverflow__controls">
         <button type="button" data-reel-previous aria-label="Previous photo">
           ←
@@ -1228,16 +1270,17 @@ function PhotoCoverflow({ allFiles }: { allFiles: PortfolioFile[] }) {
 }
 
 function Newsletter() {
+  const post = newsletterFallback
   return (
-    <article class="newsletter-card" id="newsletter" data-newsletter-card data-state="loading">
+    <article class="newsletter-card" id="newsletter" data-newsletter-card data-state="cached">
       <div class="newsletter-card__copy">
         <p class="newsletter-card__eyebrow">
-          Latest newsletter update <span data-newsletter-date />
+          Latest newsletter update <span data-newsletter-date>{formatMonthYear(post.pubDate)}</span>
         </p>
-        <h2 data-newsletter-title>Latest newsletter</h2>
-        <p data-newsletter-description>Loading the latest post…</p>
+        <h2 data-newsletter-title>{post.title}</h2>
+        <p data-newsletter-description>{post.description}</p>
         <a
-          href="https://prajwalprashanth.substack.com/"
+          href={post.link}
           data-newsletter-link
           target="_blank"
           rel="noreferrer"
@@ -1245,8 +1288,70 @@ function Newsletter() {
           Read on Substack <span aria-hidden="true">↗</span>
         </a>
       </div>
-      <img data-newsletter-image alt="" hidden loading="lazy" decoding="async" />
+      <img data-newsletter-image src={post.thumbnail} alt={post.title} loading="lazy" decoding="async" />
     </article>
+  )
+}
+
+function HomeProjects({ allFiles }: { allFiles: PortfolioFile[] }) {
+  const projects = itemsForSection(allFiles, "projects")
+  const selected = projects
+    .filter((file) => frontmatter(file).significance === "spotlight")
+    .sort((a, b) => compareGallery(a, b, "projects"))
+    .slice(0, 6)
+  if (!selected.length) return null
+  const model = buildProjectTimeline(projectTimelineInputs(projects))
+  const firstMonth = model
+    ? [...model.months].reverse().find((month) => month.kind === "month")
+    : undefined
+  const firstDate = firstMonth
+    ? new Date(Date.UTC(firstMonth.year, firstMonth.month - 1, 1))
+    : undefined
+  const hackathons = projects.filter((file) => fileMatchesTag(file, "hackathon"))
+  const hackathonAwards = itemsForSection(allFiles, "awards")
+    .filter((file) => fileMatchesTag(file, "hackathon")).length
+  const stats = [
+    { label: "Projects", value: projects.length, href: sectionHref("projects") },
+    { label: "Hackathon builds", value: hackathons.length, href: tagHref("hackathon") },
+    { label: "Hackathon awards", value: hackathonAwards, href: tagHref("hackathon") },
+  ]
+
+  return (
+    <section
+      class="portfolio-home-projects"
+      id="selected-projects"
+      aria-labelledby="selected-projects-title"
+    >
+      <header class="portfolio-home-projects__heading">
+        <h2 id="selected-projects-title">Selected projects</h2>
+        <dl class="portfolio-home-projects__stats">
+          {stats.map(({ label, value, href }) => (
+            <div><dt><a href={href}>{label}</a></dt><dd>{value}</dd></div>
+          ))}
+        </dl>
+      </header>
+      {model && firstDate && (
+        <div class="portfolio-home-journey">
+          <div class="portfolio-home-journey__dates">
+            <span>Present</span>
+            <div class="portfolio-home-journey__graph">
+              <TimelineGraph model={model} preview />
+            </div>
+            <time dateTime={firstDate.toISOString().slice(0, 7)}>{formatMonthYear(firstDate)}</time>
+          </div>
+        </div>
+      )}
+      <ul class="portfolio-grid portfolio-home-projects__grid">
+        {selected.map((file) => <CollectionCard file={file} section="projects" preview />)}
+      </ul>
+      <nav class="portfolio-home-projects__links" aria-label="Explore portfolio">
+        <a class="portfolio-home-projects__all" href={sectionHref("projects")}>
+          View all projects <span aria-hidden="true">→</span>
+        </a>
+        <a href={`${sectionHref("projects")}?view=timeline`}>Full timeline <span aria-hidden="true">↗</span></a>
+        <a href={sectionHref("awards")}>{itemsForSection(allFiles, "awards").length} awards &amp; distinctions <span aria-hidden="true">↗</span></a>
+      </nav>
+    </section>
   )
 }
 
@@ -1280,23 +1385,29 @@ function Home(props: QuartzComponentProps) {
   }
 
   return (
-    <main class="portfolio-home-shell">
-      <section class="portfolio-home-copy">
-        <h1>Prajwal Prashanth</h1>
-        <div class="portfolio-home-markdown">{content}</div>
-        <nav class="portfolio-section-links" aria-label="Portfolio sections">
-          {sections.map((section) => (
-            <a href={sectionHref(section)}>
-              <span>{section}</span>
-              <small>{counts[section]}</small>
-            </a>
-          ))}
-        </nav>
-      </section>
-      <aside class="portfolio-home-media">
-        <PhotoCoverflow allFiles={props.allFiles} />
-        <Newsletter />
-      </aside>
+    <main class="portfolio-home">
+      <div class="portfolio-home-shell">
+        <section class="portfolio-home-copy">
+          <h1>Prajwal Prashanth</h1>
+          <div class="portfolio-home-markdown">{content}</div>
+          <nav class="portfolio-section-links" aria-label="Portfolio sections">
+            {sections.map((section) => (
+              <a href={sectionHref(section)}>
+                <span>{section}</span>
+                <small>{counts[section]}</small>
+              </a>
+            ))}
+          </nav>
+          <a class="portfolio-home-explore" href="#selected-projects">
+            Explore my work <span aria-hidden="true">↓</span>
+          </a>
+        </section>
+        <aside class="portfolio-home-media">
+          <PhotoCoverflow allFiles={props.allFiles} />
+          <Newsletter />
+        </aside>
+      </div>
+      <HomeProjects allFiles={props.allFiles} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}

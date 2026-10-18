@@ -78,6 +78,30 @@ groups:
 
 Collection listing URLs use a trailing slash (`/awards/`, `/projects/`). Entry URLs do not (`/awards/class-valedictorian`). Use `sectionHref()` in the plugin; do not add a slash to `linkFor()`.
 
+## Home page
+
+The intro fills the first viewport; the next section shows up to six spotlight
+projects, selected automatically by recency. Do not hardcode project slugs.
+Cards use their first Gallery image and remain text-only when it is missing.
+The graph reuses all dated project timeline data, not just the selected cards.
+Mobile keeps a narrow rail beside the cards; wide desktops move it into the left
+margin. Keep the introduction's section links equally sized for any item count;
+do not reserve a column for a future section.
+
+The **Hackathon awards** stat counts award entries tagged `Hackathon`, including
+placements, side challenges, and honourable mentions. Project `Winner` tags alone
+are not a complete count. Avoid counting a project and its award twice.
+
+`PortfolioNewsletter` is explicitly registered in `quartz.ts` and emits
+`/newsletter.xml` from Substack at build time. Keep this fetch on the build side,
+with its last-good cache and verified
+`site-plugins/portfolio/src/newsletterFallback.ts` snapshot; do not restore the
+browser's dependency on an external RSS proxy. Browser storage is
+optional and a failed refresh must leave a populated, dated post visible.
+New posts are picked up on the next site build. See the
+[plugin README](site-plugins/portfolio/README.md) for responsive dimensions, cache
+behavior, and newsletter tests.
+
 ## Image variants
 
 For `assets/tab-panels/` images, keep three sizes with the **same basename**:

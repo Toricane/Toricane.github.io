@@ -2,6 +2,47 @@
 
 Site-specific Quartz components, transformers, RSS, and agent-readable Markdown.
 
+## Home page
+
+`Home` and `HomeProjects` in `src/components/Portfolio.tsx` render the homepage.
+The introduction fills at least the first viewport and grows naturally when its
+content needs more room. The selected-projects section follows it; its compact
+content is vertically centered within a desktop viewport rather than stretching
+the cards to fill the screen. Mobile content scrolls naturally.
+
+Selected projects come from published project entries with
+`significance: spotlight`, sorted by recency and capped at six. There is no
+hardcoded selection list. Cards use the first `## Gallery` image, with `small/`
+variants for tab-panel assets, a full-width image area, description, date, and up to two tags.
+Entries without Gallery images remain text-only; do not invent image placeholders
+or use unrelated assets. Spotlight labels are omitted within this selection.
+
+The homepage graph uses the same project inputs, colors, branches, hiatuses, and
+nodes as the full project timeline, including dated projects outside the selected
+six. It omits cards, monthly labels, and card connectors. Its vertical layout is
+compressed to the available height; its nodes do not correspond to selected-card
+rows. End labels show Present and the earliest recorded project month.
+
+Below 1600px, the graph is a 52px rail beside the cards with a 12px gap. At 1600px
+and wider, it moves into the outer left margin and widens to 96px for more lane
+spacing; the cards then align directly beneath the heading. The margin position
+keeps at least 24px of clearance from the window edge. Cards use three columns on
+desktop, two from 721–1100px, and one on mobile. These styles live in
+`src/styles/portfolio.scss`; preserve the mobile rail when adjusting desktop.
+
+Home statistics are derived from content: total projects, projects tagged
+`hackathon`, and award records tagged `Hackathon` (case-insensitive). The latter
+is labeled **Hackathon awards**, including placements, side challenges, and
+honourable mentions; counting only project `Winner` tags misses these records.
+Do not count both a project and its corresponding award as two achievements.
+The section's footer link exposes the total award count. `/projects/?view=timeline` opens
+the full collection directly in timeline view.
+
+The introduction's section-link row uses automatic equal-width grid columns.
+Projects and Awards currently split the row evenly. A future section should
+receive the same share automatically; do not reserve an empty third column or
+add an Experience collection until it is actually implemented.
+
 ## Markdown endpoints
 
 `PortfolioMarkdown` emits UTF-8 static files alongside every published content,
@@ -70,3 +111,22 @@ Markdown links, named home endpoint and absence of bare `.md` filenames, authori
 version, uniqueness, and result paths. The Pages workflow runs it after building.
 No additional server,
 deployment service, or source Markdown copies in `content/` are needed.
+
+## Home newsletter
+
+`PortfolioNewsletter` fetches the public Substack RSS feed during the build and
+emits `/newsletter.xml` on the site's own origin. Browser requests no longer depend
+on rss2json or cross-origin RSS access. `quartz.ts` registers this additional
+emitter explicitly because the package loader selects only one emitter from the
+plugin's multiple exports. The emitter uses a 10-second deadline and
+retains a last-good feed in `.quartz-cache/newsletter.xml`; a fresh offline build
+uses the verified post in `src/newsletterFallback.ts`. Update that snapshot from
+the public feed when updating the offline baseline.
+
+The homepage renders the verified post immediately, then refreshes it from the
+local feed. Browser caching is optional: denied or full localStorage cannot stop
+rendering. Concurrent navigation/render events share a request, and a failed
+request leaves the dated post visible and can be retried on the next visit.
+New Substack posts are picked up by the next site build; browser results cache for
+six hours. Run `npx tsx --test site-plugins/portfolio/src/newsletter.test.ts` from
+the repository root to exercise fresh, cached, malformed, and offline responses.
