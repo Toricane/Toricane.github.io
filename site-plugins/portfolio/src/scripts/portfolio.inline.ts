@@ -661,9 +661,13 @@ function refreshProjectTimeline(
   board: HTMLElement,
   cards: HTMLElement[],
   matchedSlugs: Set<string>,
+  compact: boolean,
 ) {
   const inputs: ProjectTimelineInput[] = JSON.parse(board.dataset.timelineInputs || "[]")
-  const model = buildProjectTimeline(inputs.filter((input) => matchedSlugs.has(input.slug)))
+  const original = buildProjectTimeline(inputs)
+  const model = buildProjectTimeline(inputs.filter((input) => matchedSlugs.has(input.slug)), {
+    laneWidth: compact && original ? original.geometry.laneWidth * 0.7 : undefined,
+  })
   const months = board.querySelector<HTMLElement>(".portfolio-project-timeline__months")!
   const slots = board.querySelector<HTMLElement>(".portfolio-project-timeline__cards")!
   const svg = board.querySelector<SVGSVGElement>("svg")!
@@ -681,8 +685,7 @@ function refreshProjectTimeline(
   if (!model) return
 
   // Keep each project's identifying hue when filtering changes lane packing.
-  const original = buildProjectTimeline(inputs)!
-  const colors = new Map(original.tracks.map((track) => [track.slug, track.color]))
+  const colors = new Map(original!.tracks.map((track) => [track.slug, track.color]))
   for (const mark of [
     ...model.tracks,
     ...model.branches,
@@ -805,6 +808,8 @@ function wireCollectionFilters() {
   const root = collection?.querySelector<HTMLElement>("[data-portfolio-filters]")
   if (!collection || !root || root.dataset.wired === "true") return
   root.dataset.wired = "true"
+
+  const compactTimeline = window.matchMedia("(max-width: 720px)")
 
   const toggle = collection.querySelector<HTMLButtonElement>("[data-filter-toggle]")
   const sortGroup = collection.querySelector<HTMLElement>("[data-sort-toggle]")
@@ -948,6 +953,7 @@ function wireCollectionFilters() {
         projectBoard,
         items.filter((item) => item.matches(".portfolio-project-timeline__card")),
         matchedSlugs,
+        compactTimeline.matches,
       )
     }
 
@@ -1073,6 +1079,8 @@ function wireCollectionFilters() {
   search?.addEventListener("keydown", onPanelKeydown)
   document.addEventListener("pointerdown", onDocumentPointer)
 
+  compactTimeline.addEventListener("change", apply)
+
   setPanelOpen(false)
   renderSelectedTags()
   syncTagOptions()
@@ -1091,6 +1099,7 @@ function wireCollectionFilters() {
     tagOptions?.removeEventListener("click", onTagOptionsClick)
     tagSelected?.removeEventListener("click", onSelectedClick)
     document.removeEventListener("pointerdown", onDocumentPointer)
+    compactTimeline.removeEventListener("change", apply)
     root.dataset.wired = "false"
   })
 }

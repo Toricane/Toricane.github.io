@@ -34,7 +34,7 @@ Built and launched the platform, supporting 83 profiles and 66 published portfol
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Buildplate landing page introducing engineering portfolios and recruiter discovery.](/assets/tab-panels/buildplate-landing.webp)
 
 ## Links
 
