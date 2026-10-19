@@ -223,6 +223,7 @@ Other scripts: `npm run images` · `npm run images -- --force` · `npm run check
 - Upstream Quartz: remote `upstream` → `jackyzha0/quartz` (`v5` branch)
 - Pre-commit: `npm run hooks` copies [`.githooks/pre-commit`](.githooks/pre-commit) into `.git/hooks/` (does not change git config)
 - Do **not** create commits or push unless the user explicitly asks
+- Commit style: follow recent history with a lowercase Conventional Commit prefix (`feat:`, `fix:`, `refactor:`, `chore:`, or `docs:`) and an imperative, descriptive subject explaining the concrete change. Combine closely related changes in one subject; omit a trailing period.
 
 ## Content debt (intentional)
 
