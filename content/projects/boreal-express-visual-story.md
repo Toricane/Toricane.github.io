@@ -13,13 +13,15 @@ tags:
 
 Hack Club brought 50 teenagers onto The Canadian for a cross-country hackathon. The train turned back at Kamloops because of the Jasper wildfire, and the hackathon continued at Vancouver station.
 
+The site pairs train-window footage with animated captions and optional train audio to tell the journey’s story.
+
 ## Result
 
 I built a visual account of the journey and its environmental context and shared it at the onboard project showcase. The site ran on the train’s local network.
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Original Boreal Express visual story with train-window footage and animated narration.](/assets/tab-panels/boreal-express-story.webp)
 
 ## Links
 

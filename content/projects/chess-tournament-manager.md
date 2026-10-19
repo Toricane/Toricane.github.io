@@ -35,7 +35,7 @@ Players and rounds are managed through the browser interface. Named tournaments 
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Chess Tournament Manager with sample players and first-round pairings.](/assets/tab-panels/chess-tournament-manager.webp)
 
 ## Links
 

@@ -19,7 +19,7 @@ I refined the idea and designed how the frontend and backend should work togethe
 
 ## Process
 
-Seven-second audio chunks pass through Whisper transcription, ChromaDB/FastEmbed section matching, and Gemini synthesis. A FIFO queue serializes writes to Markdown, and Server-Sent Events update the browser. We adjusted the similarity threshold after an early version created too many new sections.
+Short audio chunks pass through Whisper transcription, ChromaDB/FastEmbed section matching, and Gemini synthesis. A FIFO queue serializes writes to Markdown, and Server-Sent Events update the browser. We adjusted the similarity threshold after an early version created too many new sections.
 
 ## Result
 
@@ -27,7 +27,7 @@ Built the integrated note-updating MVP. Direct editing of the rendered notes was
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Latent Loop initial interface with live-stream and Markdown note panels.](/assets/tab-panels/latent-loop.webp)
 
 ## Links
 

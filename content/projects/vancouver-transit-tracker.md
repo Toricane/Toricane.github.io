@@ -34,7 +34,7 @@ Published schedule-based vehicle animation and route exploration. Positions and 
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Vancouver Transit Tracker map with transit routes and scheduled vehicle positions.](/assets/tab-panels/vancouver-transit-tracker.webp)
 
 ## Links
 

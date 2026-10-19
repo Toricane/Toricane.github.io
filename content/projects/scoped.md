@@ -33,7 +33,7 @@ Implemented collection, saved/applied views, export, and backup/restore. Collect
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Scoped semantic search interface displaying sample job listings.](/assets/tab-panels/scoped.webp)
 
 ## Links
 

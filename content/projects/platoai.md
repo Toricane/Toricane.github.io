@@ -23,7 +23,7 @@ Completed the project in approximately 3.5 hours. Saved HTML dialogues are avail
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![PlatoAI saved homepage with suggested music-survey questions.](/assets/tab-panels/platoai.webp)
 
 ## Links
 

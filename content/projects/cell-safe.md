@@ -28,7 +28,11 @@ Won first place and a $3,000 team prize. The prototype uses historical synthetic
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Five Bars 3G with hackathon organizers and judges.](/assets/tab-panels/cell-safe-group.webp)
+
+![Five Bars 3G presenting Cell Safe.](/assets/tab-panels/cell-safe-presentation.webp)
+
+![Cell Safe situation dashboard showing Waterfront Station activity and home regions.](/assets/tab-panels/cell-safe-website.webp)
 
 ## Links
 

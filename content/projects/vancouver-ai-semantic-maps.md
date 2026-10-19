@@ -23,7 +23,7 @@ This extended my earlier student-survey maps. Iterating on clustering, sizing, a
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Interactive 3D semantic map of responses about Canadian identity.](/assets/tab-panels/vancouver-ai-semantic-maps.webp)
 
 ## Links
 

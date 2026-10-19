@@ -14,7 +14,7 @@ tags:
 
 ## Overview
 
-I compared placement statistics from the 2020W–2023W and 2022W–2025W reporting periods to explore differences between engineering programs.
+I compared placement statistics from the 2020W–2023W and 2022W–2025W reporting periods to explore differences between engineering programs. The charts express historical placement averages as percentages.
 
 ## Role and constraints
 
@@ -34,7 +34,9 @@ Produced the analysis and report. Values extracted from charts and fitted distri
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Historical engineering placement GPA comparison heatmap.](/assets/tab-panels/ubc-engineering-gpa-heatmap.webp)
+
+![Historical engineering program comparison by median placement GPA.](/assets/tab-panels/ubc-engineering-gpa-ranking.webp)
 
 ## Links
 

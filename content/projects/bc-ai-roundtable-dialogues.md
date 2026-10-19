@@ -23,7 +23,7 @@ Published an interactive survey exploration with semantic maps and narrated roun
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![BC AI survey semantic visualization and generated roundtable dialogue controls.](/assets/tab-panels/bc-ai-roundtables.webp)
 
 ## Links
 

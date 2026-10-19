@@ -19,6 +19,8 @@ tags:
 
 I served as website manager from March 2023 through June 2025.
 
+The gallery shows the version I maintained; the association’s current website has since been redesigned.
+
 ## Process
 
 I developed and maintained custom styling and scripts, implemented gallery and event pages, and improved loading performance and search indexing.
@@ -33,11 +35,11 @@ I developed and maintained custom styling and scripts, implemented gallery and e
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Original BC Junior Chess Association website home page.](/assets/tab-panels/bcjca-original.webp)
 
 ## Links
 
-- [Website](https://bcjca.ca/)
+- [Current association website](https://bcjca.ca/)
 - [GitHub](https://github.com/Toricane/bcjca-fork)
 
 <!-- Sources: linkedin_export/experience.md; Toricane/bcjca-fork source inventory.

@@ -33,7 +33,7 @@ Published the Fall 2025 schedule, including holiday exceptions and a marker that
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Langara engineering cohort schedule with color-coded classes.](/assets/tab-panels/langara-etp-schedule.webp)
 
 ## Links
 

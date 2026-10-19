@@ -33,7 +33,7 @@ Published the survey exploration, which later informed my Round 2 Vancouver AI s
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Semantic map of student school-event suggestions, colored by cluster.](/assets/tab-panels/student-survey-analysis.webp)
 
 ## Links
 

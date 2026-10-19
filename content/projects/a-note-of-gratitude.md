@@ -33,7 +33,7 @@ This was my first project built with Cursor, following conversations at the June
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![A Note of Gratitude public visitor letter with audio playback.](/assets/tab-panels/a-note-of-gratitude.webp)
 
 ## Links
 
