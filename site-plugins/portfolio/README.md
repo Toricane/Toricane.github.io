@@ -43,6 +43,30 @@ Projects and Awards currently split the row evenly. A future section should
 receive the same share automatically; do not reserve an empty third column or
 add an Experience collection until it is actually implemented.
 
+## Appearance
+
+The header's Appearance control offers Light, Dark, and System. An explicit
+choice is saved in the browser's `theme` key. System removes that override and
+follows `prefers-color-scheme`; without a reported light preference, dark is the
+default. Device changes and changes in other tabs are reflected immediately.
+Blocked storage still permits switching for the current visit.
+
+`src/scripts/theme.inline.ts` initializes the theme in the head before paint and
+sets Quartz's `saved-theme` attribute. Its controller survives SPA navigation;
+the header controls are rebound with the rest of the portfolio UI. Theme changes
+emit Quartz-compatible `themechange` events and suppress color transitions during
+the swap. The small critical background style in `quartz/components/Head.tsx`
+uses the configured theme backgrounds to prevent a mismatched first paint.
+
+The light palette uses warm ivory, navy ink, and deeper copper. Metallic
+highlights, timeline labels, modal surfaces, and syntax highlighting have light
+variants. Coverflow captions fade into the light surface with navy text in light
+mode; the image lightbox retains light text against its dark backdrop.
+Keep the core palette in `quartz.config.yaml` aligned with the portfolio tokens
+in `src/styles/portfolio.scss`. Run `node --import tsx --test
+site-plugins/portfolio/src/theme.test.ts` from the root for preference, storage,
+pre-paint controller, and text contrast regression checks.
+
 ## Markdown endpoints
 
 `PortfolioMarkdown` emits UTF-8 static files alongside every published content,

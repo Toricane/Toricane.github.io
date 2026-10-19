@@ -63,7 +63,7 @@ export default (() => {
         )}
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <style>{`html,body{background:#0b1118;color-scheme:dark}`}</style>
+        <style>{`html,body{background-color:${cfg.theme.colors.darkMode.light};color-scheme:dark}html[saved-theme=light],html[saved-theme=light] body{background-color:${cfg.theme.colors.lightMode.light};color-scheme:light}`}</style>
 
         <meta name="og:site_name" content={cfg.pageTitle}></meta>
         <meta property="og:title" content={title} />

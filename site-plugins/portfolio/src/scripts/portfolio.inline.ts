@@ -1,4 +1,5 @@
 import { imageVariant } from "../imageVariant"
+import { initializeTheme, type ThemePreference } from "../theme"
 import { buildProjectTimeline, type ProjectTimelineInput } from "../projectTimeline"
 import { linkIconShortcodeRegex, type LinkIconMap } from "../linkIcons"
 
@@ -113,7 +114,9 @@ function wireTimelineGroups(root: ParentNode = document) {
 
 function wireProjectTimeline(root: ParentNode = document) {
   const boards = [
-    ...root.querySelectorAll<HTMLElement>("[data-project-timeline] .portfolio-project-timeline__board"),
+    ...root.querySelectorAll<HTMLElement>(
+      "[data-project-timeline] .portfolio-project-timeline__board",
+    ),
   ]
   for (const board of boards) {
     if (board.dataset.wired === "true") continue
@@ -665,9 +668,12 @@ function refreshProjectTimeline(
 ) {
   const inputs: ProjectTimelineInput[] = JSON.parse(board.dataset.timelineInputs || "[]")
   const original = buildProjectTimeline(inputs)
-  const model = buildProjectTimeline(inputs.filter((input) => matchedSlugs.has(input.slug)), {
-    laneWidth: compact && original ? original.geometry.laneWidth * 0.7 : undefined,
-  })
+  const model = buildProjectTimeline(
+    inputs.filter((input) => matchedSlugs.has(input.slug)),
+    {
+      laneWidth: compact && original ? original.geometry.laneWidth * 0.7 : undefined,
+    },
+  )
   const months = board.querySelector<HTMLElement>(".portfolio-project-timeline__months")!
   const slots = board.querySelector<HTMLElement>(".portfolio-project-timeline__cards")!
   const svg = board.querySelector<SVGSVGElement>("svg")!
@@ -968,7 +974,9 @@ function wireCollectionFilters() {
 
     // Gallery + timeline both carry items; count once from the gallery panel.
     const galleryItems = [
-      ...collection.querySelectorAll<HTMLElement>('[data-view-panel="gallery"] [data-portfolio-item]'),
+      ...collection.querySelectorAll<HTMLElement>(
+        '[data-view-panel="gallery"] [data-portfolio-item]',
+      ),
     ]
     const visible = galleryItems.filter((item) => !item.hidden).length
     if (countVisible) countVisible.textContent = String(visible)
@@ -2139,7 +2147,11 @@ function modelFromUserAgent(ua: string) {
   return null
 }
 
-function pickDeviceLabel(model: string | undefined, platform: string | undefined, fallback: string | null) {
+function pickDeviceLabel(
+  model: string | undefined,
+  platform: string | undefined,
+  fallback: string | null,
+) {
   const fromModel = model ? sanitizeModel(model) : null
   if (fromModel) return fromModel
   if (fallback) return fallback
@@ -2511,7 +2523,75 @@ async function initHomeGreetings() {
   }
 }
 
+function wireThemeControls() {
+  const controller = initializeTheme()
+  const host = document.querySelector<HTMLElement>("[data-portfolio-theme]")
+  const toggle = host?.querySelector<HTMLButtonElement>("[data-theme-toggle]")
+  const options = host?.querySelector<HTMLElement>(".portfolio-theme__options")
+  if (!host || !toggle || !options || host.dataset.wired === "true") return
+  host.dataset.wired = "true"
+  const choices = [...host.querySelectorAll<HTMLButtonElement>("[data-theme-choice]")]
+  const sync = () => {
+    toggle.setAttribute("aria-label", `Color theme: ${controller.theme}. Choose appearance`)
+    toggle.title = `Appearance: ${controller.preference} (${controller.theme})`
+    for (const choice of choices) {
+      choice.setAttribute(
+        "aria-pressed",
+        String(choice.dataset.themeChoice === controller.preference),
+      )
+    }
+  }
+  const close = () => {
+    options.hidden = true
+    toggle.setAttribute("aria-expanded", "false")
+  }
+  const onToggle = () => {
+    const opening = options.hidden
+    closeNavMenu()
+    options.hidden = !opening
+    toggle.setAttribute("aria-expanded", String(opening))
+    if (opening) choices.find((choice) => choice.getAttribute("aria-pressed") === "true")?.focus()
+  }
+  const onChoose = (event: Event) => {
+    const choice = (event.target as Element).closest<HTMLButtonElement>("[data-theme-choice]")
+    if (!choice) return
+    controller.setPreference(choice.dataset.themeChoice as ThemePreference)
+    close()
+    toggle.focus()
+  }
+  const onOutside = (event: Event) => {
+    if (!host.contains(event.target as Node)) close()
+  }
+  const onKey = (event: KeyboardEvent) => {
+    if (!options.hidden && event.key === "Escape") {
+      event.preventDefault()
+      close()
+      toggle.focus()
+    }
+  }
+  const onFocusOut = (event: FocusEvent) => {
+    if (!host.contains(event.relatedTarget as Node | null)) close()
+  }
+  toggle.addEventListener("click", onToggle)
+  options.addEventListener("click", onChoose)
+  document.addEventListener("pointerdown", onOutside)
+  document.addEventListener("keydown", onKey)
+  document.addEventListener("themechange", sync)
+  host.addEventListener("focusout", onFocusOut)
+  sync()
+  ;(window as CleanupWindow).addCleanup?.(() => {
+    toggle.removeEventListener("click", onToggle)
+    options.removeEventListener("click", onChoose)
+    document.removeEventListener("pointerdown", onOutside)
+    document.removeEventListener("keydown", onKey)
+    document.removeEventListener("themechange", sync)
+    host.removeEventListener("focusout", onFocusOut)
+    host.dataset.wired = "false"
+  })
+}
+
 function initializePortfolio() {
+  wireThemeControls()
   // Fresh page render from SPA clears modal chrome; reset stack.
   if (!document.querySelector("[data-portfolio-modal]:not([hidden])")) {
     modalStack.length = 0

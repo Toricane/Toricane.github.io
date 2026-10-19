@@ -30,17 +30,17 @@ configuration:
         weights: [400]
     colors:
       lightMode:
-        light: "#0b1118"
-        lightgray: "#2a3947"
-        gray: "#647586"
-        darkgray: "#e7edf3"
-        dark: "#e7edf3"
-        secondary: "#d58a4b"
-        tertiary: "#f0bc86"
-        highlight: rgba(213, 138, 75, 0.12)
-        textHighlight: rgba(240, 188, 134, 0.28)
+        light: "#f5f3ee"
+        lightgray: "#c8cfd2"
+        gray: "#687785"
+        darkgray: "#344451"
+        dark: "#202b35"
+        secondary: "#965026"
+        tertiary: "#83441f"
+        highlight: rgba(150, 80, 38, 0.09)
+        textHighlight: rgba(150, 80, 38, 0.18)
       darkMode:
-        light: "#0b1118"
+        light: "#0f161e"
         lightgray: "#2a3947"
         gray: "#647586"
         darkgray: "#e7edf3"
@@ -73,7 +73,7 @@ plugins:
     enabled: true
     options:
       theme:
-        light: github-dark
+        light: github-light
         dark: github-dark
       keepBackground: false
     order: 20
