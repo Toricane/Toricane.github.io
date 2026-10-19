@@ -1,8 +1,8 @@
 ---
 title: "Soda-Carrying Car"
 description: "Battery-powered car prebuild designed to carry soda."
-date:
-modified:
+date: 2024-10-01
+modified: 2024-11-01
 from: "MacNeill Math and Science Club"
 significance: standard
 tags:
@@ -41,4 +41,4 @@ tags:
 - [Label](https://example.com)
 
 <!-- Sources: linkedin_export/organizations.md, Math and Science Club; user-supplied gallery photos.
-Review: Club participation spans September 2022–June 2025, but that is not a verified project range. Add the actual build dates, competition, role, mechanism, and results. -->
+Review: Build months supplied by the user: October–November 2024. Add the competition, role, mechanism, and results. -->
