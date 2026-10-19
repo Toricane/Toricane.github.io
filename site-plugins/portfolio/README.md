@@ -60,8 +60,9 @@ uses the configured theme backgrounds to prevent a mismatched first paint.
 
 The light palette uses warm ivory, navy ink, and deeper copper. Metallic
 highlights, timeline labels, modal surfaces, and syntax highlighting have light
-variants. Coverflow captions fade into the light surface with navy text in light
-mode; the image lightbox retains light text against its dark backdrop.
+variants. Coverflow containers and caption fades share the same opaque surface
+color in both themes, with theme-appropriate caption text; the image lightbox
+retains light text against its dark backdrop.
 Keep the core palette in `quartz.config.yaml` aligned with the portfolio tokens
 in `src/styles/portfolio.scss`. Run `node --import tsx --test
 site-plugins/portfolio/src/theme.test.ts` from the root for preference, storage,
