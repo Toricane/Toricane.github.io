@@ -114,6 +114,15 @@ For `assets/tab-panels/` images, keep three sizes with the **same basename**:
 
 Content should reference the **full** path in `## Gallery` and in any in-body images. The plugin rewrites to `small/` or `preview/` at render time via `imageVariant()`.
 
+Entry heroes use `small/`; Gallery HTML is rewritten at build time so original
+photos do not download before browser enhancement. Gallery metadata and Markdown
+exports retain original paths, and lightboxes use full images. Relative asset
+paths are supported. Collection cards use responsive `preview/` + `small/` sources;
+only the first four cards' lead images are eager, with all other card images lazy.
+Project timeline filtering caches inputs/original layout and defers graph rebuilds
+while Gallery is visible. Text search is debounced by 100ms; unchanged matching
+projects and layout reuse the graph. See the plugin README for details.
+
 Images **outside** `## Gallery` stay where they are written and are not added to cards, timeline thumbs, or the Gallery coverflow. A single `![caption](/assets/tab-panels/foo.webp)` shows as-is with the caption; consecutive image-only blocks become the same coverflow as Gallery.
 
 `npm run images` (`scripts/generate-image-variants.mjs`) creates **missing** `small/` and `preview/` WebPs only. Existing files are not overwritten unless you pass `--force`. This is **not** part of `npx quartz build` or GitHub Actions.

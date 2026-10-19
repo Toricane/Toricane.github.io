@@ -3,6 +3,7 @@ import path from "node:path"
 import { applyPortfolioDates } from "./dates"
 import { hideContentDebt } from "./contentDebt"
 import { loadThumbnailColor } from "./thumbnailColor"
+import { imageVariant } from "./imageVariant"
 
 type HastNode = {
   type?: string
@@ -92,7 +93,7 @@ function textOf(node: HastNode | undefined): string {
   return node.children.map(textOf).join("")
 }
 
-function collectGalleryImages(tree: HastNode): GalleryImage[] {
+export function collectGalleryImages(tree: HastNode): GalleryImage[] {
   const children = tree.children ?? []
   const images: GalleryImage[] = []
   let inGallery = false
@@ -116,6 +117,14 @@ function collectGalleryImages(tree: HastNode): GalleryImage[] {
             src,
             alt: String(node.properties?.alt ?? "").trim(),
           })
+          // Keep original paths in file metadata and Markdown exports, but send
+          // thumbnails in the initial HTML before the browser starts fetching.
+          node.properties = {
+            ...node.properties,
+            src: imageVariant(src, "small"),
+            loading: "lazy",
+            decoding: "async",
+          }
         }
         continue
       }

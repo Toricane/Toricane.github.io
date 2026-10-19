@@ -567,14 +567,56 @@ function collageClass(count: number) {
   return "portfolio-card__collage portfolio-card__collage--many"
 }
 
-function CardMedia({ images, lazy = false }: { images: GalleryImage[]; lazy?: boolean }) {
+// Match the collection grid and the narrower home preview grid. Collage side
+// tiles occupy 1 / 2.45 of the card; the lead tile occupies 1.45 / 2.45.
+function cardImageSizes(count: number, index: number, preview: boolean) {
+  const fraction = count === 1 ? 1 : index === 0 ? 1.45 / 2.45 : 1 / 2.45
+  const width = (space: string, columns: number) =>
+    `calc((${space}) / ${columns} * ${fraction.toFixed(4)})`
+  const sizes = preview
+    ? [
+        `(max-width: 720px) ${width("100vw - 88px", 1)}`,
+        `(max-width: 1100px) ${width("100vw - 124px", 2)}`,
+        `(max-width: 1328px) ${width("100vw - 136px", 3)}`,
+        width("1192px", 3),
+      ]
+    : [
+        `(max-width: 720px) ${width("100vw - 24px", 1)}`,
+        `(max-width: 820px) ${width("100vw - 60px", 2)}`,
+        `(max-width: 1100px) ${width("100vw - 72px", 3)}`,
+        `(max-width: 1328px) ${width("100vw - 84px", 4)}`,
+        width("1244px", 4),
+      ]
+  return sizes.join(", ")
+}
+
+function CardMedia({
+  images,
+  lazy = true,
+  preview = false,
+}: {
+  images: GalleryImage[]
+  lazy?: boolean
+  preview?: boolean
+}) {
   if (!images.length) return null
+  const responsive = (image: GalleryImage, index: number) => {
+    const thumbnail = imageVariant(image.src, "preview")
+    if (thumbnail === image.src) return {}
+    const sizes = cardImageSizes(images.length, index, preview)
+    return {
+      srcSet: `${thumbnail} 256w, ${image.src} 800w`,
+      // Supporting browsers use the actual rendered width for lazy images.
+      sizes: lazy || index > 0 ? `auto, ${sizes}` : sizes,
+    }
+  }
   if (images.length === 1) {
     return (
       <figure class="portfolio-card__media">
         <img
           src={images[0].src}
           alt={images[0].alt}
+          {...responsive(images[0], 0)}
           loading={lazy ? "lazy" : "eager"}
           decoding="async"
         />
@@ -598,7 +640,8 @@ function CardMedia({ images, lazy = false }: { images: GalleryImage[]; lazy?: bo
           <img
             src={image.src}
             alt={image.alt}
-            loading={index === 0 ? "eager" : "lazy"}
+            {...responsive(image, index)}
+            loading={!lazy && index === 0 ? "eager" : "lazy"}
             decoding="async"
           />
         </figure>
@@ -616,10 +659,12 @@ function CollectionCard({
   file,
   section,
   preview = false,
+  eager = false,
 }: {
   file: PortfolioFile
   section: Section
   preview?: boolean
+  eager?: boolean
 }) {
   const data = frontmatter(file)
   const type = section === "projects" ? "project" : "award"
@@ -635,7 +680,7 @@ function CollectionCard({
       {...filters}
     >
       <a href={linkFor(file)} data-portfolio-open={cleanSlug(file)}>
-        <CardMedia images={images} lazy={preview} />
+        <CardMedia images={images} lazy={!eager} preview={preview} />
         <div class="portfolio-card__body">
           <div class="portfolio-card__meta">
             <span>{displayDate(data)}</span>
@@ -1067,9 +1112,9 @@ function TagCollection({ tag, allFiles }: { tag: string; allFiles: PortfolioFile
         <p class="portfolio-filters__empty">No portfolio entries use this tag.</p>
       ) : (
         <ul class="portfolio-grid" data-view-panel="gallery">
-          {items.map((file) => {
+          {items.map((file, index) => {
             const section = sectionOf(file)!
-            return <CollectionCard file={file} section={section} />
+            return <CollectionCard file={file} section={section} eager={index < 4} />
           })}
         </ul>
       )}
@@ -1164,8 +1209,8 @@ function Collection({ section, allFiles }: { section: Section; allFiles: Portfol
       </div>
       <CollectionFilters tags={tags} />
       <ul class="portfolio-grid" data-view-panel="gallery">
-        {galleryItems.map((file) => (
-          <CollectionCard file={file} section={section} />
+        {galleryItems.map((file, index) => (
+          <CollectionCard file={file} section={section} eager={index < 4} />
         ))}
       </ul>
       {section === "projects" ? (
@@ -1441,7 +1486,7 @@ function EntryHeading({ fileData }: QuartzComponentProps) {
       )}
       {hero && (
         <figure class="portfolio-entry-cover">
-          <img src={hero.src} alt={hero.alt || ""} decoding="async" />
+          <img src={imageVariant(hero.src, "small")} alt={hero.alt || ""} decoding="async" />
         </figure>
       )}
       <h1>{data.title}</h1>

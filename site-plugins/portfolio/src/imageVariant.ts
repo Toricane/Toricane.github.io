@@ -8,13 +8,15 @@
  */
 export function imageVariant(src: string, variant: "preview" | "small" | "full"): string {
   if (!src) return src
-  if (src.startsWith("http://") || src.startsWith("https://")) return src
+  if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(src)) return src
 
-  const normalized = src.startsWith("/") ? src : `/${src.replace(/^\.\//, "")}`
-  const match = normalized.match(/^(\/assets\/tab-panels\/)(?:preview\/|small\/)?([^/?#]+)$/i)
+  const normalized = `/${src.replace(/^(?:(?:\.\.?\/)|\/)+/, "")}`
+  const match = normalized.match(
+    /^(\/assets\/tab-panels\/)(?:preview\/|small\/)?([^/?#]+)([?#].*)?$/i,
+  )
   if (!match) return src
 
-  const [, base, filename] = match
-  if (variant === "full") return `${base}${filename}`
-  return `${base}${variant}/${filename}`
+  const [, base, filename, suffix = ""] = match
+  if (variant === "full") return `${base}${filename}${suffix}`
+  return `${base}${variant}/${filename}${suffix}`
 }

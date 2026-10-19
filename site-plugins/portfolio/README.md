@@ -121,12 +121,39 @@ refresh the index alongside listings and remove deleted entries.
 Output collisions fail instead of silently replacing another page. Incremental
 builds regenerate listings and remove obsolete Markdown files owned by the emitter.
 
+## Image loading and collection performance
+
+Projects, Awards, and tag galleries eagerly load only the lead image of the first
+four cards (fewer when those cards have no images). Other card images, including
+collage side tiles and the homepage's project previews, are lazy-loaded. Card
+images offer the existing 256px `preview/` and 800px `small/` variants through
+`srcset`, with responsive `sizes` for the collection and home layouts. Lazy images
+use `sizes="auto"` where supported, with breakpoint-based fallbacks.
+
+Entry heroes use `small/` images. The Gallery transformer also emits `small/`
+sources directly into the initial HTML, with lazy loading and asynchronous
+decoding, so originals do not start downloading before browser enhancement.
+Original Gallery paths remain in file metadata and Markdown exports; lightbox
+clicks resolve to full images. Relative tab-panel paths (`../assets/...` included)
+are supported. Images outside Gallery and assets outside `tab-panels/` keep their
+authored paths. Generate missing variants with `npm run images`; builds do not
+generate them.
+
+Project timeline rebuilding is deferred while Gallery is visible. Opening
+Timeline applies the latest filters and responsive layout. Parsed inputs and the
+original layout are cached per board, and unchanged matching projects/layouts
+reuse the rendered graph. Text searches wait 100ms after typing; tag and highlight
+changes apply immediately. Hover/focus updates affect only the old and new active
+projects, with the element index refreshed after graph rebuilding. Navigation
+cleanup removes listeners and pending search timers.
+
 ## Verification
 
 From this directory, run `npm run typecheck` and `npm run build`. From the repository root:
 
 ```sh
 npx tsx --test site-plugins/portfolio/src/markdown.test.ts
+node --import tsx --test site-plugins/portfolio/src/galleryExtractor.test.ts
 node quartz/bootstrap-cli.mjs build -o .quartz-cache/markdown-check
 node scripts/check-markdown-output.mjs .quartz-cache/markdown-check
 ```

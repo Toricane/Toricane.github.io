@@ -122,12 +122,24 @@ function wireProjectTimeline(root: ParentNode = document) {
     if (board.dataset.wired === "true") continue
     board.dataset.wired = "true"
 
-    const setActive = (slug: string | null) => {
-      const marks = board.querySelectorAll<Element>("[data-project-slug]")
-      for (const el of marks) {
-        const elSlug = el.getAttribute("data-project-slug")
-        el.classList.toggle("is-active", slug !== null && elSlug === slug)
+    let activeSlug: string | null = null
+    const marksBySlug = new Map<string, Element[]>()
+    const indexMarks = () => {
+      activeSlug = null
+      marksBySlug.clear()
+      for (const mark of board.querySelectorAll<Element>("[data-project-slug]")) {
+        const slug = mark.getAttribute("data-project-slug")!
+        const marks = marksBySlug.get(slug) ?? []
+        marks.push(mark)
+        marksBySlug.set(slug, marks)
       }
+    }
+    indexMarks()
+    const setActive = (slug: string | null) => {
+      if (slug === activeSlug) return
+      for (const mark of marksBySlug.get(activeSlug ?? "") ?? []) mark.classList.remove("is-active")
+      for (const mark of marksBySlug.get(slug ?? "") ?? []) mark.classList.add("is-active")
+      activeSlug = slug
       board.classList.toggle("is-focusing", slug !== null)
     }
 
@@ -159,6 +171,7 @@ function wireProjectTimeline(root: ParentNode = document) {
     board.addEventListener("pointercancel", onTouchEnd)
     board.addEventListener("focusin", onOver)
     board.addEventListener("focusout", onFocusOut)
+    board.addEventListener("portfolio:timelineupdated", indexMarks)
     ;(window as CleanupWindow).addCleanup?.(() => {
       board.removeEventListener("pointerover", onOver)
       board.removeEventListener("pointerout", onOut)
@@ -167,6 +180,7 @@ function wireProjectTimeline(root: ParentNode = document) {
       board.removeEventListener("pointercancel", onTouchEnd)
       board.removeEventListener("focusin", onOver)
       board.removeEventListener("focusout", onFocusOut)
+      board.removeEventListener("portfolio:timelineupdated", indexMarks)
       board.dataset.wired = "false"
       setActive(null)
     })
@@ -595,6 +609,7 @@ function wireViewToggle() {
       if (mode !== "gallery") sortGroup.style.display = "none"
       else sortGroup.style.removeProperty("display")
     }
+    collection.dispatchEvent(new Event("portfolio:viewchange"))
   }
 
   const onClick = (event: Event) => {
@@ -660,14 +675,29 @@ function itemMatchesFilters(
   return true
 }
 
+const timelineLayoutCache = new WeakMap<HTMLElement, {
+  source: string
+  inputs: ProjectTimelineInput[]
+  original: ReturnType<typeof buildProjectTimeline>
+  signature?: string
+}>()
+
 function refreshProjectTimeline(
   board: HTMLElement,
   cards: HTMLElement[],
   matchedSlugs: Set<string>,
   compact: boolean,
 ) {
-  const inputs: ProjectTimelineInput[] = JSON.parse(board.dataset.timelineInputs || "[]")
-  const original = buildProjectTimeline(inputs)
+  const source = board.dataset.timelineInputs || "[]"
+  let cached = timelineLayoutCache.get(board)
+  if (!cached || cached.source !== source) {
+    const inputs: ProjectTimelineInput[] = JSON.parse(source)
+    cached = { source, inputs, original: buildProjectTimeline(inputs) }
+    timelineLayoutCache.set(board, cached)
+  }
+  const signature = JSON.stringify([compact, [...matchedSlugs].sort()])
+  if (cached.signature === signature) return
+  const { inputs, original } = cached
   const model = buildProjectTimeline(
     inputs.filter((input) => matchedSlugs.has(input.slug)),
     {
@@ -688,7 +718,11 @@ function refreshProjectTimeline(
   board.classList.remove("is-focusing")
   board.hidden = !model
   board.style.display = model ? "" : "none"
-  if (!model) return
+  if (!model) {
+    cached.signature = signature
+    board.dispatchEvent(new Event("portfolio:timelineupdated"))
+    return
+  }
 
   // Keep each project's identifying hue when filtering changes lane packing.
   const colors = new Map(original!.tracks.map((track) => [track.slug, track.color]))
@@ -807,6 +841,8 @@ function refreshProjectTimeline(
       { cx: node.x, cy: node.y, r: geometry.nodeRadius, style: `--pt-color: ${node.color}` },
     )
   }
+  cached.signature = signature
+  board.dispatchEvent(new Event("portfolio:timelineupdated"))
 }
 
 function wireCollectionFilters() {
@@ -839,6 +875,18 @@ function wireCollectionFilters() {
   const countVisible = collection.querySelector<HTMLElement>("[data-collection-count-visible]")
   const items = [...collection.querySelectorAll<HTMLElement>("[data-portfolio-item]")]
   const gallery = collection.querySelector<HTMLElement>('[data-view-panel="gallery"]')
+  const projectBoard = collection.querySelector<HTMLElement>(
+    "[data-project-timeline] .portfolio-project-timeline__board",
+  )
+  const projectCards = items.filter((item) => item.matches(".portfolio-project-timeline__card"))
+  let matchedSlugs = new Set<string>()
+  let timelineDirty = true
+
+  const updateVisibleTimeline = () => {
+    if (!projectBoard || !timelineDirty || collection.dataset.view !== "timeline") return
+    refreshProjectTimeline(projectBoard, projectCards, matchedSlugs, compactTimeline.matches)
+    timelineDirty = false
+  }
 
   let significance = "all"
   const selectedTags = new Set<string>()
@@ -935,10 +983,12 @@ function wireCollectionFilters() {
     }
   }
 
+  let searchTimer = 0
   const apply = () => {
+    window.clearTimeout(searchTimer)
     const query = search?.value || ""
     const tags = [...selectedTags]
-    const matchedSlugs = new Set<string>()
+    matchedSlugs = new Set<string>()
 
     for (const item of items) {
       const match = itemMatchesFilters(item, query, significance, tags)
@@ -951,17 +1001,8 @@ function wireCollectionFilters() {
       if (slug) matchedSlugs.add(slug)
     }
 
-    const projectBoard = collection.querySelector<HTMLElement>(
-      "[data-project-timeline] .portfolio-project-timeline__board",
-    )
-    if (projectBoard) {
-      refreshProjectTimeline(
-        projectBoard,
-        items.filter((item) => item.matches(".portfolio-project-timeline__card")),
-        matchedSlugs,
-        compactTimeline.matches,
-      )
-    }
+    timelineDirty = true
+    updateVisibleTimeline()
 
     for (const group of collection.querySelectorAll<HTMLElement>("[data-timeline-group]")) {
       const children = [...group.querySelectorAll<HTMLElement>("[data-portfolio-item]")]
@@ -993,7 +1034,10 @@ function wireCollectionFilters() {
     apply()
   }
 
-  const onSearch = () => apply()
+  const onSearch = () => {
+    window.clearTimeout(searchTimer)
+    searchTimer = window.setTimeout(apply, 100)
+  }
   search?.addEventListener("input", onSearch)
 
   const onSignificance = (event: Event) => {
@@ -1088,6 +1132,7 @@ function wireCollectionFilters() {
   document.addEventListener("pointerdown", onDocumentPointer)
 
   compactTimeline.addEventListener("change", apply)
+  collection.addEventListener("portfolio:viewchange", updateVisibleTimeline)
 
   setPanelOpen(false)
   renderSelectedTags()
@@ -1096,6 +1141,7 @@ function wireCollectionFilters() {
   apply()
 
   ;(window as CleanupWindow).addCleanup?.(() => {
+    window.clearTimeout(searchTimer)
     search?.removeEventListener("input", onSearch)
     search?.removeEventListener("keydown", onPanelKeydown)
     toggle?.removeEventListener("click", onFilterToggle)
@@ -1108,6 +1154,7 @@ function wireCollectionFilters() {
     tagSelected?.removeEventListener("click", onSelectedClick)
     document.removeEventListener("pointerdown", onDocumentPointer)
     compactTimeline.removeEventListener("change", apply)
+    collection.removeEventListener("portfolio:viewchange", updateVisibleTimeline)
     root.dataset.wired = "false"
   })
 }
