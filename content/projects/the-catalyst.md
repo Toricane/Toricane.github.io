@@ -36,11 +36,11 @@ Implemented a locally runnable mentoring application with documented retry, quot
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![The Catalyst interface with a generic project goal and an example mentoring conversation.](/assets/tab-panels/the-catalyst.webp)
 
 ## Links
 
 - [GitHub](https://github.com/Toricane/TheCatalyst)
 
-<!-- Sources: https://github.com/Toricane/TheCatalyst
+<!-- Sources: https://github.com/Toricane/TheCatalyst; screenshot of the running interface with user-authorized generic example content replacing personal information.
 Review: Development phases inferred from source commits: September–November 2025, then June 2026. The pause follows 285eac7 (system prompt); substantive implementation restarts at 5e99dea on June 19. June 15 documentation-only changes do not end the pause. Commit inactivity is evidence of a code-development gap, not proof that no planning happened between phases. -->

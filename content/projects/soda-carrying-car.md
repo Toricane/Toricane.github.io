@@ -32,11 +32,13 @@ tags:
 
 ## Gallery
 
-<!-- [Replace with: verified project images.] -->
+![Soda-Carrying Car with its cargo platform, battery pack, and soda cans alongside.](/assets/tab-panels/soda-carrying-car.webp)
+
+![Close-up of the Soda-Carrying Car’s gears, axle, and drivetrain.](/assets/tab-panels/soda-carrying-car-drivetrain.webp)
 
 ## Links
 
 - [Label](https://example.com)
 
-<!-- Sources: linkedin_export/organizations.md, Math and Science Club.
-Review: Club participation spans September 2022–June 2025, but that is not a verified project range. Add the actual build dates, competition, role, mechanism, photos, and results. -->
+<!-- Sources: linkedin_export/organizations.md, Math and Science Club; user-supplied gallery photos.
+Review: Club participation spans September 2022–June 2025, but that is not a verified project range. Add the actual build dates, competition, role, mechanism, and results. -->

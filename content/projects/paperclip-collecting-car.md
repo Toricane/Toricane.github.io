@@ -1,8 +1,8 @@
 ---
 title: "Paperclip-Collecting Car"
 description: "Battery-powered car prebuild designed to collect paperclips."
-date:
-modified:
+date: "2023-10-01"
+modified: "2023-11-01"
 from: "MacNeill Math and Science Club"
 significance: standard
 tags:
@@ -32,11 +32,13 @@ tags:
 
 ## Gallery
 
-<!-- [Replace with: verified project images.] -->
+![Paperclip-Collecting Car during the competition.](/assets/tab-panels/paperclip-collecting-car-competition.webp)
+
+![Paperclip-Collecting Car on its test board with batteries, motors, and wiring visible.](/assets/tab-panels/paperclip-collecting-car-build.webp)
 
 ## Links
 
 - [Label](https://example.com)
 
-<!-- Sources: linkedin_export/organizations.md, Math and Science Club.
-Review: Club participation spans September 2022–June 2025, but that is not a verified project range. Add the actual build dates, competition, role, mechanism, photos, and results. -->
+<!-- Sources: linkedin_export/organizations.md, Math and Science Club; user-supplied photos and October–November 2023 project dates.
+Review: Month-only bounds normalized to day 01. Add the verified competition name, role, mechanism, and results. -->
