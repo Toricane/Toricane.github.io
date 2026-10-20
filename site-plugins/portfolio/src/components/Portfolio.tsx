@@ -1535,56 +1535,42 @@ function SiteNav({ slug }: { slug: string }) {
             type="button"
             class="portfolio-theme__toggle"
             data-theme-toggle
-            aria-label="Color theme"
-            aria-expanded="false"
-            aria-controls="portfolio-theme-options"
+            role="switch"
+            aria-label="Dark mode"
+            aria-checked="true"
           >
-            <svg
-              class="portfolio-theme__sun"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
-            </svg>
-            <svg
-              class="portfolio-theme__moon"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M20.9 13.1A9 9 0 0 1 10.9 3.1a9 9 0 1 0 10 10Z" />
-            </svg>
+            <span class="portfolio-theme__track" aria-hidden="true">
+              <span class="portfolio-theme__thumb" />
+              <svg
+                class="portfolio-theme__sun"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
+              </svg>
+              <svg
+                class="portfolio-theme__moon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M20.9 13.1A9 9 0 0 1 10.9 3.1a9 9 0 1 0 10 10Z" />
+              </svg>
+            </span>
           </button>
-          <div
-            id="portfolio-theme-options"
-            class="portfolio-theme__options"
-            role="group"
-            aria-label="Color theme"
-            hidden
-          >
-            <span class="portfolio-theme__label">Appearance</span>
-            {(["light", "dark", "system"] as const).map((mode) => (
-              <button type="button" data-theme-choice={mode} aria-pressed="false">
-                <span>{mode === "system" ? "System" : mode === "light" ? "Light" : "Dark"}</span>
-                <span class="portfolio-theme__check" aria-hidden="true">
-                  ✓
-                </span>
-              </button>
-            ))}
-          </div>
         </div>
         <button
           type="button"

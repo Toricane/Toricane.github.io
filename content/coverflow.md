@@ -4,7 +4,7 @@ title: Coverflow
 # or an external URL. Without `link`, click expands a full-image lightbox.
 photos:
   - src: assets/tab-panels/small/vanaimay.webp
-    caption: VanAI May 2025
+    caption: VanAI May 2024
   - src: assets/tab-panels/small/vancouver-ai-data-storytelling-award.webp
     caption: Vancouver AI Data Storytelling
   - src: assets/tab-panels/small/cell-safe-presentation.webp

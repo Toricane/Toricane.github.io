@@ -1,5 +1,6 @@
 import { imageVariant } from "../imageVariant"
-import { initializeTheme, type ThemePreference } from "../theme"
+import { initializeTheme, type Theme } from "../theme"
+import { transitionTheme } from "../themeTransition"
 import { buildProjectTimeline, type ProjectTimelineInput } from "../projectTimeline"
 import { linkIconShortcodeRegex, type LinkIconMap } from "../linkIcons"
 
@@ -2574,65 +2575,38 @@ function wireThemeControls() {
   const controller = initializeTheme()
   const host = document.querySelector<HTMLElement>("[data-portfolio-theme]")
   const toggle = host?.querySelector<HTMLButtonElement>("[data-theme-toggle]")
-  const options = host?.querySelector<HTMLElement>(".portfolio-theme__options")
-  if (!host || !toggle || !options || host.dataset.wired === "true") return
+  if (!host || !toggle || host.dataset.wired === "true") return
   host.dataset.wired = "true"
-  const choices = [...host.querySelectorAll<HTMLButtonElement>("[data-theme-choice]")]
+  let requested: Theme = controller.theme
+  let switching = false
+  let disposed = false
   const sync = () => {
-    toggle.setAttribute("aria-label", `Color theme: ${controller.theme}. Choose appearance`)
-    toggle.title = `Appearance: ${controller.preference} (${controller.theme})`
-    for (const choice of choices) {
-      choice.setAttribute(
-        "aria-pressed",
-        String(choice.dataset.themeChoice === controller.preference),
-      )
-    }
+    toggle.setAttribute("aria-checked", String(controller.theme === "dark"))
+    toggle.title = `Switch to ${controller.theme === "dark" ? "light" : "dark"} mode`
+    if (!switching) requested = controller.theme
   }
-  const close = () => {
-    options.hidden = true
-    toggle.setAttribute("aria-expanded", "false")
-  }
-  const onToggle = () => {
-    const opening = options.hidden
+  const onToggle = async () => {
+    requested = requested === "dark" ? "light" : "dark"
+    if (switching) return
+    switching = true
     closeNavMenu()
-    options.hidden = !opening
-    toggle.setAttribute("aria-expanded", String(opening))
-    if (opening) choices.find((choice) => choice.getAttribute("aria-pressed") === "true")?.focus()
-  }
-  const onChoose = (event: Event) => {
-    const choice = (event.target as Element).closest<HTMLButtonElement>("[data-theme-choice]")
-    if (!choice) return
-    controller.setPreference(choice.dataset.themeChoice as ThemePreference)
-    close()
-    toggle.focus()
-  }
-  const onOutside = (event: Event) => {
-    if (!host.contains(event.target as Node)) close()
-  }
-  const onKey = (event: KeyboardEvent) => {
-    if (!options.hidden && event.key === "Escape") {
-      event.preventDefault()
-      close()
-      toggle.focus()
+    try {
+      // Coalesce quick taps to the latest intent without overlapping snapshots.
+      while (!disposed && requested !== controller.theme) {
+        await transitionTheme(controller, requested, toggle)
+      }
+    } finally {
+      switching = false
+      sync()
     }
-  }
-  const onFocusOut = (event: FocusEvent) => {
-    if (!host.contains(event.relatedTarget as Node | null)) close()
   }
   toggle.addEventListener("click", onToggle)
-  options.addEventListener("click", onChoose)
-  document.addEventListener("pointerdown", onOutside)
-  document.addEventListener("keydown", onKey)
   document.addEventListener("themechange", sync)
-  host.addEventListener("focusout", onFocusOut)
   sync()
   ;(window as CleanupWindow).addCleanup?.(() => {
+    disposed = true
     toggle.removeEventListener("click", onToggle)
-    options.removeEventListener("click", onChoose)
-    document.removeEventListener("pointerdown", onOutside)
-    document.removeEventListener("keydown", onKey)
     document.removeEventListener("themechange", sync)
-    host.removeEventListener("focusout", onFocusOut)
     host.dataset.wired = "false"
   })
 }

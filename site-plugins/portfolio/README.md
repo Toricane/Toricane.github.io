@@ -14,6 +14,7 @@ Selected projects come from published project entries with
 `significance: spotlight`, sorted by recency and capped at six. There is no
 hardcoded selection list. Cards use the first `## Gallery` image, with `small/`
 variants for tab-panel assets, a full-width image area, description, date, and up to two tags.
+Image areas share a 96–144px height cap on desktop and mobile.
 Entries without Gallery images remain text-only; do not invent image placeholders
 or use unrelated assets. Spotlight labels are omitted within this selection.
 
@@ -47,11 +48,19 @@ add an Experience collection until it is actually implemented.
 
 ## Appearance
 
-The header's Appearance control offers Light, Dark, and System. An explicit
-choice is saved in the browser's `theme` key. System removes that override and
-follows `prefers-color-scheme`; without a reported light preference, dark is the
-default. Device changes and changes in other tabs are reflected immediately.
-Blocked storage still permits switching for the current visit.
+The header's sun/moon switch toggles Light and Dark directly and saves the choice
+in the browser's `theme` key. Before a choice is saved, the site follows
+`prefers-color-scheme`; without a reported light preference, dark is the default.
+Device changes are reflected while following the system, and changes in other
+tabs are reflected immediately. Blocked storage still permits switching for the
+current visit. The control supports keyboard activation and exposes Dark mode as
+an accessible switch.
+
+`src/themeTransition.ts` reveals the new theme in a 650ms circle expanding from
+the switch, using the View Transition API. Reduced motion uses a 120ms fade;
+browsers without the API switch immediately. Quick clicks coalesce to the latest
+choice, with no overlapping theme transitions. Snapshot styles are scoped to
+theme reveals so they do not affect navigation transitions.
 
 `src/scripts/theme.inline.ts` initializes the theme in the head before paint and
 sets Quartz's `saved-theme` attribute. Its controller survives SPA navigation;
@@ -84,8 +93,15 @@ light `secondary` colour matches the readable text token, not the bright fill.
 Contrast checks cover text on surfaces and foregrounds on both accent fills.
 
 The projects timeline, its card dots, and the homepage graph share
-`--pt-display-color`. Light mode lowers lane lightness in OKLCH while preserving
-the project's hue and limiting chroma; older browsers use a darkened sRGB fallback.
+image-derived colours recalculated at build time by `src/thumbnailColor.ts`.
+Extraction weights vivid pixels above dim backgrounds and requires a hue to cover
+at least 1% of the sample, so small UI accents count without isolated artifacts
+choosing the colour. No separate colour refresh script or cache reset is needed.
+Missing image sizes can be filled with `npm run images` before building.
+These surfaces share
+`--pt-display-color`. Light mode caps lane lightness at 0.64 in OKLCH and boosts
+chroma by 35% while preserving the project's hue; older browsers use a lightly
+darkened sRGB fallback.
 Do not mix lane colours toward navy: that makes unrelated projects look alike.
 Solid segments remain opaque in light mode, and hiatus/branch paths retain enough
 opacity to remain visible. Dark mode keeps the original thumbnail/palette colours.
@@ -94,8 +110,9 @@ page grid does not show through. Home preview dates keep their muted text colour
 styling applies only when a separate significance label is actually rendered.
 Keep the core palette in `quartz.config.yaml` aligned with the portfolio tokens
 in `src/styles/portfolio.scss`. Run `node --import tsx --test
-site-plugins/portfolio/src/theme.test.ts` from the root for preference, storage,
-pre-paint controller, and text contrast regression checks.
+site-plugins/portfolio/src/theme.test.ts site-plugins/portfolio/src/themeTransition.test.ts`
+from the root for preference, storage, pre-paint controller, text contrast, and
+radial reveal/fallback regression checks.
 
 ## Markdown endpoints
 

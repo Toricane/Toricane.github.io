@@ -89,6 +89,33 @@ test("dominant thumbnail extraction follows preview priority and handles absent/
       .png()
       .toFile(preview)
     assert.equal(await loadThumbnailColor("/assets/tab-panels/photo.png", root), previewColor)
+    // A small brand accent on a dim blue interface still supplies the image hue.
+    // It is meaningful even when it covers less than the former 8% cutoff.
+    const greenPatch = await sharp({
+      create: { width: 8, height: 6, channels: 3, background: "#70c870" },
+    })
+      .png()
+      .toBuffer()
+    await sharp({ create: { width: 64, height: 42, channels: 3, background: "#1b2530" } })
+      .composite([{ input: greenPatch, top: 20, left: 10 }])
+      .png()
+      .toFile(preview)
+    const accentColor = await loadThumbnailColor("/assets/tab-panels/photo.png", root)
+    assert.ok(accentColor)
+    const [red, green, blue] = [1, 3, 5].map((offset) =>
+      parseInt(accentColor.slice(offset, offset + 2), 16),
+    )
+    assert.ok(green > red && green > blue, `Expected the green accent, got ${accentColor}`)
+    const speck = await sharp({
+      create: { width: 1, height: 1, channels: 3, background: "#ff0000" },
+    })
+      .png()
+      .toBuffer()
+    await sharp({ create: { width: 64, height: 42, channels: 3, background: "#ffffff" } })
+      .composite([{ input: speck, top: 20, left: 10 }])
+      .png()
+      .toFile(preview)
+    assert.equal(await loadThumbnailColor("/assets/tab-panels/photo.png", root), "#b7c2cf")
     assert.equal(await loadThumbnailColor("/missing.png", root), undefined)
     assert.equal(await loadThumbnailColor("https://example.com/photo.png", root), undefined)
     assert.equal(await loadThumbnailColor("/assets/../../outside.png", root), undefined)

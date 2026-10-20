@@ -2,11 +2,10 @@ import path from "node:path"
 import { imageVariant } from "./imageVariant"
 import { readableThumbnailColor } from "./timelineColors"
 
-/** Find the most common visible hue, ignoring neutral backgrounds and transparency. */
+/** Find the most prominent visible hue, ignoring neutral backgrounds and transparency. */
 function dominantVisibleHue(pixels: Uint8Array): [number, number, number] | undefined {
-  const bins = Array.from({ length: 12 }, () => ({ count: 0, r: 0, g: 0, b: 0 }))
-  let visible = 0,
-    colorful = 0
+  const bins = Array.from({ length: 12 }, () => ({ count: 0, weight: 0, r: 0, g: 0, b: 0 }))
+  let visible = 0
   for (let index = 0; index < pixels.length; index += 4) {
     if (pixels[index + 3] < 128) continue
     visible++
@@ -21,16 +20,19 @@ function dominantVisibleHue(pixels: Uint8Array): [number, number, number] | unde
       max === r ? ((g - b) / delta) % 6 : max === g ? (b - r) / delta + 2 : (r - g) / delta + 4
     hue = (hue * 60 + 360) % 360
     const bin = bins[Math.round(hue / 30) % bins.length]
+    // Vivid accents should outweigh large, dim, slightly tinted backgrounds.
+    const weight = (delta / 255) ** 3
     bin.count++
-    bin.r += r
-    bin.g += g
-    bin.b += b
-    colorful++
+    bin.weight += weight
+    bin.r += r * weight
+    bin.g += g * weight
+    bin.b += b * weight
   }
   // Small colored artifacts shouldn't override a predominantly neutral image.
-  if (colorful < Math.max(1, visible * 0.08)) return undefined
-  const dominant = bins.reduce((best, bin) => (bin.count > best.count ? bin : best))
-  return [dominant.r / dominant.count, dominant.g / dominant.count, dominant.b / dominant.count]
+  const meaningful = bins.filter((bin) => bin.count >= Math.max(3, visible * 0.01))
+  if (!meaningful.length) return undefined
+  const dominant = meaningful.reduce((best, bin) => (bin.weight > best.weight ? bin : best))
+  return [dominant.r / dominant.weight, dominant.g / dominant.weight, dominant.b / dominant.weight]
 }
 
 /** No network fetches: remote/missing thumbnails simply use the palette fallback. */
