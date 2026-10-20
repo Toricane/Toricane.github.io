@@ -5,16 +5,16 @@ title: Coverflow
 photos:
   - src: assets/tab-panels/small/vanaimay.webp
     caption: VanAI May 2025
-  - src: assets/tab-panels/small/ingenious_plus_photo.webp
-    caption: Ingenious+
-  - src: assets/tab-panels/small/nwhacks_hackathon.webp
-    caption: nwHacks
-  - src: assets/tab-panels/small/hackthenorth_hackathon.webp
-    caption: Hack the North
-  - src: assets/tab-panels/small/yvrhacks_hackathon.webp
-    caption: yvrHacks
+  - src: assets/tab-panels/small/vancouver-ai-data-storytelling-award.webp
+    caption: Vancouver AI Data Storytelling
+  - src: assets/tab-panels/small/cell-safe-presentation.webp
+    caption: Presenting cell-safe
   - src: assets/tab-panels/small/valedictorian_speech.webp
     caption: Class of 2025
+  - src: assets/tab-panels/small/calendai_demo.webp
+    caption: Presenting CalendAI
+  - src: assets/tab-panels/small/ingenious_plus_photo.webp
+    caption: Ingenious+
 ---
 
 Curated home photos. Edit the list above to change the coverflow.

@@ -33,6 +33,8 @@ Placed second overall and received the $1,000 Hall of Fame prize in the four-rou
 
 ## Gallery
 
+![Receiving the $1,000 prize at the Vancouver AI Data Storytelling Hackathon.](/assets/tab-panels/vancouver-ai-data-storytelling-award.webp)
+
 ![Round 2 semantic map of Canadian survey responses.](/assets/tab-panels/vancouver-ai-semantic-maps.webp)
 
 ![Round 3 BC AI survey visualization and narrated dialogue.](/assets/tab-panels/bc-ai-roundtables.webp)
