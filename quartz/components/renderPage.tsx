@@ -51,12 +51,20 @@ export function pageResources(
   }
 
   const extracted = ctx?.extractedInlineResources
-  const resolvedCss: CSSResource[] = staticResources.css.map((resource) => {
-    if (!(resource.inline ?? false) || !extracted) return resource
-    const filename = extracted.get(resource.content)
-    if (!filename) return resource
-    return { content: joinSegments(baseDir, filename) }
-  })
+  const seenCss = new Set<string>()
+  const resolvedCss: CSSResource[] = staticResources.css
+    .map((resource) => {
+      if (!(resource.inline ?? false) || !extracted) return resource
+      const filename = extracted.get(resource.content)
+      if (!filename) return resource
+      return { content: joinSegments(baseDir, filename) }
+    })
+    .filter((resource) => {
+      if (resource.inline) return true
+      if (seenCss.has(resource.content)) return false
+      seenCss.add(resource.content)
+      return true
+    })
 
   const resolvedJs: JSResource[] = staticResources.js.map((resource) => {
     if (resource.contentType !== "inline" || !extracted) return resource
@@ -83,11 +91,17 @@ export function pageResources(
       ...resolvedCss,
     ],
     js: [
-      {
-        src: joinSegments(baseDir, prescriptFile),
-        loadTime: "beforeDOMReady",
-        contentType: "external",
-      },
+      ctx?.inlinePrescript !== undefined
+        ? {
+            script: ctx.inlinePrescript,
+            loadTime: "beforeDOMReady",
+            contentType: "inline",
+          }
+        : {
+            src: joinSegments(baseDir, prescriptFile),
+            loadTime: "beforeDOMReady",
+            contentType: "external",
+          },
       {
         loadTime: "beforeDOMReady",
         contentType: "inline",

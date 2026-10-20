@@ -150,6 +150,16 @@ builds regenerate listings and remove obsolete Markdown files owned by the emitt
 
 ## Image loading and collection performance
 
+Quartz's `ComponentResources` emitter consolidates component CSS into one hashed
+stylesheet and consecutive plugin resource styles into shared hashed files. The
+current site loads three stylesheets (base, components, code helpers), preserving
+their cascade order and cacheability. Keep resource style bundles in `static/` so
+relative asset URLs retain their base. Startup scripts up to 4 KiB, including the
+portfolio theme initializer, are embedded in the head to avoid a blocking network
+request while applying the theme before paint. Larger startup scripts retain the
+external file fallback. These delivery changes live in Quartz's resource emitter
+and `pageResources`, since the portfolio component does not own the document head.
+
 Projects, Awards, and tag galleries eagerly load only the lead image of the first
 four cards (fewer when those cards have no images). Other card images, including
 collage side tiles and the homepage's project previews, are lazy-loaded. Card

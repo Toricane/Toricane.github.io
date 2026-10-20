@@ -347,6 +347,9 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
       const stylesheet = `@layer quartz-base {\n${quartzBase}\n}\n${customStyles}`
 
       const prescript = await joinScripts(componentResources.beforeDOMLoaded)
+      // Theme initialization must run before paint. Small scripts cost less inline
+      // than a blocking round trip; keep larger bundles externally cacheable.
+      ctx.inlinePrescript = Buffer.byteLength(prescript) <= 4096 ? prescript : undefined
 
       let postscript: string
       if (!useHashing) {
@@ -405,10 +408,11 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
       }).code.toString()
 
       const cssStringToFilename = new Map<string, string>()
-      for (const cssString of componentResources.componentCssStrings) {
-        if (cssStringToFilename.has(cssString)) continue
-
-        const wrapped = `@layer quartz-base {\n${cssString}\n}`
+      const componentStyles = [...componentResources.componentCssStrings]
+      if (componentStyles.length > 0) {
+        // Preserve cascade order while avoiding a request per component, including
+        // components whose entire stylesheet is only a few dozen bytes.
+        const wrapped = componentStyles.map((css) => `@layer quartz-base {\n${css}\n}`).join("\n")
         const minified = transform({
           filename: "component.css",
           code: Buffer.from(wrapped),
@@ -420,7 +424,7 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
         const hash = hashContent(minified)
         const slug = `component-${hash}`
         const filename = `${slug}.css`
-        cssStringToFilename.set(cssString, filename)
+        for (const cssString of componentStyles) cssStringToFilename.set(cssString, filename)
 
         yield write({
           ctx,
@@ -432,30 +436,37 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
 
       ctx.componentCssMap = cssStringToFilename
 
-      // Extract inline CSS/JS from plugin externalResources() into external files.
-      // This prevents large inline payloads (e.g. theme CSS) from being duplicated
-      // into every HTML page's <head>.
+      // Extract inline CSS/JS into cacheable files. Consecutive inline styles
+      // share a file, preserving order relative to external stylesheets. Keep
+      // the bundle in static/ so relative URLs retain their existing base.
       const extractedInlineResources = new Map<string, string>()
-      for (const cssResource of resources.css) {
-        if (!(cssResource.inline ?? false)) continue
-
-        let output: string
-        try {
-          output = transform({
-            filename: "plugin-resource.css",
-            code: Buffer.from(cssResource.content),
-            minify: true,
-            targets: lightningTargets,
-            include: Features.MediaQueries,
-          }).code.toString()
-        } catch {
-          output = cssResource.content
+      for (let i = 0; i < resources.css.length; i++) {
+        if (!resources.css[i].inline) continue
+        const group: string[] = []
+        const outputs: string[] = []
+        while (i < resources.css.length && resources.css[i].inline) {
+          const css = resources.css[i++].content
+          group.push(css)
+          try {
+            outputs.push(
+              transform({
+                filename: "plugin-resource.css",
+                code: Buffer.from(css),
+                minify: true,
+                targets: lightningTargets,
+                include: Features.MediaQueries,
+              }).code.toString(),
+            )
+          } catch {
+            outputs.push(css)
+          }
         }
-
+        i--
+        const output = outputs.join("\n")
         const hash = hashContent(output)
         const slug = `static/resource-style-${hash}`
         const filename = `${slug}.css`
-        extractedInlineResources.set(cssResource.content, filename)
+        for (const css of group) extractedInlineResources.set(css, filename)
 
         yield write({
           ctx,

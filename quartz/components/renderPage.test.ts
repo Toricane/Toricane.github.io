@@ -6,6 +6,7 @@ import { FullSlug } from "../util/path"
 import { GlobalConfiguration } from "../cfg"
 import { QuartzComponentProps } from "./types"
 import { StaticResources } from "../util/resources"
+import { BuildCtx } from "../util/ctx"
 
 function makeTranscludeBlockquote(targetSlug: string, block?: string): Element {
   return {
@@ -274,6 +275,52 @@ describe("pageResources", () => {
     js: [],
     additionalHead: [],
   }
+
+  test("embeds small startup scripts without a blocking external script", () => {
+    const script = 'document.documentElement.setAttribute("saved-theme", "light")'
+    const ctx = { inlinePrescript: script } as BuildCtx
+    const result = pageResources("/quartz" as FullSlug, emptyResources, ctx)
+    assert.deepStrictEqual(result.js[0], {
+      script,
+      loadTime: "beforeDOMReady",
+      contentType: "inline",
+    })
+    assert.ok(!result.js.some((r) => r.contentType === "external" && r.src.includes("prescript")))
+    assert.equal(result.css[0].content, "/quartz/index.css")
+  })
+
+  test("links each shared CSS bundle once, in cascade order, with nested page paths", () => {
+    const ctx = {
+      componentCssMap: new Map([
+        ["component one", "component-abc.css"],
+        ["component two", "component-abc.css"],
+      ]),
+      extractedInlineResources: new Map([
+        ["helper one", "static/resource-style-abc.css"],
+        ["helper two", "static/resource-style-abc.css"],
+      ]),
+    } as BuildCtx
+    const result = pageResources(
+      "../.." as FullSlug,
+      {
+        ...emptyResources,
+        css: [
+          { content: "helper one", inline: true },
+          { content: "helper two", inline: true },
+          { content: "https://example.com/external.css" },
+          { content: ".inline { color: red }", inline: true },
+        ],
+      },
+      ctx,
+    )
+    assert.deepStrictEqual(result.css, [
+      { content: "../../index.css" },
+      { content: "../../component-abc.css" },
+      { content: "../../static/resource-style-abc.css" },
+      { content: "https://example.com/external.css" },
+      { content: ".inline { color: red }", inline: true },
+    ])
+  })
 
   test("uses baseDir prefix for resource paths in production mode", () => {
     const result = pageResources("/quartz" as FullSlug, emptyResources)
