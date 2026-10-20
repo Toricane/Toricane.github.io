@@ -23,10 +23,12 @@ six. It omits cards, monthly labels, and card connectors. Its vertical layout is
 compressed to the available height; its nodes do not correspond to selected-card
 rows. End labels show Present and the earliest recorded project month.
 
-Below 1600px, the graph is a 52px rail beside the cards with a 12px gap. At 1600px
+Below 1440px, the graph is a 52px rail beside the cards with a 12px gap. At 1440px
 and wider, it moves into the outer left margin and widens to 96px for more lane
 spacing; the cards then align directly beneath the heading. The margin position
-keeps at least 24px of clearance from the window edge. Cards use three columns on
+keeps at least 24px of clearance from the window edge. The section reserves 144px
+of outer margin on each side when needed so the expanded graph clears the cards,
+including on desktop windows narrowed by vertical tabs. Cards use three columns on
 desktop, two from 721–1100px, and one on mobile. These styles live in
 `src/styles/portfolio.scss`; preserve the mobile rail when adjusting desktop.
 

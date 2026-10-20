@@ -3971,10 +3971,13 @@ a.internal.portfolio-bookmark {
   a:not(:first-child) { color: var(--portfolio-steel); }
 }
 
-/* Wide viewports have enough outer margin for the history to frame the section. */
-@media (min-width: 1600px) {
+/* Reserve room for the expanded history even with desktop vertical tabs open. */
+@media (min-width: 1440px) {
   .portfolio-home-projects {
     position: relative;
+    width: 100%;
+    max-width: calc(100vw - 288px);
+    margin-inline: auto;
     grid-template-columns: minmax(0, 1fr);
   }
   .portfolio-home-projects__heading,
@@ -3985,8 +3988,8 @@ a.internal.portfolio-bookmark {
     grid-column: auto;
     grid-row: auto;
     left: max(
-      calc((var(--portfolio-page-max) - 100vw) / 2 + 24px),
-      calc((var(--portfolio-page-max) - 100vw) * 0.3 - 48px)
+      calc((100% - 100vw) / 2 + 24px),
+      calc((100% - 100vw) * 0.3 - 48px)
     );
     width: 96px;
     top: clamp(24px, 15svh, 160px);
