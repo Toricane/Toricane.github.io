@@ -58,11 +58,30 @@ emit Quartz-compatible `themechange` events and suppress color transitions durin
 the swap. The small critical background style in `quartz/components/Head.tsx`
 uses the configured theme backgrounds to prevent a mismatched first paint.
 
-The light palette uses warm ivory, navy ink, and deeper copper. Metallic
+The light palette uses warm ivory, navy ink, and a bright orange accent. Metallic
 highlights, timeline labels, modal surfaces, and syntax highlighting have light
 variants. Coverflow containers and caption fades share the same opaque surface
 color in both themes, with theme-appropriate caption text; the image lightbox
 retains light text against its dark backdrop.
+Light-mode highlights use warm gold and neutral silver borders/surfaces, dark ink
+titles, and filled Spotlight/Featured labels. Do not darken decorative metallic
+colors into brown or blue just to use them as title text; keep text contrast and
+decorative accents separate.
+Orange fills (`--portfolio-copper`) and their dark foreground
+(`--portfolio-on-accent`) are separate from the darker orange text token
+(`--portfolio-copper-soft`). Hover fills use `--portfolio-copper-hover`. Quartz's
+light `secondary` colour matches the readable text token, not the bright fill.
+Contrast checks cover text on surfaces and foregrounds on both accent fills.
+
+The projects timeline, its card dots, and the homepage graph share
+`--pt-display-color`. Light mode lowers lane lightness in OKLCH while preserving
+the project's hue and limiting chroma; older browsers use a darkened sRGB fallback.
+Do not mix lane colours toward navy: that makes unrelated projects look alike.
+Solid segments remain opaque in light mode, and hiatus/branch paths retain enough
+opacity to remain visible. Dark mode keeps the original thumbnail/palette colours.
+Light timeline cards composite highlight gradients over an opaque panel so the
+page grid does not show through. Home preview dates keep their muted text colour; metallic label
+styling applies only when a separate significance label is actually rendered.
 Keep the core palette in `quartz.config.yaml` aligned with the portfolio tokens
 in `src/styles/portfolio.scss`. Run `node --import tsx --test
 site-plugins/portfolio/src/theme.test.ts` from the root for preference, storage,
@@ -129,6 +148,13 @@ collage side tiles and the homepage's project previews, are lazy-loaded. Card
 images offer the existing 256px `preview/` and 800px `small/` variants through
 `srcset`, with responsive `sizes` for the collection and home layouts. Lazy images
 use `sizes="auto"` where supported, with breakpoint-based fallbacks.
+
+Collection gallery links use `content-visibility: auto` with a reserved 240px
+intrinsic height, matching their card slot, so offscreen descendants can skip
+layout and painting without collapsing the gallery. Keep this reservation aligned
+with card sizing changes. Card tags use opaque surfaces without `backdrop-filter`:
+one blur per tag creates more than 100 unnecessary effects on the projects page
+and can make scrolling expensive even after image loading is optimized.
 
 Entry heroes use `small/` images. The Gallery transformer also emits `small/`
 sources directly into the initial HTML, with lazy loading and asynchronous

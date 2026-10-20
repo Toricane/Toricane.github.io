@@ -123,6 +123,17 @@ Project timeline filtering caches inputs/original layout and defers graph rebuil
 while Gallery is visible. Text search is debounced by 100ms; unchanged matching
 projects and layout reuse the graph. See the plugin README for details.
 
+Gallery card links use `content-visibility: auto` with a 240px intrinsic height
+matching their reserved slot. Keep this aligned with card sizing. Card tag surfaces
+are opaque: do not restore per-tag backdrop blurs, which add substantial rendering
+cost across a collection. Light-mode highlights use metallic borders/surfaces and
+filled labels with dark ink titles; keep accent colors separate from text contrast.
+Light-mode orange fills use `--portfolio-copper` and `--portfolio-on-accent`;
+orange text uses `--portfolio-copper-soft` (also Quartz's light `secondary`).
+Both project graphs and timeline card dots share `--pt-display-color`: light mode
+adjusts lightness without mixing project hues toward navy; dark mode keeps the
+original colours. Preserve this mapping when changing graph or filter rendering.
+
 Images **outside** `## Gallery` stay where they are written and are not added to cards, timeline thumbs, or the Gallery coverflow. A single `![caption](/assets/tab-panels/foo.webp)` shows as-is with the caption; consecutive image-only blocks become the same coverflow as Gallery.
 
 `npm run images` (`scripts/generate-image-variants.mjs`) creates **missing** `small/` and `preview/` WebPs only. Existing files are not overwritten unless you pass `--force`. This is **not** part of `npx quartz build` or GitHub Actions.

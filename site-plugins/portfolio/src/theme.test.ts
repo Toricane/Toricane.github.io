@@ -136,11 +136,19 @@ test("both themes maintain AA text contrast on page, card, and raised surfaces",
       [...block.matchAll(/--portfolio-([\w-]+): (#[a-f\d]{6});/gi)].map((m) => [m[1], m[2]]),
     )
     for (const surface of ["ink", "panel", "raised"]) {
-      for (const text of ["frost", "steel", "copper", "copper-soft", "gold-text", "silver-text"]) {
+      for (const text of ["frost", "steel", "copper-soft", "gold-text", "silver-text"]) {
         const values = [luminance(palette[surface]), luminance(palette[text])].sort((a, b) => a - b)
         const ratio = (values[1] + 0.05) / (values[0] + 0.05)
         assert.ok(ratio >= 4.5, `${selector}: ${text} on ${surface} = ${ratio.toFixed(2)}:1`)
       }
+    }
+    // Bright orange fills are distinct from the darker orange text token.
+    for (const surface of ["copper", "copper-hover"]) {
+      const values = [luminance(palette[surface]), luminance(palette["on-accent"])].sort(
+        (a, b) => a - b,
+      )
+      const ratio = (values[1] + 0.05) / (values[0] + 0.05)
+      assert.ok(ratio >= 4.5, `${selector}: on-accent on ${surface} = ${ratio.toFixed(2)}:1`)
     }
   }
 })

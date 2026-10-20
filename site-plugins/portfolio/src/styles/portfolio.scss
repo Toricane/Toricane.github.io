@@ -8,6 +8,8 @@
   --portfolio-steel: #93a4b5;
   --portfolio-copper: #d58a4b;
   --portfolio-copper-soft: #f0bc86;
+  --portfolio-on-accent: #0f161e;
+  --portfolio-copper-hover: #f0bc86;
   --portfolio-grid: rgba(147, 164, 181, 0.065);
   --portfolio-modal-surface: #101820;
   --portfolio-menu-shadow: rgba(4, 8, 12, 0.45);
@@ -21,7 +23,7 @@
   --portfolio-silver-edge: #e2eaf4;
   --portfolio-silver-edge-end: #9caec5;
   --portfolio-on-image: #e7edf3;
-  --portfolio-tag-surface: rgba(11, 17, 24, 0.55);
+  --portfolio-tag-surface: #101b25;
 
   --portfolio-page-max: 1280px;
   --portfolio-content-max: 860px;
@@ -46,20 +48,22 @@
   --portfolio-rule: #c8cfd2;
   --portfolio-frost: #202b35;
   --portfolio-steel: #526170;
-  --portfolio-copper: #965026;
-  --portfolio-copper-soft: #83441f;
+  --portfolio-copper: #ef7c25;
+  --portfolio-copper-soft: #ad3f06;
+  --portfolio-on-accent: #202b35;
+  --portfolio-copper-hover: #f58a3a;
   --portfolio-grid: rgba(52, 68, 81, 0.045);
   --portfolio-modal-surface: #fdfcf9;
   --portfolio-menu-shadow: rgba(32, 43, 53, 0.12);
   --portfolio-shadow: rgba(32, 43, 53, 0.1);
-  --portfolio-gold-rgb: 156, 111, 19;
-  --portfolio-gold-warm-rgb: 171, 116, 22;
-  --portfolio-gold-text: #79530d;
-  --portfolio-silver-rgb: 92, 113, 134;
-  --portfolio-silver-soft-rgb: 109, 128, 146;
-  --portfolio-silver-text: #43586d;
-  --portfolio-silver-edge: #647b92;
-  --portfolio-silver-edge-end: #a4b3c0;
+  --portfolio-gold-rgb: 205, 159, 38;
+  --portfolio-gold-warm-rgb: 237, 198, 83;
+  --portfolio-gold-text: #725400;
+  --portfolio-silver-rgb: 151, 153, 157;
+  --portfolio-silver-soft-rgb: 190, 192, 196;
+  --portfolio-silver-text: #4e5054;
+  --portfolio-silver-edge: #989a9f;
+  --portfolio-silver-edge-end: #d6d7da;
   --portfolio-tag-surface: #ede9e2;
 }
 
@@ -703,7 +707,7 @@ body {
 }
 
 .portfolio-search-preview__expand:hover {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
   border-color: var(--portfolio-copper);
 }
@@ -843,7 +847,7 @@ body {
   justify-content: center;
   min-height: 42px;
   padding: 0 1.35rem;
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: linear-gradient(
     165deg,
     color-mix(in srgb, var(--portfolio-copper-soft) 72%, white) 0%,
@@ -868,7 +872,7 @@ body {
 .portfolio-tap-banner:focus-visible .portfolio-tap-banner__action,
 .portfolio-tap-bar__cta:hover,
 .portfolio-tap-bar__cta:focus-visible {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: linear-gradient(
     165deg,
     color-mix(in srgb, var(--portfolio-copper-soft) 55%, white) 0%,
@@ -939,7 +943,7 @@ html[data-tap-bar="shown"] .portfolio-tap-bar {
 
 .portfolio-tap-bar__dismiss:hover,
 .portfolio-tap-bar__dismiss:focus-visible {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
   border-color: var(--portfolio-copper);
 }
@@ -1118,7 +1122,7 @@ html.portfolio-lightbox-open .portfolio-tap-bar {
 }
 
 .portfolio-coverflow__controls button:hover {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
   border-color: var(--portfolio-copper);
 }
@@ -1334,7 +1338,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 
 .portfolio-filter-toggle.is-open,
 .portfolio-filter-toggle.has-active {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
   border-color: var(--portfolio-copper);
 }
@@ -1342,7 +1346,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 .portfolio-filter-toggle__badge {
   min-width: 1.25rem;
   padding: 0 5px;
-  color: var(--portfolio-copper);
+  color: var(--portfolio-copper-soft);
   background: var(--portfolio-ink);
   border-radius: 999px;
   font-size: 0.625rem;
@@ -1390,7 +1394,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-view-toggle button[aria-pressed="true"] {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
 }
 
@@ -1502,7 +1506,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-filters__chips button[aria-pressed="true"] {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
   border-color: var(--portfolio-copper);
 }
@@ -1527,7 +1531,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 .portfolio-filters__chip {
   min-height: 28px;
   padding: 0 10px;
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
   border: 1px solid var(--portfolio-copper);
   border-radius: 999px;
@@ -1539,8 +1543,8 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-filters__chip:hover {
-  background: var(--portfolio-copper-soft);
-  border-color: var(--portfolio-copper-soft);
+  background: var(--portfolio-copper-hover);
+  border-color: var(--portfolio-copper-hover);
 }
 
 .portfolio-filters__combobox input {
@@ -1604,7 +1608,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-filters__options [data-tag-option].is-selected {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
 }
 
@@ -1664,6 +1668,13 @@ body[data-slug="coverflow"] .portfolio-footer {
   transform: translateY(-2px);
 }
 
+/* These cards already reserve a 240px slot. Skip offscreen descendants while
+   keeping hover transforms, outlines and shadows on the containing link. */
+.portfolio-collection .portfolio-grid > .portfolio-card > a {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
+}
+
 .portfolio-card[data-significance="spotlight"] > a {
   background: linear-gradient(
     135deg,
@@ -1693,7 +1704,7 @@ body[data-slug="coverflow"] .portfolio-footer {
   text-shadow: 0 0 10px rgba(var(--portfolio-gold-rgb), 0.18);
 }
 
-.portfolio-card[data-significance="spotlight"] .portfolio-card__meta span:last-child {
+.portfolio-card[data-significance="spotlight"] .portfolio-card__meta span + span {
   color: var(--portfolio-gold-text);
 }
 
@@ -1731,7 +1742,7 @@ body[data-slug="coverflow"] .portfolio-footer {
   text-shadow: 0 0 8px rgba(192, 192, 192, 0.12);
 }
 
-.portfolio-card[data-significance="featured"] .portfolio-card__meta span:last-child {
+.portfolio-card[data-significance="featured"] .portfolio-card__meta span + span {
   color: var(--portfolio-silver-text);
 }
 
@@ -1947,7 +1958,6 @@ body[data-slug="coverflow"] .portfolio-footer {
 .portfolio-card .portfolio-tags li {
   color: var(--portfolio-frost);
   background: var(--portfolio-tag-surface);
-  backdrop-filter: blur(4px);
 }
 
 .portfolio-tag-page .portfolio-heading .portfolio-back {
@@ -1986,7 +1996,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-tag-cloud a:hover {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
   border-color: var(--portfolio-copper);
 }
@@ -1994,7 +2004,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 .portfolio-tag-cloud__count {
   min-width: 1.25rem;
   padding: 0 5px;
-  color: var(--portfolio-copper);
+  color: var(--portfolio-copper-soft);
   background: var(--portfolio-ink);
   border-radius: 999px;
   font-size: 0.625rem;
@@ -2285,8 +2295,9 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-project-timeline__color {
-  color: var(--pt-color);
-  stroke: var(--pt-color);
+  --pt-display-color: var(--pt-color);
+  color: var(--pt-display-color);
+  stroke: var(--pt-display-color);
 }
 
 .portfolio-project-timeline__card-slot {
@@ -3033,7 +3044,7 @@ body:has(.portfolio-collection) .center.full-width > .popover-hint,
 }
 
 .portfolio-modal__controls button:hover {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
   border-color: var(--portfolio-copper);
 }
@@ -3204,7 +3215,7 @@ a.internal.portfolio-bookmark {
 }
 
 .portfolio-bookmark--internal .portfolio-bookmark__icon {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: color-mix(in srgb, var(--portfolio-copper) 75%, var(--portfolio-raised));
   border-color: color-mix(in srgb, var(--portfolio-copper) 55%, transparent);
 }
@@ -3312,7 +3323,7 @@ a.internal.portfolio-bookmark {
 }
 
 .portfolio-lightbox__close:hover {
-  color: var(--portfolio-ink);
+  color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
   border-color: var(--portfolio-copper);
 }
@@ -3355,11 +3366,47 @@ a.internal.portfolio-bookmark {
 
 /* Light mode uses ink-like hues rather than dark mode's luminous labels. */
 :root[saved-theme="light"] {
+  .portfolio-project-timeline__card,
+  .portfolio-timeline__item > a {
+    background-color: var(--portfolio-panel);
+  }
+
+  // Metallic surfaces carry the highlight; titles keep their natural ink color.
+  .portfolio-card[data-significance] h2,
+  .portfolio-project-timeline__card[data-significance] h2,
+  .portfolio-timeline__item[data-significance] h2 {
+    color: var(--portfolio-frost);
+  }
+
+  .portfolio-card[data-significance="spotlight"] > a {
+    border-color: rgba(var(--portfolio-gold-rgb), 0.65);
+  }
+
+  .portfolio-card[data-significance="featured"] > a {
+    border-color: rgba(var(--portfolio-silver-rgb), 0.7);
+  }
+
+  .portfolio-card[data-significance] .portfolio-card__meta span + span {
+    padding: 2px 5px;
+    border-radius: 3px;
+    line-height: 1;
+  }
+
+  .portfolio-card[data-significance="spotlight"] .portfolio-card__meta span + span {
+    color: #634900;
+    background: #f4dfa0;
+  }
+
+  .portfolio-card[data-significance="featured"] .portfolio-card__meta span + span {
+    color: #414246;
+    background: #e1e2e5;
+  }
+
   @each $digit,
     $color
       in (
         "0": #a73753,
-        "1": #934a23,
+        "1": #aa430b,
         "2": #79600e,
         "3": #516922,
         "4": #267047,
@@ -3376,7 +3423,7 @@ a.internal.portfolio-bookmark {
     }
   }
   @each $season,
-    $color in ("winter": #35668d, "spring": #556d22, "summer": #17704c, "fall": #945120)
+    $color in ("winter": #35668d, "spring": #556d22, "summer": #17704c, "fall": #ad3f06)
   {
     [data-season="#{$season}"] .portfolio-project-timeline__month-label,
     [data-season="#{$season}"] .portfolio-timeline__month-label {
@@ -3384,8 +3431,23 @@ a.internal.portfolio-bookmark {
     }
   }
   .portfolio-project-timeline__color {
-    color: color-mix(in srgb, var(--pt-color) 45%, var(--portfolio-frost));
-    stroke: color-mix(in srgb, var(--pt-color) 45%, var(--portfolio-frost));
+    // Darken against ivory without mixing different project hues toward navy.
+    --pt-display-color: color-mix(in srgb, var(--pt-color) 60%, black);
+  }
+  @supports (color: oklch(from red 0.52 c h)) {
+    .portfolio-project-timeline__color {
+      --pt-display-color: oklch(from var(--pt-color) 0.52 min(c, 0.16) h);
+    }
+  }
+  :where(.portfolio-project-timeline__segment) {
+    opacity: 1;
+  }
+  :where(
+    .portfolio-project-timeline__segment--pause,
+    .portfolio-project-timeline__branch,
+    .portfolio-project-timeline__connector
+  ) {
+    opacity: 0.85;
   }
   .portfolio-card h2,
   .portfolio-card__meta,
@@ -3396,7 +3458,7 @@ a.internal.portfolio-bookmark {
 
   .portfolio-tap-banner__action,
   .portfolio-tap-bar__cta {
-    color: var(--portfolio-ink);
+    color: var(--portfolio-on-accent);
     background: var(--portfolio-copper);
     text-shadow: none;
     box-shadow: 0 2px 4px var(--portfolio-shadow);
