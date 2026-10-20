@@ -37,8 +37,8 @@ configuration:
         dark: "#202b35"
         secondary: "#ad3f06"
         tertiary: "#a43b00"
-        highlight: rgba(239, 124, 37, 0.09)
-        textHighlight: rgba(239, 124, 37, 0.18)
+        highlight: rgba(210, 135, 70, 0.09)
+        textHighlight: rgba(210, 135, 70, 0.18)
       darkMode:
         light: "#0f161e"
         lightgray: "#2a3947"

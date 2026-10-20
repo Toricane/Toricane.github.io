@@ -48,10 +48,10 @@
   --portfolio-rule: #c8cfd2;
   --portfolio-frost: #202b35;
   --portfolio-steel: #526170;
-  --portfolio-copper: #ef7c25;
+  --portfolio-copper: #d28746;
   --portfolio-copper-soft: #ad3f06;
-  --portfolio-on-accent: #202b35;
-  --portfolio-copper-hover: #f58a3a;
+  --portfolio-on-accent: #0f161e;
+  --portfolio-copper-hover: #d58a4b;
   --portfolio-grid: rgba(52, 68, 81, 0.045);
   --portfolio-modal-surface: #fdfcf9;
   --portfolio-menu-shadow: rgba(32, 43, 53, 0.12);
@@ -1149,9 +1149,10 @@ html.portfolio-lightbox-open .portfolio-tap-bar {
   scroll-snap-align: start;
   color: inherit;
   text-decoration: none;
-  background: var(--portfolio-raised);
+  background: var(--portfolio-coverflow-surface);
   border-radius: 16px;
-  box-shadow: 0 18px 40px var(--portfolio-shadow);
+  // Shadows are clipped by the scroller and create a gray strip below the fade.
+  box-shadow: none;
   cursor: pointer;
 }
 
@@ -1887,7 +1888,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 }
 
 .portfolio-card h2 {
-  margin: 2px 0 6px;
+  margin: 1px 0 3px;
   color: var(--portfolio-frost);
   font-family: var(--headerFont);
   font-size: 0.875rem;
@@ -1896,7 +1897,7 @@ body[data-slug="coverflow"] .portfolio-footer {
 
 .portfolio-card p {
   display: -webkit-box;
-  margin: 6px 0 0;
+  margin: 3px 0 0;
   overflow: hidden;
   color: var(--portfolio-steel);
   font-size: 0.875rem;

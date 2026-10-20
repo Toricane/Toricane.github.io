@@ -128,7 +128,8 @@ matching their reserved slot. Keep this aligned with card sizing. Card tag surfa
 are opaque: do not restore per-tag backdrop blurs, which add substantial rendering
 cost across a collection. Light-mode highlights use metallic borders/surfaces and
 filled labels with dark ink titles; keep accent colors separate from text contrast.
-Light-mode orange fills use `--portfolio-copper` and `--portfolio-on-accent`;
+Light-mode orange fills use a slightly darker version of dark mode's orange
+(`#d28746`, hovering to `#d58a4b`). Do not add text outlines. Orange fills use `--portfolio-copper` and `--portfolio-on-accent`;
 orange text uses `--portfolio-copper-soft` (also Quartz's light `secondary`).
 Both project graphs and timeline card dots share `--pt-display-color`: light mode
 adjusts lightness without mixing project hues toward navy; dark mode keeps the

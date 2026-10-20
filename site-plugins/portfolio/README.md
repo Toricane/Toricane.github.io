@@ -58,7 +58,11 @@ emit Quartz-compatible `themechange` events and suppress color transitions durin
 the swap. The small critical background style in `quartz/components/Head.tsx`
 uses the configured theme backgrounds to prevent a mismatched first paint.
 
-The light palette uses warm ivory, navy ink, and a bright orange accent. Metallic
+Gallery cards use compact spacing between date, title, affiliation, and description
+in both themes (1px above titles; 3px below titles and above paragraphs). The
+image fade remains 68% of the media height.
+
+The light palette uses warm ivory, navy ink, and a warm orange accent. Metallic
 highlights, timeline labels, modal surfaces, and syntax highlighting have light
 variants. Coverflow containers and caption fades share the same opaque surface
 color in both themes, with theme-appropriate caption text; the image lightbox
@@ -67,6 +71,10 @@ Light-mode highlights use warm gold and neutral silver borders/surfaces, dark in
 titles, and filled Spotlight/Featured labels. Do not darken decorative metallic
 colors into brown or blue just to use them as title text; keep text contrast and
 decorative accents separate.
+Light-mode orange fills use `#d28746`, a slightly darker shade of dark mode's
+`#d58a4b`; hover returns to `#d58a4b`. Text has no outlines.
+Coverflow photo tiles share the caption/container surface and have no drop shadow:
+the horizontal scroller clips large shadows into a gray strip below the fade.
 Orange fills (`--portfolio-copper`) and their dark foreground
 (`--portfolio-on-accent`) are separate from the darker orange text token
 (`--portfolio-copper-soft`). Hover fills use `--portfolio-copper-hover`. Quartz's
