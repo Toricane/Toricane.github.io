@@ -14,6 +14,7 @@ import type {
 } from "@quartz-community/types"
 import { slugifyFilePath, slugTag } from "@quartz-community/utils/path"
 import { hideContentDebt } from "./contentDebt"
+import { selectHomeProjects } from "./homeProjects"
 
 type Page = {
   slug?: string
@@ -203,6 +204,30 @@ function searchableText(markdown: string): string {
   return chunks.join(" ").replace(/\s+/g, " ").trim()
 }
 
+function listedEntry(entry: Page): string {
+  const description = entry.frontmatter?.description
+  return `- [${escapeLabel(title(entry))}](${markdownPath(String(entry.slug))})${description ? `: ${escapeLabel(String(description))}` : ""}${listingMetadata(entry)}`
+}
+
+function homeProjects(pages: Page[]): string {
+  const entries = (section: string) =>
+    pages.filter(
+      (page) =>
+        page.unlisted !== true &&
+        String(page.slug).startsWith(`${section}/`) &&
+        !String(page.slug).endsWith("/index"),
+    )
+  const projects = entries("projects")
+  const selected = selectHomeProjects(projects)
+  if (!selected.length) return ""
+  const awards = entries("awards")
+  const isHackathon = (page: Page) =>
+    page.frontmatter?.tags?.some(
+      (tag) => slugTag(tag) === "hackathon" || slugTag(tag).startsWith("hackathon/"),
+    )
+  return `## Selected projects\n\nProjects: ${projects.length} · Hackathon builds: ${projects.filter(isHackathon).length} · Hackathon awards: ${awards.filter(isHackathon).length}\n\n${selected.map(listedEntry).join("\n")}\n\n[View all projects](/projects.md) · [Full timeline](/projects/?view=timeline) · [${awards.length} awards & distinctions](/awards.md)\n\n`
+}
+
 function listing(page: Page, pages: Page[]): string {
   const slug = String(page.slug)
   let entries: Page[] = []
@@ -242,14 +267,7 @@ function listing(page: Page, pages: Page[]): string {
     )
     return significance || bDate.localeCompare(aDate) || title(a).localeCompare(title(b))
   })
-  return entries.length
-    ? `## Pages\n\n${entries
-        .map((entry) => {
-          const description = entry.frontmatter?.description
-          return `- [${escapeLabel(title(entry))}](${markdownPath(String(entry.slug))})${description ? `: ${escapeLabel(String(description))}` : ""}${listingMetadata(entry)}`
-        })
-        .join("\n")}\n\n`
-    : ""
+  return entries.length ? `## Pages\n\n${entries.map(listedEntry).join("\n")}\n\n` : ""
 }
 
 export async function markdownOutputs(
@@ -279,6 +297,7 @@ export async function markdownOutputs(
     const fm = page.frontmatter ?? {}
     const header = `# ${escapeLabel(title(page))}\n\n${fm.description ? `${escapeLabel(String(fm.description))}\n\n` : ""}`
     let value = `${header}Web page: ${pagePath(slug)}\n\n${facts(page)}${cleanMarkdown(source, slug, base, routes)}\n\n${listing(page, pages)}`
+    if (slug === "index") value += homeProjects(pages)
     if (Array.isArray(fm.photos)) {
       value += `## Photos\n\n${fm.photos
         .map(

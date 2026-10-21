@@ -15,6 +15,7 @@ import path from "node:path"
 import type { GalleryImage } from "../galleryExtractor"
 import { imageVariant } from "../imageVariant"
 import { newsletterFallback } from "../newsletterFallback"
+import { selectHomeProjects } from "../homeProjects"
 import { applyLinkIconsToHast, linkIconMapFromFilenames, type LinkIconMap } from "../linkIcons"
 import { displayPeriod, formatMonthYear, projectDateBounds } from "../dates"
 import {
@@ -1342,10 +1343,7 @@ function Newsletter() {
 
 function HomeProjects({ allFiles }: { allFiles: PortfolioFile[] }) {
   const projects = itemsForSection(allFiles, "projects")
-  const selected = projects
-    .filter((file) => frontmatter(file).significance === "spotlight")
-    .sort((a, b) => compareGallery(a, b, "projects"))
-    .slice(0, 6)
+  const selected = selectHomeProjects(projects)
   if (!selected.length) return null
   const model = buildProjectTimeline(projectTimelineInputs(projects))
   const firstMonth = model

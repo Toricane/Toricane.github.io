@@ -131,6 +131,11 @@ External URLs are preserved. Collection and tag listings include known dates,
 highlight level (including standard), tags, and affiliation; coverflow metadata becomes images.
 Drafts and ignored notes follow Quartz's normal publishing filters.
 
+The home `/index.md` also exports Selected projects using the same six-spotlight
+selection and recency ordering as the homepage cards, including descriptions,
+dates, tags, affiliations, and current project/hackathon/award counts. These are
+regenerated from published entries on every build and included in home search text.
+
 `/llms.txt` stays concise: a brief description of Prajwal and the portfolio,
 Markdown URL and local search instructions, and five links (About, Projects,
 Awards, Resume, Search index). It does not duplicate individual entry or tag listings.

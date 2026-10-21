@@ -202,3 +202,61 @@ test("colliding directory and entry routes fail instead of silently overwriting"
     /collision/,
   )
 })
+
+test("home exports the six current spotlight projects with counts and metadata", async () => {
+  const projects = Array.from({ length: 7 }, (_, index) =>
+    page(`projects/build-${index}`, {
+      title: `Build ${index}`,
+      description: `Prototype ${index}`,
+      significance: "spotlight",
+      when: `2026/0${index + 1}`,
+      tags: ["hackathon", "Winner"],
+      from: "Challenge",
+    }),
+  )
+  const content = [
+    page("index"),
+    page("projects/index"),
+    page("awards/index"),
+    ...projects,
+    page("projects/ranged", {
+      title: "Ranged",
+      significance: "spotlight",
+      date: new Date("2025-01-01"),
+      modified: new Date("2026-08-01"),
+    }),
+    page("projects/ordinary", { significance: "featured", when: "2026/10" }),
+    page("projects/hidden", { significance: "spotlight", when: "2026/12" }, { unlisted: true }),
+    page("awards/win", { significance: "spotlight", tags: ["Hackathon"] }),
+    page("awards/mention", { tags: ["hackathon/side-challenge"] }),
+    page("awards/academic", { tags: ["academic"] }),
+  ]
+  const outputs = await markdownOutputs(context("unused"), content)
+  const home = outputs.get("index.md")!
+  assert.match(home, /## Selected projects/)
+  assert.match(home, /Projects: 9 · Hackathon builds: 7 · Hackathon awards: 2/)
+  assert.deepEqual(
+    [...home.matchAll(/^- \[([^\]]+)\]/gm)].map((match) => match[1]),
+    ["Ranged", "Build 6", "Build 5", "Build 4", "Build 3", "Build 2"],
+  )
+  assert.match(home, /\[Build 6\]\(\/projects\/build-6.md\): Prototype 6/)
+  assert.match(
+    home,
+    /When: 2026-07 · Highlight: spotlight · Tags: hackathon, Winner · From: Challenge/,
+  )
+  assert.match(home, /\[View all projects\]\(\/projects.md\)/)
+  assert.match(home, /\[3 awards & distinctions\]\(\/awards.md\)/)
+  const search = JSON.parse(outputs.get("search-index.json")!)
+  assert.match(
+    search.pages.find((entry: { slug: string }) => entry.slug === "index").content,
+    /Selected projects.*Prototype 6/,
+  )
+  const refreshed = await markdownOutputs(
+    context("unused"),
+    content.filter(([, file]) => file.data.slug !== "projects/build-6"),
+  )
+  assert.doesNotMatch(refreshed.get("index.md")!, /build-6/)
+  assert.match(refreshed.get("index.md")!, /build-1.md/)
+  const empty = await markdownOutputs(context("unused"), [page("index")])
+  assert.doesNotMatch(empty.get("index.md")!, /## Selected projects/)
+})
