@@ -32,9 +32,7 @@ function escapeHTML(unsafe: string) {
 }
 
 function isPortfolioEntry(slug: string) {
-  return SECTIONS.some(
-    (section) => slug.startsWith(`${section}/`) && !slug.endsWith("/index"),
-  )
+  return SECTIONS.some((section) => slug.startsWith(`${section}/`) && !slug.endsWith("/index"))
 }
 
 function entryDate(data: EntryData): Date | undefined {
@@ -45,9 +43,7 @@ function entryDate(data: EntryData): Date | undefined {
 }
 
 function joinUrl(base: string, slug: string) {
-  return `https://${[base.replace(/\/+$/, ""), slug.replace(/^\/+/, "")]
-    .filter(Boolean)
-    .join("/")}`
+  return `https://${[base.replace(/\/+$/, ""), slug.replace(/^\/+/, "")].filter(Boolean).join("/")}`
 }
 
 /**
@@ -71,11 +67,7 @@ export default (() => {
         .map((data) => ({
           slug: data.slug as string,
           title: data.frontmatter?.title?.trim() || (data.slug as string),
-          description: (
-            data.description ||
-            data.frontmatter?.description ||
-            ""
-          ).trim(),
+          description: (data.description || data.frontmatter?.description || "").trim(),
           date: entryDate(data),
         }))
         .sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0))

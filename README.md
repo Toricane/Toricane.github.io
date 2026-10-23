@@ -6,14 +6,13 @@ Built with [Quartz 5](https://quartz.jzhao.xyz/) and deployed as a static site o
 
 ```
 content/                  # Markdown pages + assets (the CMS)
-  index.md                # Home bio
+  index.md                # Home introduction + curated narrative chapters
   coverflow.md            # Home photo reel
   projects|awards/
   assets/
     tab-panels/           # Full-size entry images
       small/              # 800px-wide gallery / coverflow thumbs
       preview/            # 256px-wide timeline thumbs
-    coverflow/            # Home reel photos
     icons/                # Inline bio link icons
 site-plugins/portfolio/   # Site UI, RSS, Markdown endpoints + agent search
 scripts/                  # Image variants, git-hook installer + output checks
@@ -26,24 +25,34 @@ There is no separate content sync step or manually maintained collection data fi
 
 ## Home page
 
-The homepage has a viewport-height introduction followed by selected projects and
-a compact project-history graph. Up to six projects marked `significance: spotlight`
-appear automatically, newest first. Their first `## Gallery` image supplies the
-card image; entries without images stay text-only.
+The homepage is a finite scrolling narrative: an introduction and curated photo
+reel, a compact selected-project overview, contribution/result stories, and
+authored chapters about projects, community work, smaller tools, hackathons,
+milestones, and contact. The introduction fills the first desktop viewport;
+mobile follows its content height.
 
-The timeline sits beside the cards on mobile and smaller desktops, and moves into
-the left margin on wide desktops. The Projects and Awards links share their row
-equally, without reserving space for a future section.
+Up to six projects marked `significance: spotlight` appear automatically, newest
+first. Their first `## Gallery` image supplies the card image; entries without
+images stay text-only. Contribution and result summaries come from the project
+entries. The remaining narrative and hero facts are curated in `content/index.md`.
+
+The timeline spans the compact overview on mobile, with full-width detailed
+stories below, and moves into the left margin on wide desktops. The Projects and
+Awards links share their row equally, without reserving a future section.
 
 Project totals, hackathon builds, and hackathon awards are calculated from content.
 Tag relevant award entries `Hackathon` so placements, side challenges, and
 honourable mentions are included, rather than counting only first-place projects.
 
-The newsletter is populated immediately from a verified post and refreshed from
-`/newsletter.xml`, generated from Substack during the site build. New posts require
-a site rebuild; a last-good feed and verified snapshot cover upstream failures.
-See the [plugin's home-page and newsletter documentation](site-plugins/portfolio/README.md)
-for layout details, cache behavior, and maintenance instructions.
+The newsletter is resolved from Substack at build time, with a last-good feed and
+verified snapshot covering upstream failures. Its home preview is only rendered
+when the latest post is within four calendar months of the build. A new post
+requires a site rebuild. The browser does not fetch an external RSS proxy.
+
+For every content change, use the [home-page maintenance guide](site-plugins/portfolio/HOME-MAINTENANCE.md)
+to decide whether the curated home page needs an edit. Most new entries require
+no home-page change: selection, counters, timeline data, and derived summaries
+update automatically. Technical details live in the [plugin documentation](site-plugins/portfolio/README.md).
 
 ## Update content
 
@@ -54,14 +63,15 @@ for layout details, cache behavior, and maintenance instructions.
 - Home coverflow: edit `photos` in `content/coverflow.md`. Optional `link` opens an entry modal (e.g. `/awards/class-valedictorian`); omit `link` for a full-image lightbox.
 - Hackathon projects use `content/templates/hackathon.md` and a quoted `when: "YYYY/MM"` for a completed month-only timeline event. Existing hackathon URLs redirect to their project pages.
 - Project pages may still contain `[Replace with: …]` prompts — replace only when you have verified copy. The build hides prompts, template example links, and empty section headings until actual content is added.
+- Check whether the change affects an authored home claim, selected milestone, photo caption, or curated story. Update only the affected copy following the [maintenance guide](site-plugins/portfolio/HOME-MAINTENANCE.md); do not copy project totals or the selected-project list into `content/index.md`.
 
 ### Image sizing convention
 
-| Surface | Variant | Size |
-|---------|---------|------|
-| Gallery cards + coverflows | `tab-panels/small/` | 800px wide |
-| Timeline thumbs | `tab-panels/preview/` | 256px wide |
-| Lightbox / expanded | `tab-panels/` (full) | original |
+| Surface                    | Variant               | Size       |
+| -------------------------- | --------------------- | ---------- |
+| Gallery cards + coverflows | `tab-panels/small/`   | 800px wide |
+| Timeline thumbs            | `tab-panels/preview/` | 256px wide |
+| Lightbox / expanded        | `tab-panels/` (full)  | original   |
 
 The plugin rewrites paths automatically; keep frontmatter and gallery Markdown pointed at the full image. Variants are **not** generated during `npx quartz build` or GitHub Pages CI.
 

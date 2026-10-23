@@ -4,11 +4,73 @@ import fs from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import type { BuildCtx } from "@quartz-community/types"
-import { createNewsletterEmitter, fallbackNewsletterFeed } from "./newsletter"
+import {
+  createNewsletterEmitter,
+  createNewsletterPlugins,
+  fallbackNewsletterFeed,
+  isRecentNewsletter,
+  latestNewsletterPost,
+} from "./newsletter"
 
 function context(output: string): BuildCtx {
   return { argv: { output } } as BuildCtx
 }
+
+test("freshness uses four calendar months, including month ends and future dates", () => {
+  const post = latestNewsletterPost(fallbackNewsletterFeed())!
+  const now = new Date("2026-10-31T12:00:00Z")
+  assert.equal(isRecentNewsletter({ ...post, pubDate: "2026-06-30T12:00:00Z" }, now), true)
+  assert.equal(isRecentNewsletter({ ...post, pubDate: "2026-06-30T11:59:59Z" }, now), false)
+  assert.equal(isRecentNewsletter({ ...post, pubDate: "2026-11-01T00:00:00Z" }, now), false)
+  assert.equal(isRecentNewsletter(post, now), false)
+})
+
+test("parses the newest valid RSS item, decodes text, and rejects unsafe links", () => {
+  const older = fallbackNewsletterFeed().match(/<item>([\s\S]*?)<\/item>/)![0]
+  const xml = `<rss><channel>${older}<item><title><![CDATA[Notes &amp; builds]]></title><link>https://example.com/new</link><pubDate>2026-10-20</pubDate><description><![CDATA[<p>Hardware &amp; software.</p>]]></description></item><item><title>Invalid</title><link>javascript:alert(1)</link><pubDate>2026-10-21</pubDate></item></channel></rss>`
+  assert.deepEqual(latestNewsletterPost(xml), {
+    title: "Notes & builds",
+    link: "https://example.com/new",
+    pubDate: "2026-10-20",
+    description: "Hardware & software.",
+    thumbnail: "",
+  })
+})
+
+test("SSR and the RSS endpoint share one verified fetch, including a fresh offline cache", async () => {
+  await workspace(async (directory) => {
+    const cachePath = path.join(directory, "cached.xml")
+    const xml = fallbackNewsletterFeed().replace(
+      "Sun, 21 Sep 2025 22:24:05 GMT",
+      "Tue, 20 Oct 2026 12:00:00 GMT",
+    )
+    await fs.writeFile(cachePath, xml)
+    let requests = 0
+    const plugins = createNewsletterPlugins({
+      cachePath,
+      fetch: (async () => {
+        requests++
+        throw new Error("Offline")
+      }) as typeof fetch,
+    })
+    const file = { data: { slug: "index" } } as {
+      data: { slug: string; portfolioNewsletter?: ReturnType<typeof latestNewsletterPost> }
+    }
+    const factory = plugins.transformer.htmlPlugins!(context(directory))[0] as unknown as () => (
+      tree: unknown,
+      file: unknown,
+    ) => Promise<void>
+    await factory()({ type: "root", children: [] }, file)
+    assert.equal(file.data.portfolioNewsletter?.title, "Summer 2025")
+    assert.equal(
+      isRecentNewsletter(file.data.portfolioNewsletter!, new Date("2026-10-23T12:00:00Z")),
+      true,
+    )
+    await plugins.emitter.emit(context(directory), [], { css: [], js: [], additionalHead: [] })
+    assert.equal(requests, 1)
+    assert.equal(await fs.readFile(path.join(directory, "newsletter.xml"), "utf8"), xml)
+  })
+})
 
 async function workspace(run: (directory: string) => Promise<void>) {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "portfolio-newsletter-"))

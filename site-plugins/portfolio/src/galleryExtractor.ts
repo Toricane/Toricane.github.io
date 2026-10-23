@@ -4,6 +4,7 @@ import { applyPortfolioDates } from "./dates"
 import { hideContentDebt } from "./contentDebt"
 import { loadThumbnailColor } from "./thumbnailColor"
 import { imageVariant } from "./imageVariant"
+import { homeProjectStory } from "./homeContent"
 
 type HastNode = {
   type?: string
@@ -37,10 +38,7 @@ async function loadOgCoverDataUrl(src: string): Promise<string | undefined> {
 
   const root = process.cwd()
   // Prefer the full tab-panels asset — small/preview are too soft when stretched to 1200×630.
-  const candidates = [
-    path.join(root, "content", cleaned),
-    path.join(root, "public", cleaned),
-  ]
+  const candidates = [path.join(root, "content", cleaned), path.join(root, "public", cleaned)]
 
   // Avoid static `import("sharp")` — tsup/esbuild rewrites it into a broken bundled chunk.
   type SharpPipeline = {
@@ -48,7 +46,11 @@ async function loadOgCoverDataUrl(src: string): Promise<string | undefined> {
     resize: (
       w: number,
       h: number,
-      opts: { fit: string; position: string; background?: { r: number; g: number; b: number; alpha: number } },
+      opts: {
+        fit: string
+        position: string
+        background?: { r: number; g: number; b: number; alpha: number }
+      },
     ) => SharpPipeline
     blur: (sigma: number) => SharpPipeline
     modulate: (opts: { brightness?: number }) => SharpPipeline
@@ -100,7 +102,14 @@ export function collectGalleryImages(tree: HastNode): GalleryImage[] {
 
   for (const child of children) {
     const tag = child.tagName?.toLowerCase()
-    if (tag === "h1" || tag === "h2" || tag === "h3" || tag === "h4" || tag === "h5" || tag === "h6") {
+    if (
+      tag === "h1" ||
+      tag === "h2" ||
+      tag === "h3" ||
+      tag === "h4" ||
+      tag === "h5" ||
+      tag === "h6"
+    ) {
       const heading = textOf(child).trim().toLowerCase()
       inGallery = heading === "gallery"
       continue
@@ -141,7 +150,10 @@ export default function GalleryExtractor() {
     markdownPlugins() {
       return [
         () => {
-          return (tree: Parameters<typeof hideContentDebt>[0], file: { data: Record<string, unknown> }) => {
+          return (
+            tree: Parameters<typeof hideContentDebt>[0],
+            file: { data: Record<string, unknown> },
+          ) => {
             hideContentDebt(tree)
             applyPortfolioDates(file.data)
           }
@@ -154,6 +166,7 @@ export default function GalleryExtractor() {
           return async (tree: HastNode, file: { data: Record<string, unknown> }) => {
             const images = collectGalleryImages(tree)
             file.data.galleryImages = images
+            file.data.homeProjectStory = homeProjectStory(tree)
             const first = images[0]?.src
             file.data.timelineThumbnailColor = first
               ? await loadThumbnailColor(first, ctx.argv.directory)

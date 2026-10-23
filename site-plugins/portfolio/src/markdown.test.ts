@@ -28,6 +28,36 @@ function context(output: string): BuildCtx {
   } as BuildCtx
 }
 
+test("home Markdown keeps stories before narrative chapters and includes their documented outcomes", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "portfolio-home-markdown-"))
+  try {
+    const source = path.join(directory, "index.md")
+    await fs.writeFile(
+      source,
+      "Hello.\n\n## Building with people\n\nTeaching chess.\n\n## Contact\n\nEmail me.\n",
+    )
+    const outputs = await markdownOutputs(context(directory), [
+      page("index", {}, { filePath: source }),
+      page(
+        "projects/example",
+        { title: "Example", significance: "spotlight", when: "2026/09" },
+        {
+          homeProjectStory: { contribution: "Designed the pipeline.", result: "Won a team prize." },
+        },
+      ),
+    ])
+    const home = outputs.get("index.md")!
+    assert.ok(home.indexOf("Selected projects") < home.indexOf("Building with people"))
+    assert.ok(home.indexOf("Building with people") < home.indexOf("## Contact"))
+    assert.match(home, /My contribution: Designed the pipeline/)
+    assert.match(home, /The result: Won a team prize/)
+    assert.match(home, /Teaching chess/)
+  } finally {
+    assert.equal(path.dirname(path.resolve(directory)), path.resolve(os.tmpdir()))
+    await fs.rm(directory, { recursive: true, force: true })
+  }
+})
+
 test("root, folders, tags and explicit HTML/index URL forms", () => {
   assert.equal(markdownPath("index"), "/index.md")
   assert.equal(markdownPath("/"), "/index.md")

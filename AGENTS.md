@@ -4,15 +4,15 @@ This repo is a **Quartz 5** portfolio fork. Site-specific UI lives in the local 
 
 ## Stack
 
-| Area | Location |
-|------|----------|
-| Content | `content/` |
-| Portfolio UI | `site-plugins/portfolio/` |
-| Site config | `quartz.config.yaml` |
-| Image variants | `scripts/generate-image-variants.mjs` |
-| Git hook | `.githooks/pre-commit` (install with `npm run hooks`) |
-| Quartz core (upstream) | `quartz/` — avoid casual edits |
-| Deploy | `.github/workflows/pages.yml` (push to `v5`) |
+| Area                   | Location                                              |
+| ---------------------- | ----------------------------------------------------- |
+| Content                | `content/`                                            |
+| Portfolio UI           | `site-plugins/portfolio/`                             |
+| Site config            | `quartz.config.yaml`                                  |
+| Image variants         | `scripts/generate-image-variants.mjs`                 |
+| Git hook               | `.githooks/pre-commit` (install with `npm run hooks`) |
+| Quartz core (upstream) | `quartz/` — avoid casual edits                        |
+| Deploy                 | `.github/workflows/pages.yml` (push to `v5`)          |
 
 ## Content layout
 
@@ -29,13 +29,13 @@ Create new collection notes from `content/templates/{award,hackathon,project}.md
 
 Shared on every entry:
 
-| Field | Meaning |
-|-------|---------|
-| `title` | Card / timeline / entry heading |
-| `description` | Card, timeline, and entry heading blurb. Injected into the entry — do not repeat it as `## Overview`. |
-| `from` | Source / host / affiliation — who issued it or where it lived, not a restatement of the title or the outcome |
+| Field          | Meaning                                                                                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`        | Card / timeline / entry heading                                                                                                                                 |
+| `description`  | Card, timeline, and entry heading blurb. Injected into the entry — do not repeat it as `## Overview`.                                                           |
+| `from`         | Source / host / affiliation — who issued it or where it lived, not a restatement of the title or the outcome                                                    |
 | `significance` | Always set: `spotlight` (gold), `featured` (silver), `standard` (normal). `standard` is YAML-only — the UI never shows a pill or `data-significance="standard"` |
-| `tags` | The only chip list. Awards: topic. Hackathons: placement/format. Projects: stack/topic |
+| `tags`         | The only chip list. Awards: topic. Hackathons: placement/format. Projects: stack/topic                                                                          |
 
 Card / timeline / entry hero images come from the note’s `## Gallery` (first image). Do **not** set a `cover` frontmatter field.
 
@@ -80,25 +80,45 @@ Collection listing URLs use a trailing slash (`/awards/`, `/projects/`). Entry U
 
 ## Home page
 
-The intro fills the first viewport; the next section shows up to six spotlight
-projects, selected automatically by recency. Do not hardcode project slugs.
+For every project, award, biography, or image update, follow the
+[home-page maintenance guide](site-plugins/portfolio/HOME-MAINTENANCE.md) before
+finishing. Review the curated home content for affected facts and links; leave it
+alone when the change does not affect its story. Do not append every new entry
+to the landing page. The guide defines the automatic updates, editorial triggers,
+source structure, and verification steps.
+
+The intro fills the first desktop viewport; mobile follows its content height.
+The next section shows up to six `significance: spotlight` projects, selected
+automatically by recency. Do not hardcode this selection's project slugs.
 Cards use their first Gallery image and remain text-only when it is missing.
 The graph reuses all dated project timeline data, not just the selected cards.
-Mobile keeps a narrow rail beside the cards; wide desktops move it into the left
-margin. Keep the introduction's section links equally sized for any item count;
-do not reserve a column for a future section.
+The compact overview is followed by contribution/result summaries derived from
+the entries, then curated narrative chapters from `content/index.md`.
+Mobile keeps a narrow rail beside the overview heading, cards, and archive links;
+the detailed stories below use the full width. Wide desktops move the rail into
+the left margin. Keep the introduction's section links equally sized for any
+item count; do not reserve a column for a future section.
+
+Home body copy uses `--portfolio-frost`, matching the introduction in both themes.
+Illustrated columns share heading/image/text rows on desktop, with headings bottom
+aligned above the images; mobile stacks naturally. Preserve this alignment when
+editing headings or adding images. The hero's Email/GitHub/LinkedIn links use
+16px text and at least 44px touch targets.
 
 The **Hackathon awards** stat counts award entries tagged `Hackathon`, including
 placements, side challenges, and honourable mentions. Project `Winner` tags alone
 are not a complete count. Avoid counting a project and its award twice.
 
-`PortfolioNewsletter` is explicitly registered in `quartz.ts` and emits
-`/newsletter.xml` from Substack at build time. Keep this fetch on the build side,
+`quartz.ts` explicitly registers the transformer and emitter returned by
+`createNewsletterPlugins()`. They resolve Substack once at build time, attach its
+latest post to the home page, and emit `/newsletter.xml`. Keep this fetch on the build side,
 with its last-good cache and verified
 `site-plugins/portfolio/src/newsletterFallback.ts` snapshot; do not restore the
 browser's dependency on an external RSS proxy. Browser storage is
-optional and a failed refresh must leave a populated, dated post visible.
-New posts are picked up on the next site build. See the
+unnecessary for this feed. A failed refresh preserves the last-good feed; the home
+preview only appears when that post is within four calendar months of build time.
+Stale previews and their remote thumbnails are excluded from home HTML, while the
+Substack link remains. New posts are picked up on the next site build. See the
 [plugin README](site-plugins/portfolio/README.md) for responsive dimensions, cache
 behavior, and newsletter tests.
 
@@ -106,11 +126,11 @@ behavior, and newsletter tests.
 
 For `assets/tab-panels/` images, keep three sizes with the **same basename**:
 
-| Variant | Path | Size | Used for |
-|---------|------|------|----------|
-| Full | `assets/tab-panels/{name}.webp` | original | Lightbox / expanded only |
-| Small | `assets/tab-panels/small/{name}.webp` | 800px wide | Gallery cards + coverflows |
-| Preview | `assets/tab-panels/preview/{name}.webp` | 256px wide | Timeline thumbs |
+| Variant | Path                                    | Size       | Used for                   |
+| ------- | --------------------------------------- | ---------- | -------------------------- |
+| Full    | `assets/tab-panels/{name}.webp`         | original   | Lightbox / expanded only   |
+| Small   | `assets/tab-panels/small/{name}.webp`   | 800px wide | Gallery cards + coverflows |
+| Preview | `assets/tab-panels/preview/{name}.webp` | 256px wide | Timeline thumbs            |
 
 Content should reference the **full** path in `## Gallery` and in any in-body images. The plugin rewrites to `small/` or `preview/` at render time via `imageVariant()`.
 
@@ -147,9 +167,9 @@ Other folders (`coverflow/`, `icons/`, highlight webps) are used as-is — no va
 
 Put image files in `content/assets/icons/`. The basename becomes the shortcode key:
 
-| File | Shortcode |
-|------|-----------|
-| `langara.webp` | `:langara:` |
+| File             | Shortcode      |
+| ---------------- | -------------- |
+| `langara.webp`   | `:langara:`    |
 | `handy-andy.png` | `:handy-andy:` |
 
 Supported extensions: `.webp`, `.png`, `.jpg`/`.jpeg`, `.svg`, `.gif`. Keys must be lowercase letters, digits, and hyphens. If the same key exists with multiple extensions, prefer webp → png → svg → jpg → gif.
@@ -171,7 +191,7 @@ In `content/coverflow.md`:
 photos:
   - src: assets/coverflow/example.webp
     caption: Example
-    link: /projects/some-slug   # optional — opens entry modal
+    link: /projects/some-slug # optional — opens entry modal
 ```
 
 - With an internal portfolio `link` → entry modal (same as cards)
@@ -248,4 +268,4 @@ Other scripts: `npm run images` · `npm run images -- --force` · `npm run check
 
 ## Content debt (intentional)
 
-Some project pages and the home bio still contain `[Replace with: …]` prompts. Leave them unless the user provides verified copy. The portfolio transformer hides these prompts, template example links, and empty section headings from the published output; real content makes the section visible automatically.
+Some project pages still contain `[Replace with: …]` prompts. Leave them unless the user provides verified copy. The portfolio transformer hides these prompts, template example links, and empty section headings from the published output; real content makes the section visible automatically.

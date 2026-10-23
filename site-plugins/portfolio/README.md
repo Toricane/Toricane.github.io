@@ -4,34 +4,87 @@ Site-specific Quartz components, transformers, RSS, and agent-readable Markdown.
 
 ## Home page
 
-`Home` and `HomeProjects` in `src/components/Portfolio.tsx` render the homepage.
-The introduction fills at least the first viewport and grows naturally when its
-content needs more room. The selected-projects section follows it; its compact
-content is vertically centered within a desktop viewport rather than stretching
-the cards to fill the screen. Mobile content scrolls naturally.
+For content edits, start with [HOME-MAINTENANCE.md](HOME-MAINTENANCE.md). It is the
+agent runbook for deciding whether a new entry needs a curated home edit and for
+keeping existing claims in sync. This section documents the implementation.
 
-Selected projects come from published project entries with
-`significance: spotlight`, sorted by recency and capped at six. There is no
-hardcoded selection list. Cards use the first `## Gallery` image, with `small/`
-variants for tab-panel assets, a full-width image area, description, date, and up to two tags.
-Image areas share a 96–144px height cap on desktop and mobile.
-Entries without Gallery images remain text-only; do not invent image placeholders
-or use unrelated assets. Spotlight labels are omitted within this selection.
+`Home`, `HomeProjects`, and `HomeChapter` in `src/components/Portfolio.tsx`
+render a finite, vertically scrolling story. The first desktop viewport contains a
+concise introduction, a two-column list of profile facts authored in `content/index.md`,
+prominent Projects/Awards links, and the curated photos from `content/coverflow.md`.
+Mobile follows its content height. Only the hero carries a quiet engineering grid; the following chapters
+use slightly different, theme-aware static surface tints. No scroll listeners,
+parallax, entrance animation, or additional client library is required.
 
-The homepage graph uses the same project inputs, colors, branches, hiatuses, and
-nodes as the full project timeline, including dated projects outside the selected
-six. It omits cards, monthly labels, and card connectors. Its vertical layout is
-compressed to the available height; its nodes do not correspond to selected-card
-rows. End labels show Present and the earliest recorded project month.
+Selected projects come from published entries with `significance: spotlight`,
+sorted by recency and capped at six. `homeContent.ts` projects each entry's first
+published **Role and constraints** and **Result** paragraphs into file metadata at
+build time. A compact six-card overview comes before shorter image/text stories.
+Stories show the contribution and result, falling back to the description when a
+contribution is missing, plus the date, affiliation, and first Gallery image.
+Missing images and absent results are omitted. Modals and full-page entry URLs
+remain available.
 
-Below 1440px, the graph is a 52px rail beside the cards with a 12px gap. At 1440px
-and wider, it moves into the outer left margin and widens to 96px for more lane
-spacing; the cards then align directly beneath the heading. The margin position
-keeps at least 24px of clearance from the window edge. The section reserves 144px
-of outer margin on each side when needed so the expanded graph clears the cards,
-including on desktop windows narrowed by vertical tabs. Cards use three columns on
-desktop, two from 721–1100px, and one on mobile. These styles live in
-`src/styles/portfolio.scss`; preserve the mobile rail when adjusting desktop.
+The result projection keeps the first sentence of the first published Result
+paragraph. Write that sentence so it is accurate on its own, including any
+qualification essential to interpreting the outcome. Authoring placeholders are
+never used as home copy. The body headings are the source of these summaries;
+the optional `role` and `outcome` frontmatter fields do not populate them.
+
+The rest of the narrative lives in `content/index.md`. Each `##` heading becomes
+a chapter; `###` subsections become responsive groups. The Markdown export inserts
+selected projects after the introduction and preserves the same chapter order,
+contributions, and results. Private LinkedIn exports and the resume source are
+not read by the build. Home images use `small/` and `preview/` sources; the first
+coverflow photo is eager/high-priority and other images are lazy with reserved
+geometry. Text remains immediately available throughout the document; there is
+no JavaScript reveal step or estimated-height chapter placeholder.
+
+The homepage graph uses all dated project inputs, colors, branches, hiatuses,
+and nodes from the full timeline, including projects outside the selected six.
+The graph represents the whole history; its nodes are not selected-story row
+connectors. It stays in a 28px rail on mobile, a 52px rail at intermediate widths,
+and a 48px left margin at 1440px and wider. Stories use image/text columns on
+desktop and stack in reading order on mobile.
+
+On mobile, the rail spans the overview heading, cards, and archive links, which
+share the content column beside it. The detailed stories span the full section width below the rail,
+aligning with subsequent home chapters rather than carrying an empty graph gutter.
+
+The home coverflow advances every six seconds only while visible. Hover, keyboard
+focus, hidden tabs, and overlays suspend it; manual interaction pauses it until
+Play is chosen. Reduced-motion preferences disable automatic advancement and
+smooth arrow scrolling. The controls remain available without autoplay. Navigation
+cleanup disconnects its observer and removes timers and listeners.
+Previous, pause/play, and next controls overlay the top-right corner of the photos;
+there is no separate caption or controls strip beneath the carousel.
+
+Hackathon experiments and smaller tools are curated in the source Markdown. The
+milestones chapter resolves its authored award links to collection records, using
+each award's first Gallery image automatically. Photographed awards share a row;
+awards awaiting photos use compact text rows below, joining the photo row on the
+next build when a Gallery image is added. Home headings have no numbered eyebrow
+labels, and dates use muted body typography. The four hero facts link to concrete
+work and documented outcomes. Heading anchor icons are removed only from the home
+rendering. Contact uses a regular section heading beside a compact group of email,
+Resume, GitHub, and LinkedIn buttons.
+
+Home body copy uses `--portfolio-frost`, the same theme-aware colour as the intro.
+The hero's social links use 16px text and 44px hit areas. At widths above 720px,
+illustrated groups use CSS subgrid to share heading, image, and paragraph tracks;
+headings align to the bottom of their track. Selected-project and photo-award
+cards also share their text tracks within each row. Mobile restores natural
+single-column narrative flow. Full-size image margins are reset in the home
+layout so Quartz's default image margins do not offset the shared rows.
+Standalone project/archive links at the end of the last illustrated group become
+a section-wide action below the columns.
+
+`?tap=true` adds a greeting and LinkedIn action after the hero heading. Once this
+banner leaves the viewport, a dismissible sticky action appears; overlays hide
+that bar. Both actions use the site's flat copper fill, body font, 8px radius,
+and 44px minimum touch targets. They do not use a separate gradient, uppercase
+monospace label, or pulse animation. Greeting/session behaviour lives in
+`src/scripts/portfolio.inline.ts`; visual changes belong in the stylesheet.
 
 Home statistics are derived from content: total projects, projects tagged
 `hackathon`, and award records tagged `Hackathon` (case-insensitive). The latter
@@ -234,19 +287,21 @@ deployment service, or source Markdown copies in `content/` are needed.
 
 ## Home newsletter
 
-`PortfolioNewsletter` fetches the public Substack RSS feed during the build and
-emits `/newsletter.xml` on the site's own origin. Browser requests no longer depend
-on rss2json or cross-origin RSS access. `quartz.ts` registers this additional
-emitter explicitly because the package loader selects only one emitter from the
-plugin's multiple exports. The emitter uses a 10-second deadline and
-retains a last-good feed in `.quartz-cache/newsletter.xml`; a fresh offline build
-uses the verified post in `src/newsletterFallback.ts`. Update that snapshot from
-the public feed when updating the offline baseline.
+`quartz.ts` registers the transformer and emitter returned by
+`createNewsletterPlugins()`. They share one build-side Substack RSS request:
+the transformer attaches the latest valid post to the homepage before rendering,
+and the emitter publishes the same resolved feed as `/newsletter.xml`.
+The loader has a 10-second deadline, a last-good cache at
+`.quartz-cache/newsletter.xml`, and the verified `src/newsletterFallback.ts`
+snapshot for fresh offline builds. An invalid feed never replaces a good cache.
 
-The homepage renders the verified post immediately, then refreshes it from the
-local feed. Browser caching is optional: denied or full localStorage cannot stop
-rendering. Concurrent navigation/render events share a request, and a failed
-request leaves the dated post visible and can be retried on the next visit.
-New Substack posts are picked up by the next site build; browser results cache for
-six hours. Run `npx tsx --test site-plugins/portfolio/src/newsletter.test.ts` from
-the repository root to exercise fresh, cached, malformed, and offline responses.
+The home preview appears only if the newest verified publication is within four
+calendar months of build time (with month-end clamping). A stale post and its
+remote thumbnail are absent from the home HTML. A fresh cached post survives a
+failed refresh. The footer/contact area always links to Substack. New posts are
+picked up by the next build. No browser RSS request, XML parsing, or newsletter
+localStorage cache is needed.
+
+Run `node --import tsx --test site-plugins/portfolio/src/newsletter.test.ts`
+from the root to check freshness boundaries, feed parsing, shared requests,
+cache preservation, malformed responses, and offline builds.

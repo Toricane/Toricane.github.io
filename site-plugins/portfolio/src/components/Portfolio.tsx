@@ -14,7 +14,8 @@ import fs from "node:fs"
 import path from "node:path"
 import type { GalleryImage } from "../galleryExtractor"
 import { imageVariant } from "../imageVariant"
-import { newsletterFallback } from "../newsletterFallback"
+import { isRecentNewsletter, type NewsletterPost } from "../newsletter"
+import { homeChapters, homeText, type HomeNode, type HomeProjectStory } from "../homeContent"
 import { selectHomeProjects } from "../homeProjects"
 import { applyLinkIconsToHast, linkIconMapFromFilenames, type LinkIconMap } from "../linkIcons"
 import { displayPeriod, formatMonthYear, projectDateBounds } from "../dates"
@@ -261,7 +262,8 @@ function compareByTitle(a: PortfolioFile, b: PortfolioFile) {
 
 /** Gallery: significance first, then recency, then title. Timeline stays chronological. */
 function compareGallery(a: PortfolioFile, b: PortfolioFile, section: string) {
-  const rank = significanceRank(frontmatter(a).significance) - significanceRank(frontmatter(b).significance)
+  const rank =
+    significanceRank(frontmatter(a).significance) - significanceRank(frontmatter(b).significance)
   if (rank !== 0) return rank
   const recency = compareByRecency(a, b, section)
   return recency !== 0 ? recency : compareByTitle(a, b)
@@ -325,7 +327,9 @@ function countLabel(section: Section, count: number) {
 }
 
 function tagList(tags: Frontmatter["tags"]): string[] {
-  return Array.isArray(tags) ? tags.filter((tag): tag is string => typeof tag === "string" && tag.length > 0) : []
+  return Array.isArray(tags)
+    ? tags.filter((tag): tag is string => typeof tag === "string" && tag.length > 0)
+    : []
 }
 
 function filterSignificance(value: Frontmatter["significance"]): string {
@@ -349,10 +353,7 @@ function filterDataset(
     .filter((part): part is string => typeof part === "string" && part.trim().length > 0)
     .join(" ")
     .toLowerCase()
-  const recency =
-    section === "projects"
-      ? projectRecency(data)
-      : whenSortValue(whenKey(data.when))
+  const recency = section === "projects" ? projectRecency(data) : whenSortValue(whenKey(data.when))
   return {
     "data-filter-text": text,
     "data-filter-tags": tags.map((tag) => tag.toLowerCase()).join("|"),
@@ -451,12 +452,7 @@ function allPortfolioTags(allFiles: PortfolioFile[]): { tag: string; count: numb
 function CollectionFilters({ tags }: { tags: string[] }) {
   return (
     <div class="portfolio-filters" data-portfolio-filters>
-      <div
-        class="portfolio-filters__panel"
-        id="portfolio-filters-panel"
-        data-filter-panel
-        hidden
-      >
+      <div class="portfolio-filters__panel" id="portfolio-filters-panel" data-filter-panel hidden>
         <label class="portfolio-filters__search">
           <span class="portfolio-filters__label">Search</span>
           <input
@@ -550,14 +546,14 @@ function TagList({
   linked?: boolean
 }) {
   // Frontmatter may pass explicit `null`, which bypasses a default param of [].
-  const list = Array.isArray(tags) ? tags.filter((tag): tag is string => typeof tag === "string") : []
+  const list = Array.isArray(tags)
+    ? tags.filter((tag): tag is string => typeof tag === "string")
+    : []
   if (!list.length) return null
   return (
     <ul class={`portfolio-tags${compact ? " portfolio-tags--compact" : ""}`} aria-label="Tags">
       {list.map((tag) => (
-        <li>
-          {linked ? <a href={tagHref(tag)}>{displayTag(tag)}</a> : displayTag(tag)}
-        </li>
+        <li>{linked ? <a href={tagHref(tag)}>{displayTag(tag)}</a> : displayTag(tag)}</li>
       ))}
     </ul>
   )
@@ -711,12 +707,7 @@ function TimelineRow({
   const shown = visibleSignificance(data.significance)
   const filters = filterDataset(data, section)
   return (
-    <li
-      class="portfolio-timeline__item"
-      data-portfolio-item
-      data-significance={shown}
-      {...filters}
-    >
+    <li class="portfolio-timeline__item" data-portfolio-item data-significance={shown} {...filters}>
       {showDate ? (
         <TimelineWhenLabel when={data.when} />
       ) : (
@@ -803,7 +794,8 @@ function projectTimelineInputs(files: PortfolioFile[]) {
       nodes: projectMilestoneNodes(file),
       parent: projectParentSlug(data.parent),
       series: typeof data.series === "string" ? data.series : undefined,
-      thumbnailColor: (file as unknown as { timelineThumbnailColor?: string }).timelineThumbnailColor,
+      thumbnailColor: (file as unknown as { timelineThumbnailColor?: string })
+        .timelineThumbnailColor,
       timelineColor: data.timelineColor,
     }
   })
@@ -883,7 +875,12 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
 
   if (!model) {
     return (
-      <div class="portfolio-project-timeline" data-view-panel="timeline" data-project-timeline hidden>
+      <div
+        class="portfolio-project-timeline"
+        data-view-panel="timeline"
+        data-project-timeline
+        hidden
+      >
         <p class="portfolio-project-timeline__empty">No projects with dates to show.</p>
       </div>
     )
@@ -898,12 +895,7 @@ function ProjectTimeline({ files }: { files: PortfolioFile[] }) {
   }
 
   return (
-    <div
-      class="portfolio-project-timeline"
-      data-view-panel="timeline"
-      data-project-timeline
-      hidden
-    >
+    <div class="portfolio-project-timeline" data-view-panel="timeline" data-project-timeline hidden>
       <ul class="portfolio-project-timeline__legend" aria-label="Timeline legend">
         <li>
           <span class="portfolio-project-timeline__legend-node portfolio-project-timeline__legend-node--start" />
@@ -1079,7 +1071,9 @@ function TimelineGroupRow({ group, section }: { group: TimelineGroup; section: S
             ▾
           </span>
           <span class="portfolio-timeline__summary-title">{group.summary}</span>
-          <span class="portfolio-timeline__summary-count">{countLabel(section, group.items.length)}</span>
+          <span class="portfolio-timeline__summary-count">
+            {countLabel(section, group.items.length)}
+          </span>
         </button>
         <ol class="portfolio-timeline__children" data-timeline-children hidden>
           {group.items.map((file) => (
@@ -1099,7 +1093,11 @@ function TagCollection({ tag, allFiles }: { tag: string; allFiles: PortfolioFile
     items.length === 1 ? "1 entry with this tag" : `${items.length} entries with this tag`
 
   return (
-    <main class="portfolio-collection portfolio-tag-page" data-portfolio-collection="tags" data-view="gallery">
+    <main
+      class="portfolio-collection portfolio-tag-page"
+      data-portfolio-collection="tags"
+      data-view="gallery"
+    >
       <div class="portfolio-heading">
         <div>
           <a class="portfolio-back" href="/tags/">
@@ -1128,7 +1126,11 @@ function TagIndex({ allFiles }: { allFiles: PortfolioFile[] }) {
   const total = tags.reduce((sum, entry) => sum + entry.count, 0)
 
   return (
-    <main class="portfolio-collection portfolio-tag-page" data-portfolio-collection="tags" data-view="gallery">
+    <main
+      class="portfolio-collection portfolio-tag-page"
+      data-portfolio-collection="tags"
+      data-view="gallery"
+    >
       <div class="portfolio-heading">
         <div>
           <p>
@@ -1177,7 +1179,12 @@ function Collection({ section, allFiles }: { section: Section; allFiles: Portfol
         </div>
         <div class="portfolio-heading__actions">
           <div class="portfolio-heading__toggles">
-            <div class="portfolio-view-toggle" role="group" aria-label="Sort order" data-sort-toggle>
+            <div
+              class="portfolio-view-toggle"
+              role="group"
+              aria-label="Sort order"
+              data-sort-toggle
+            >
               <button type="button" data-sort-mode="significance" aria-pressed="true">
                 Highlights
               </button>
@@ -1249,95 +1256,385 @@ function linkIcons(): LinkIconMap {
   return cachedLinkIcons
 }
 
+function homeJsx(nodes: HomeNode[]) {
+  return toJsxRuntime({ type: "root", children: nodes } as Parameters<typeof toJsxRuntime>[0], {
+    Fragment,
+    jsx,
+    jsxs,
+    elementAttributeNameCase: "html",
+  })
+}
+
+function prepareHomeContent(node: HomeNode) {
+  if (/^h[1-6]$/.test(node.tagName ?? "")) {
+    node.children = node.children?.filter((child) => child.properties?.role !== "anchor")
+  }
+  // Modal history changes the document URL while the homepage stays mounted.
+  // Keep lazy assets and narrative links stable underneath those entry URLs.
+  if (node.tagName === "a" && typeof node.properties?.href === "string") {
+    const href = node.properties.href
+    if (href === RESUME_HREF || /^\/?resume\/?$/.test(href)) {
+      node.properties["data-router-ignore"] = true
+    }
+    if (!/^[a-z][a-z\d+.-]*:|^\/\//i.test(href)) {
+      const url = new URL(href, "https://portfolio.local/")
+      node.properties.href = `${url.pathname}${url.search}${url.hash}`
+    }
+  }
+  if (node.tagName === "img" && node.properties?.src) {
+    const src = imageVariant(normalizeImageSrc(String(node.properties.src)), "small")
+    const preview = imageVariant(src, "preview")
+    Object.assign(node.properties, {
+      src,
+      loading: "lazy",
+      decoding: "async",
+      width: 800,
+      height: 500,
+      ...(src !== preview
+        ? {
+            srcSet: `${preview} 256w, ${src} 800w`,
+            sizes: "(max-width: 720px) calc(100vw - 48px), 420px",
+          }
+        : {}),
+    })
+  }
+  node.children?.forEach(prepareHomeContent)
+}
+
+function Newsletter({ post }: { post?: NewsletterPost }) {
+  if (!post || !isRecentNewsletter(post)) return null
+  return (
+    <section
+      class="portfolio-home-section portfolio-home-writing"
+      aria-labelledby="newsletter-title"
+    >
+      <article class="newsletter-card" id="newsletter">
+        <div class="newsletter-card__copy">
+          <p class="newsletter-card__eyebrow">From my notebook · {formatMonthYear(post.pubDate)}</p>
+          <h2 id="newsletter-title">{post.title}</h2>
+          <p>{post.description}</p>
+          <a href={post.link} target="_blank" rel="noreferrer">
+            Read on Substack <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        {post.thumbnail && (
+          <img
+            src={post.thumbnail}
+            alt=""
+            width="640"
+            height="400"
+            loading="lazy"
+            decoding="async"
+          />
+        )}
+      </article>
+    </section>
+  )
+}
+
 function PhotoCoverflow({ allFiles }: { allFiles: PortfolioFile[] }) {
   const photos = coverPhotos(allFiles)
   if (!photos.length) return null
-
-  const firstSrc = normalizeImageSrc(photos[0]?.src ?? "")
-
   return (
-    <section class="portfolio-coverflow" aria-label="Photo coverflow">
-      {firstSrc && <link rel="preload" as="image" href={firstSrc} fetchpriority="high" />}
-      <div class="portfolio-coverflow__controls">
-        <button type="button" data-reel-previous aria-label="Previous photo">
-          ←
-        </button>
-        <button type="button" data-reel-next aria-label="Next photo">
-          →
-        </button>
-      </div>
-      <div class="portfolio-coverflow__viewport" data-portfolio-reel tabindex={0}>
-        {photos.map((photo, index) => {
-          const src = normalizeImageSrc(photo.src ?? "")
-          const caption = photo.caption ?? ""
-          const link = typeof photo.link === "string" ? photo.link.trim() : ""
-          const priority = index === 0
-          const media = (
-            <>
-              <img
-                src={src}
-                alt={caption}
-                loading={priority ? "eager" : "lazy"}
-                decoding="async"
-                {...(priority ? { fetchpriority: "high" as const } : {})}
-              />
-              {caption && <figcaption>{caption}</figcaption>}
-            </>
-          )
-
-          if (link) {
-            const external = isExternalLink(link)
-            return (
-              <a
-                class="portfolio-coverflow__item"
-                href={link}
-                {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
-              >
+    <section class="home-photo-reel" aria-label="A few moments along the way">
+      <div class="portfolio-coverflow">
+        <div
+          class="portfolio-coverflow__viewport"
+          data-portfolio-reel
+          data-reel-autoplay
+          tabindex={0}
+        >
+          {photos.map((photo, index) => {
+            const src = imageVariant(normalizeImageSrc(photo.src ?? ""), "small")
+            const caption = photo.caption ?? ""
+            const media = (
+              <>
+                <img
+                  src={src}
+                  alt={caption}
+                  width="800"
+                  height="600"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  {...(index === 0 ? { fetchpriority: "high" as const } : {})}
+                />
+                <figcaption>{caption}</figcaption>
+              </>
+            )
+            return photo.link ? (
+              <a class="portfolio-coverflow__item" href={photo.link}>
                 {media}
               </a>
+            ) : (
+              <figure
+                class="portfolio-coverflow__item"
+                data-portfolio-lightbox
+                data-lightbox-src={imageVariant(src, "full")}
+                data-lightbox-caption={caption}
+                role="button"
+                tabindex={0}
+                aria-label={`Expand ${caption}`}
+              >
+                {media}
+              </figure>
             )
-          }
-
-          return (
-            <figure
-              class="portfolio-coverflow__item"
-              data-portfolio-lightbox
-              data-lightbox-src={imageVariant(src, "full")}
-              data-lightbox-caption={caption}
-              role="button"
-              tabindex={0}
-              aria-label={caption ? `Expand ${caption}` : "Expand photo"}
+          })}
+        </div>
+        <div class="portfolio-coverflow__controls">
+          <button type="button" data-reel-previous aria-label="Previous photo">
+            ←
+          </button>
+          <button
+            type="button"
+            data-reel-pause
+            aria-label="Pause automatic photos"
+            aria-pressed="false"
+          >
+            <svg
+              data-reel-pause-icon
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
             >
-              {media}
-            </figure>
-          )
-        })}
+              <path d="M7 5h3v14H7zM14 5h3v14h-3z" />
+            </svg>
+            <svg
+              data-reel-play-icon
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </button>
+          <button type="button" data-reel-next aria-label="Next photo">
+            →
+          </button>
+        </div>
       </div>
     </section>
   )
 }
 
-function Newsletter() {
-  const post = newsletterFallback
+function HomeProject({ file }: { file: PortfolioFile }) {
+  const data = frontmatter(file)
+  const image = entryImages(file, 1)[0]
+  const story = (file as { homeProjectStory?: HomeProjectStory }).homeProjectStory ?? {}
+  const distinctResult =
+    story.result && story.result !== data.description && story.result !== story.contribution
   return (
-    <article class="newsletter-card" id="newsletter" data-newsletter-card data-state="cached">
-      <div class="newsletter-card__copy">
-        <p class="newsletter-card__eyebrow">
-          Latest newsletter update <span data-newsletter-date>{formatMonthYear(post.pubDate)}</span>
-        </p>
-        <h2 data-newsletter-title>{post.title}</h2>
-        <p data-newsletter-description>{post.description}</p>
+    <li class={`home-project${image ? "" : " home-project--text"}`}>
+      {image && (
         <a
-          href={post.link}
-          data-newsletter-link
-          target="_blank"
-          rel="noreferrer"
+          class="home-project__image"
+          href={linkFor(file)}
+          data-portfolio-open={cleanSlug(file)}
+          aria-label={`Explore ${data.title}`}
         >
-          Read on Substack <span aria-hidden="true">↗</span>
+          <img
+            src={imageVariant(image.src, "small")}
+            alt={image.alt}
+            width="800"
+            height="500"
+            srcSet={`${imageVariant(image.src, "preview")} 256w, ${imageVariant(image.src, "small")} 800w`}
+            sizes="(max-width: 720px) calc(100vw - 80px), (max-width: 1100px) 40vw, 560px"
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      )}
+      <div class="home-project__copy">
+        <p class="home-project__meta">
+          {displayDate(data)}
+          {data.from && <> · {data.from}</>}
+        </p>
+        <h3>
+          <a href={linkFor(file)} data-portfolio-open={cleanSlug(file)}>
+            {data.title}
+          </a>
+        </h3>
+        {!story.contribution && data.description && <p>{data.description}</p>}
+        {story.contribution && (
+          <p class="home-project__detail">
+            <span>My contribution</span>
+            {story.contribution}
+          </p>
+        )}
+        {distinctResult && (
+          <p class="home-project__detail">
+            <span>The result</span>
+            {story.result}
+          </p>
+        )}
+        <a class="home-project__more" href={linkFor(file)} data-portfolio-open={cleanSlug(file)}>
+          Explore the build <span aria-hidden="true">↗</span>
         </a>
       </div>
-      <img data-newsletter-image src={post.thumbnail} alt={post.title} loading="lazy" decoding="async" />
-    </article>
+    </li>
+  )
+}
+
+function HomeMilestone({ file }: { file: PortfolioFile }) {
+  const data = frontmatter(file)
+  const image = entryImages(file, 1)[0]
+  return (
+    <li class="home-milestone" data-significance={visibleSignificance(data.significance)}>
+      <a href={linkFor(file)} data-portfolio-open={cleanSlug(file)}>
+        {image && (
+          <img
+            src={imageVariant(image.src, "small")}
+            alt={image.alt}
+            srcSet={`${imageVariant(image.src, "preview")} 256w, ${imageVariant(image.src, "small")} 800w`}
+            sizes="(max-width: 720px) calc(100vw - 48px), (max-width: 1000px) 45vw, 560px"
+            width="800"
+            height="500"
+            loading="lazy"
+            decoding="async"
+          />
+        )}
+        <div class="home-milestone__body">
+          <p class="home-milestone__meta">
+            {data.from}
+            {data.from && " · "}
+            {displayDate(data)}
+          </p>
+          <h3>
+            {data.title}
+            <span aria-hidden="true">↗</span>
+          </h3>
+          {data.description && <p>{data.description}</p>}
+        </div>
+      </a>
+    </li>
+  )
+}
+
+function HomeChapter({
+  heading,
+  nodes,
+  index,
+  allFiles,
+}: {
+  heading: HomeNode
+  nodes: HomeNode[]
+  index: number
+  allFiles: PortfolioFile[]
+}) {
+  const id = String(heading.properties?.id ?? `home-chapter-${index}`)
+  const lead: HomeNode[] = []
+  const groups: HomeNode[][] = []
+  for (const node of nodes) {
+    if (node.tagName === "h3") groups.push([node])
+    else if (groups.length) groups[groups.length - 1].push(node)
+    else lead.push(node)
+  }
+  const milestones = id === "a-few-milestones-along-the-way"
+  const linkedAwards: PortfolioFile[] = []
+  if (milestones) {
+    const visit = (node: HomeNode) => {
+      if (node.tagName === "a") {
+        const file = allFiles.find(
+          (file) => linkFor(file) === node.properties?.href && sectionOf(file) === "awards",
+        )
+        if (file && !linkedAwards.includes(file)) linkedAwards.push(file)
+      }
+      node.children?.forEach(visit)
+    }
+    lead.filter((node) => node.tagName === "ul").forEach(visit)
+  }
+  const photoAwards = linkedAwards.filter((file) => entryImages(file, 1).length)
+  const textAwards = linkedAwards.filter((file) => !entryImages(file, 1).length)
+  if (id === "lets-build-something-useful") {
+    const paragraphs = lead.filter((node) => node.tagName === "p")
+    const actions = paragraphs[1]?.children?.filter((node) => node.tagName === "a") ?? []
+    return (
+      <section
+        class={`portfolio-home-section home-chapter home-chapter--${id} home-contact`}
+        id={id}
+        aria-labelledby={`${id}-title`}
+      >
+        <div class="home-contact__copy">
+          <h2 id={`${id}-title`}>{homeText(heading)}</h2>
+          {homeJsx(paragraphs.slice(0, 1))}
+        </div>
+        <div class="home-contact__links">
+          <nav class="home-contact__actions" aria-label="Get in touch">
+            {homeJsx(actions)}
+          </nav>
+          <div class="home-contact__elsewhere">{homeJsx(paragraphs.slice(2))}</div>
+        </div>
+      </section>
+    )
+  }
+  // A standalone project or archive action belongs to the whole chapter.
+  const trailingLinks: HomeNode[] = []
+  const lastGroup = groups.at(-1)
+  if (lastGroup) {
+    const linkIndex = lastGroup.findIndex(
+      (node) =>
+        node.tagName === "p" &&
+        node.children?.some(
+          (child) =>
+            child.tagName === "a" &&
+            /^\/(?:tags\/|projects\/|awards\/)/.test(String(child.properties?.href ?? "")),
+        ) &&
+        node.children.every(
+          (child) => child.tagName === "a" || (child.type === "text" && !child.value?.trim()),
+        ),
+    )
+    if (linkIndex >= 0) trailingLinks.push(...lastGroup.splice(linkIndex))
+  }
+  return (
+    <section
+      class={`portfolio-home-section home-chapter home-chapter--${id}`}
+      id={id}
+      aria-labelledby={`${id}-title`}
+    >
+      <header class="home-chapter__heading">
+        <h2 id={`${id}-title`}>{homeText(heading)}</h2>
+      </header>
+      {linkedAwards.length > 0 && (
+        <div class="home-milestones">
+          {photoAwards.length > 0 && (
+            <ul class="home-milestones__photos" data-count={photoAwards.length}>
+              {photoAwards.map((file) => (
+                <HomeMilestone file={file} />
+              ))}
+            </ul>
+          )}
+          {textAwards.length > 0 && (
+            <ul class="home-milestones__notes">
+              {textAwards.map((file) => (
+                <HomeMilestone file={file} />
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+      {lead.length > 0 && (
+        <div class="home-chapter__intro">
+          {homeJsx(milestones ? lead.filter((node) => node.tagName !== "ul") : lead)}
+        </div>
+      )}
+      {groups.length > 0 && (
+        <div class="home-chapter__groups">
+          {groups.map((group) => (
+            <div class="home-chapter__group">{homeJsx(group)}</div>
+          ))}
+        </div>
+      )}
+      {trailingLinks.length > 0 && (
+        <nav class="home-chapter__actions" aria-label="Explore this chapter">
+          {homeJsx(trailingLinks)}
+        </nav>
+      )}
+    </section>
   )
 }
 
@@ -1364,7 +1661,7 @@ function HomeProjects({ allFiles }: { allFiles: PortfolioFile[] }) {
 
   return (
     <section
-      class="portfolio-home-projects"
+      class="portfolio-home-section portfolio-home-projects"
       id="selected-projects"
       aria-labelledby="selected-projects-title"
     >
@@ -1372,7 +1669,12 @@ function HomeProjects({ allFiles }: { allFiles: PortfolioFile[] }) {
         <h2 id="selected-projects-title">Selected projects</h2>
         <dl class="portfolio-home-projects__stats">
           {stats.map(({ label, value, href }) => (
-            <div><dt><a href={href}>{label}</a></dt><dd>{value}</dd></div>
+            <div>
+              <dt>
+                <a href={href}>{label}</a>
+              </dt>
+              <dd>{value}</dd>
+            </div>
           ))}
         </dl>
       </header>
@@ -1387,7 +1689,10 @@ function HomeProjects({ allFiles }: { allFiles: PortfolioFile[] }) {
           </div>
         </div>
       )}
-      <ul class="portfolio-grid portfolio-home-projects__grid">
+      <ul
+        class="portfolio-grid portfolio-home-projects__grid"
+        aria-label="Selected project overview"
+      >
         {selected.map((file) => (
           <CollectionCard file={file} section="projects" preview />
         ))}
@@ -1404,6 +1709,17 @@ function HomeProjects({ allFiles }: { allFiles: PortfolioFile[] }) {
           <span aria-hidden="true">↗</span>
         </a>
       </nav>
+      <div class="portfolio-home-projects__deeper" id="project-stories">
+        <h3>What I worked on. What came out of it.</h3>
+        <ul class="portfolio-home-projects__stories">
+          {selected.map((file) => (
+            <HomeProject file={file} />
+          ))}
+        </ul>
+        <a class="home-section-action" href={sectionHref("projects")}>
+          Browse all {projects.length} projects <span aria-hidden="true">→</span>
+        </a>
+      </div>
     </section>
   )
 }
@@ -1412,12 +1728,14 @@ function Home(props: QuartzComponentProps) {
   const icons = linkIcons()
   const tree = props.tree as Parameters<typeof applyLinkIconsToHast>[0]
   applyLinkIconsToHast(tree, icons)
-  const content = toJsxRuntime(tree as Parameters<typeof toJsxRuntime>[0], {
-    Fragment,
-    jsx,
-    jsxs,
-    elementAttributeNameCase: "html",
-  })
+  prepareHomeContent(tree as HomeNode)
+  const { intro, chapters } = homeChapters(tree as HomeNode)
+  // Quartz renders a second, CSS-hidden article after this component. Keep
+  // just the intro there for search previews instead of duplicating every
+  // chapter and image. renderPage gives us a per-page clone of the tree.
+  ;(tree as HomeNode).children = intro
+  const newsletter = (props.fileData as { portfolioNewsletter?: NewsletterPost })
+    .portfolioNewsletter
   const counts = Object.fromEntries(
     sections.map((section) => [section, itemsForSection(props.allFiles, section).length]),
   )
@@ -1439,28 +1757,37 @@ function Home(props: QuartzComponentProps) {
 
   return (
     <main class="portfolio-home">
-      <div class="portfolio-home-shell">
+      <div class="portfolio-home-section portfolio-home-shell">
         <section class="portfolio-home-copy">
           <h1>Prajwal Prashanth</h1>
-          <div class="portfolio-home-markdown">{content}</div>
+          <div class="portfolio-home-markdown">{homeJsx(intro)}</div>
+          <div class="home-hero-actions">
+            <a class="home-primary-link" href="#selected-projects">
+              Explore my work <span aria-hidden="true">↓</span>
+            </a>
+            <ResumeLink children="View resume ↗" />
+          </div>
           <nav class="portfolio-section-links" aria-label="Portfolio sections">
             {sections.map((section) => (
               <a href={sectionHref(section)}>
-                <span>{section}</span>
-                <small>{counts[section]}</small>
+                <span>
+                  {section}
+                  <small>
+                    {counts[section]} {section === "projects" ? "things built" : "distinctions"}
+                  </small>
+                </span>
+                <span aria-hidden="true">↗</span>
               </a>
             ))}
           </nav>
-          <a class="portfolio-home-explore" href="#selected-projects">
-            Explore my work <span aria-hidden="true">↓</span>
-          </a>
         </section>
-        <aside class="portfolio-home-media">
-          <PhotoCoverflow allFiles={props.allFiles} />
-          <Newsletter />
-        </aside>
+        <PhotoCoverflow allFiles={props.allFiles} />
       </div>
       <HomeProjects allFiles={props.allFiles} />
+      {chapters.map((chapter, index) => (
+        <HomeChapter {...chapter} index={index} allFiles={props.allFiles} />
+      ))}
+      <Newsletter post={newsletter} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}

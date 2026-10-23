@@ -29,10 +29,7 @@ async function listFullImages() {
 
 async function writeVariant(src, dest, width) {
   await fs.mkdir(path.dirname(dest), { recursive: true })
-  await sharp(src)
-    .resize({ width, withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(dest)
+  await sharp(src).resize({ width, withoutEnlargement: true }).webp({ quality: 80 }).toFile(dest)
 }
 
 const names = await listFullImages()

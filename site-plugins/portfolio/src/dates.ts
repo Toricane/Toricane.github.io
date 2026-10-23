@@ -92,7 +92,7 @@ export function applyPortfolioDates(data: {
   if (!fm.date) return
   const created = coerceDate(fm.date)
   if (!created) return
-  const modified = fm.modified ? coerceDate(fm.modified) ?? created : created
+  const modified = fm.modified ? (coerceDate(fm.modified) ?? created) : created
   data.dates = {
     created,
     modified,

@@ -14,7 +14,9 @@ function hasContent(node: MarkdownNode): boolean {
   if (node.type === "heading" || node.type === "definition" || node.type === "yaml") return false
   if (node.type === "html" && /^\s*<!--[\s\S]*-->\s*$/.test(node.value ?? "")) return false
   if (node.children) return node.children.some(hasContent)
-  return ["image", "imageReference", "thematicBreak"].includes(node.type) || Boolean(node.value?.trim())
+  return (
+    ["image", "imageReference", "thematicBreak"].includes(node.type) || Boolean(node.value?.trim())
+  )
 }
 
 /** Remove authoring prompts before HTML, search text, and descriptions are generated. */

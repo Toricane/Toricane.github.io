@@ -9,12 +9,7 @@ type CleanupWindow = Window & {
   spaNavigate?: (url: URL) => Promise<void>
 }
 
-const NEWSLETTER_ENDPOINT = "/newsletter.xml"
-const NEWSLETTER_URL = "https://prajwalprashanth.substack.com/"
-const CACHE_KEY = "portfolio:newsletter:v3"
-const CACHE_TTL = 6 * 60 * 60 * 1000
 const ENTRY_PATTERN = /^\/(projects|awards)\/([^/]+)\/?$/
-const NEWSLETTER_PREVIEW_CHARS = 300
 const TAP_STICKY_DISMISS_KEY = "portfolio:tap-sticky-dismissed"
 const TAP_LINKEDIN_FALLBACK = "https://linkedin.com/in/prajwal-prashanth"
 const TAP_PLACE_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} '\-]{0,39}$/u
@@ -37,15 +32,6 @@ const modalStack: ModalFrame[] = []
 const contentCache = new Map<string, { html: string; title: string }>()
 let returnUrl = "/"
 let suppressingSpa = false
-
-function safeUrl(value: unknown, fallback: string) {
-  try {
-    const url = new URL(String(value))
-    return url.protocol === "https:" || url.protocol === "http:" ? url.href : fallback
-  } catch {
-    return fallback
-  }
-}
 
 function redirectLegacyHash() {
   if (location.pathname !== "/" && location.pathname !== "/index.html") return
@@ -75,17 +61,128 @@ function wireReel(root: ParentNode = document) {
     const host = viewport.closest(".portfolio-coverflow") ?? viewport.parentElement
     const previous = host?.querySelector<HTMLButtonElement>("[data-reel-previous]")
     const next = host?.querySelector<HTMLButtonElement>("[data-reel-next]")
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)")
     const move = (direction: number) => {
-      viewport.scrollBy({ left: direction * viewport.clientWidth * 0.78, behavior: "smooth" })
+      viewport.scrollBy({
+        left: direction * viewport.clientWidth * 0.78,
+        behavior: motion.matches ? "auto" : "smooth",
+      })
     }
     const previousHandler = () => move(-1)
     const nextHandler = () => move(1)
     previous?.addEventListener("click", previousHandler)
     next?.addEventListener("click", nextHandler)
 
+    if (!viewport.hasAttribute("data-reel-autoplay")) {
+      ;(window as CleanupWindow).addCleanup?.(() => {
+        previous?.removeEventListener("click", previousHandler)
+        next?.removeEventListener("click", nextHandler)
+        viewport.dataset.reelWired = "false"
+      })
+      continue
+    }
+
+    const pause = host?.querySelector<HTMLButtonElement>("[data-reel-pause]")
+    let timer: ReturnType<typeof setTimeout> | undefined
+    let inView = false
+    let hovered = false
+    let focused = false
+    let paused = false
+    const schedule = () => {
+      clearTimeout(timer)
+      if (
+        motion.matches ||
+        !inView ||
+        hovered ||
+        focused ||
+        paused ||
+        document.hidden ||
+        document.querySelector(".portfolio-lightbox:not([hidden]), .portfolio-modal:not([hidden])")
+      )
+        return
+      timer = setTimeout(() => {
+        const items = [...viewport.querySelectorAll<HTMLElement>(".portfolio-coverflow__item")]
+        const nextItem = items.find(
+          (item) => item.offsetLeft - viewport.offsetLeft > viewport.scrollLeft + 12,
+        )
+        const atEnd = viewport.scrollLeft >= viewport.scrollWidth - viewport.clientWidth - 12
+        viewport.scrollTo({
+          left: !atEnd && nextItem ? nextItem.offsetLeft - viewport.offsetLeft : 0,
+          behavior: "smooth",
+        })
+        schedule()
+      }, 6000)
+    }
+    const updatePause = () => {
+      if (pause) {
+        pause.hidden = motion.matches
+        pause.setAttribute(
+          "aria-label",
+          paused ? "Play automatic photos" : "Pause automatic photos",
+        )
+        pause.setAttribute("aria-pressed", String(paused))
+      }
+      schedule()
+    }
+    const togglePause = () => {
+      paused = !paused
+      updatePause()
+    }
+    const onEnter = () => {
+      hovered = true
+      schedule()
+    }
+    const onLeave = () => {
+      hovered = false
+      schedule()
+    }
+    const onFocus = () => {
+      focused = true
+      schedule()
+    }
+    const onBlur = (event: FocusEvent) => {
+      focused = host?.contains(event.relatedTarget as Node) ?? false
+      schedule()
+    }
+    const stopForInteraction = () => {
+      paused = true
+      updatePause()
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting
+        schedule()
+      },
+      { threshold: 0.25 },
+    )
+    observer.observe(viewport)
+    pause?.addEventListener("click", togglePause)
+    host?.addEventListener("pointerenter", onEnter)
+    host?.addEventListener("pointerleave", onLeave)
+    host?.addEventListener("focusin", onFocus)
+    host?.addEventListener("focusout", onBlur as EventListener)
+    viewport.addEventListener("pointerdown", stopForInteraction)
+    previous?.addEventListener("click", stopForInteraction)
+    next?.addEventListener("click", stopForInteraction)
+    document.addEventListener("visibilitychange", schedule)
+    motion.addEventListener("change", updatePause)
+    updatePause()
+
     ;(window as CleanupWindow).addCleanup?.(() => {
       previous?.removeEventListener("click", previousHandler)
       next?.removeEventListener("click", nextHandler)
+      clearTimeout(timer)
+      observer?.disconnect()
+      pause?.removeEventListener("click", togglePause)
+      host?.removeEventListener("pointerenter", onEnter)
+      host?.removeEventListener("pointerleave", onLeave)
+      host?.removeEventListener("focusin", onFocus)
+      host?.removeEventListener("focusout", onBlur as EventListener)
+      viewport.removeEventListener("pointerdown", stopForInteraction)
+      previous?.removeEventListener("click", stopForInteraction)
+      next?.removeEventListener("click", stopForInteraction)
+      document.removeEventListener("visibilitychange", schedule)
+      motion.removeEventListener("change", updatePause)
       viewport.dataset.reelWired = "false"
     })
   }
@@ -244,7 +341,9 @@ function imagesIn(node: Element): EntryImage[] {
     const image = entryImageFrom(node)
     return image ? [image] : []
   }
-  return [...node.querySelectorAll("img")].map(entryImageFrom).filter((image): image is EntryImage => image !== null)
+  return [...node.querySelectorAll("img")]
+    .map(entryImageFrom)
+    .filter((image): image is EntryImage => image !== null)
 }
 
 function buildCoverflow(images: EntryImage[], ariaLabel: string) {
@@ -464,128 +563,6 @@ function enhanceEntryContent(root: ParentNode = document) {
   wireReel(root)
 }
 
-function firstHtmlImage(value: unknown) {
-  const html = String(value ?? "")
-  if (!html) return ""
-  const doc = new DOMParser().parseFromString(html, "text/html")
-  const src = doc.querySelector("img")?.getAttribute("src")
-  return src ? safeUrl(src, "") : ""
-}
-
-function newsletterImageUrl(item: Record<string, unknown>) {
-  const enclosure = item.enclosure as { link?: string } | undefined
-  return (
-    safeUrl(item.thumbnail, "") ||
-    safeUrl(enclosure?.link, "") ||
-    firstHtmlImage(item.content) ||
-    firstHtmlImage(item.description)
-  )
-}
-
-function renderNewsletter(root: HTMLElement, item: Record<string, unknown>) {
-  if (!root.isConnected) return
-
-  const title = root.querySelector<HTMLElement>("[data-newsletter-title]")
-  const description = root.querySelector<HTMLElement>("[data-newsletter-description]")
-  const date = root.querySelector<HTMLElement>("[data-newsletter-date]")
-  const link = root.querySelector<HTMLAnchorElement>("[data-newsletter-link]")
-  const image = root.querySelector<HTMLImageElement>("[data-newsletter-image]")
-
-  if (title) title.textContent = String(item.title ?? "Latest newsletter")
-  if (description) {
-    const toPlain = (value: unknown) =>
-      new DOMParser().parseFromString(String(value ?? ""), "text/html").body.textContent?.trim() ??
-      ""
-    const fromDescription = toPlain(item.description)
-    const fromContent = toPlain(item.content)
-    const plain = fromContent.length > fromDescription.length ? fromContent : fromDescription
-    const clipped = plain.slice(0, NEWSLETTER_PREVIEW_CHARS).trim()
-    description.textContent =
-      plain.length > NEWSLETTER_PREVIEW_CHARS ? `${clipped.replace(/\s+\S*$/, "")}…` : clipped
-  }
-  if (date && item.pubDate) {
-    const parsed = new Date(String(item.pubDate))
-    date.textContent = Number.isNaN(parsed.getTime())
-      ? ""
-      : new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(parsed)
-  }
-  if (link) link.href = safeUrl(item.link, NEWSLETTER_URL)
-
-  const imageUrl = newsletterImageUrl(item)
-  if (image && imageUrl) {
-    image.src = imageUrl
-    image.alt = String(item.title ?? "Newsletter cover")
-    image.hidden = false
-    image.onerror = () => { image.hidden = true }
-  } else if (image) {
-    image.hidden = true
-  }
-  root.dataset.state = "ready"
-}
-
-let newsletterRequest: Promise<Record<string, unknown>> | undefined
-
-function fetchNewsletter() {
-  newsletterRequest ??= (async () => {
-    const response = await fetch(NEWSLETTER_ENDPOINT, { signal: AbortSignal.timeout(8000) })
-    if (!response.ok) throw new Error(`Newsletter request failed: ${response.status}`)
-    const xml = new DOMParser().parseFromString(await response.text(), "application/xml")
-    if (xml.querySelector("parsererror")) throw new Error("Invalid newsletter feed")
-    const item = xml.querySelector("item")
-    const title = item?.querySelector("title")?.textContent?.trim()
-    const link = safeUrl(item?.querySelector("link")?.textContent, "")
-    if (!item || !title || !link) throw new Error("Newsletter returned no valid posts")
-    return {
-      title,
-      link,
-      pubDate: item.querySelector("pubDate")?.textContent ?? "",
-      description: item.querySelector("description")?.textContent ?? "",
-      content: item.getElementsByTagNameNS("http://purl.org/rss/1.0/modules/content/", "encoded")[0]?.textContent ?? "",
-      thumbnail: item.querySelector("enclosure")?.getAttribute("url") ?? "",
-    }
-  })().catch((error) => {
-    newsletterRequest = undefined
-    throw error
-  })
-  return newsletterRequest
-}
-
-async function loadNewsletter() {
-  const root = document.querySelector<HTMLElement>("[data-newsletter-card]")
-  if (!root || root.dataset.loaded === "true" || root.dataset.loading === "true") return
-  root.dataset.loading = "true"
-
-  try {
-    // Storage can be denied in private browsing. It must never block rendering.
-    try {
-      const cached = JSON.parse(localStorage.getItem(CACHE_KEY) ?? "null") as {
-        savedAt?: number
-        item?: Record<string, unknown>
-      } | null
-      if (cached?.item?.title && cached.item.link) {
-        renderNewsletter(root, cached.item)
-        if (cached.savedAt && Date.now() - cached.savedAt < CACHE_TTL) {
-          root.dataset.loaded = "true"
-          return
-        }
-      }
-    } catch { /* Keep the server-rendered verified post. */ }
-
-    // Share a request across nav/render events. Navigation cannot abort another root's load.
-    const item = await fetchNewsletter()
-    renderNewsletter(root, item)
-    root.dataset.loaded = "true"
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), item }))
-    } catch { /* A cache write failure must not discard a successfully rendered post. */ }
-  } catch {
-    // Keep the dated server-rendered or cached post; allow a later event to retry.
-    if (root.dataset.state !== "ready") root.dataset.state = "fallback"
-  } finally {
-    delete root.dataset.loading
-  }
-}
-
 function wireViewToggle() {
   const collection = document.querySelector<HTMLElement>("[data-portfolio-collection]")
   if (!collection) return
@@ -676,12 +653,15 @@ function itemMatchesFilters(
   return true
 }
 
-const timelineLayoutCache = new WeakMap<HTMLElement, {
-  source: string
-  inputs: ProjectTimelineInput[]
-  original: ReturnType<typeof buildProjectTimeline>
-  signature?: string
-}>()
+const timelineLayoutCache = new WeakMap<
+  HTMLElement,
+  {
+    source: string
+    inputs: ProjectTimelineInput[]
+    original: ReturnType<typeof buildProjectTimeline>
+    signature?: string
+  }
+>()
 
 function refreshProjectTimeline(
   board: HTMLElement,
@@ -829,7 +809,10 @@ function refreshProjectTimeline(
       segment.slug,
       `portfolio-project-timeline__segment portfolio-project-timeline__segment--${segment.style} portfolio-project-timeline__color`,
       {
-        x1: segment.x, y1: segment.y1, x2: segment.x, y2: segment.y2,
+        x1: segment.x,
+        y1: segment.y1,
+        x2: segment.x,
+        y2: segment.y2,
         style: `--pt-color: ${segment.color}`,
       },
     )
@@ -1687,8 +1670,7 @@ function enhanceInlineLinkIcons(root: ParentNode = document) {
 
         const afterInNode = value.slice(index + match[0].length)
         const isLast = i === matches.length - 1
-        const following =
-          isLast && !afterInNode.trim() ? nextElementSkippingWhitespace(node) : null
+        const following = isLast && !afterInNode.trim() ? nextElementSkippingWhitespace(node) : null
 
         if (following instanceof HTMLAnchorElement) {
           prependIconToLabel(following, src)
@@ -2044,7 +2026,9 @@ function wireSearchPortfolioPreview() {
   const layoutObserver = new MutationObserver(() => {
     const pane = ensurePane()
     watchResults()
-    const watching = search.querySelector<HTMLElement>(".results-container")?.dataset.portfolioPreviewWatch === "true"
+    const watching =
+      search.querySelector<HTMLElement>(".results-container")?.dataset.portfolioPreviewWatch ===
+      "true"
     if (!pane || !watching) return
     layoutObserver.disconnect()
     scheduleSyncToResults()
@@ -2490,6 +2474,10 @@ function mountTapSticky(href: string) {
   cta.href = href
   cta.rel = "noopener noreferrer"
   cta.textContent = "Connect on LinkedIn"
+  const ctaArrow = document.createElement("span")
+  ctaArrow.setAttribute("aria-hidden", "true")
+  ctaArrow.textContent = "↗"
+  cta.append(ctaArrow)
 
   const dismiss = document.createElement("button")
   dismiss.type = "button"
@@ -2526,7 +2514,11 @@ function mountTapBanner(href: string, greeting: string) {
 
   const action = document.createElement("span")
   action.className = "portfolio-tap-banner__action"
-  action.textContent = "connect on LinkedIn"
+  action.textContent = "Connect on LinkedIn"
+  const actionArrow = document.createElement("span")
+  actionArrow.setAttribute("aria-hidden", "true")
+  actionArrow.textContent = "↗"
+  action.append(actionArrow)
 
   banner.append(greetingNode, action)
   fillTapBanner(banner, greeting)
@@ -2633,12 +2625,14 @@ function initializePortfolio() {
   wireLightbox()
   wireModal()
   // Full entry pages get the same gallery coverflow + bookmark links as the modal.
-  if (normalizeEntryPath(location.pathname) || document.querySelector("[data-portfolio-entry-heading]")) {
+  if (
+    normalizeEntryPath(location.pathname) ||
+    document.querySelector("[data-portfolio-entry-heading]")
+  ) {
     enhanceEntryContent(document)
   }
   styleHomeProfileLinks()
   enhanceHomeBioIcons()
-  void loadNewsletter()
   void initHomeGreetings()
 }
 

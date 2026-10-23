@@ -49,6 +49,8 @@ Verified result.`)
 })
 
 test("code examples and ordinary mentions of placeholders remain content", () => {
-  const tree = clean('## Notes\nUse `[Replace with: …]` in the template.\n\n```text\n[Replace with: example]\n```')
+  const tree = clean(
+    "## Notes\nUse `[Replace with: …]` in the template.\n\n```text\n[Replace with: example]\n```",
+  )
   assert.equal(tree.children.length, 3)
 })

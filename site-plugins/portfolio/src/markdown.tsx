@@ -15,12 +15,16 @@ import type {
 import { slugifyFilePath, slugTag } from "@quartz-community/utils/path"
 import { hideContentDebt } from "./contentDebt"
 import { selectHomeProjects } from "./homeProjects"
+import type { HomeProjectStory } from "./homeContent"
+import { isRecentNewsletter, type NewsletterPost } from "./newsletter"
 
 type Page = {
   slug?: string
   filePath?: string
   aliases?: string[]
   unlisted?: boolean
+  homeProjectStory?: HomeProjectStory
+  portfolioNewsletter?: NewsletterPost
   frontmatter?: Record<string, unknown> & {
     title?: string
     description?: string
@@ -225,7 +229,22 @@ function homeProjects(pages: Page[]): string {
     page.frontmatter?.tags?.some(
       (tag) => slugTag(tag) === "hackathon" || slugTag(tag).startsWith("hackathon/"),
     )
-  return `## Selected projects\n\nProjects: ${projects.length} · Hackathon builds: ${projects.filter(isHackathon).length} · Hackathon awards: ${awards.filter(isHackathon).length}\n\n${selected.map(listedEntry).join("\n")}\n\n[View all projects](/projects.md) · [Full timeline](/projects/?view=timeline) · [${awards.length} awards & distinctions](/awards.md)\n\n`
+  const stories = selected.map((page) => {
+    const story = page.homeProjectStory
+    const detail = [
+      story?.contribution ? `My contribution: ${escapeLabel(story.contribution)}` : "",
+      story?.result &&
+      story.result !== page.frontmatter?.description &&
+      story.result !== story.contribution
+        ? `The result: ${escapeLabel(story.result)}`
+        : "",
+    ]
+      .filter(Boolean)
+      .map((text) => `\n  ${text}`)
+      .join("")
+    return listedEntry(page) + detail
+  })
+  return `## Selected projects\n\nProjects: ${projects.length} · Hackathon builds: ${projects.filter(isHackathon).length} · Hackathon awards: ${awards.filter(isHackathon).length}\n\n${stories.join("\n")}\n\n[View all projects](/projects.md) · [Full timeline](/projects/?view=timeline) · [${awards.length} awards & distinctions](/awards.md)\n\n`
 }
 
 function listing(page: Page, pages: Page[]): string {
@@ -296,8 +315,18 @@ export async function markdownOutputs(
     const source = page.filePath ? await fs.readFile(page.filePath, "utf8") : ""
     const fm = page.frontmatter ?? {}
     const header = `# ${escapeLabel(title(page))}\n\n${fm.description ? `${escapeLabel(String(fm.description))}\n\n` : ""}`
-    let value = `${header}Web page: ${pagePath(slug)}\n\n${facts(page)}${cleanMarkdown(source, slug, base, routes)}\n\n${listing(page, pages)}`
-    if (slug === "index") value += homeProjects(pages)
+    let body = cleanMarkdown(source, slug, base, routes)
+    if (slug === "index") {
+      const chapter = body.search(/\n## /)
+      body =
+        chapter < 0
+          ? `${body}\n\n${homeProjects(pages)}`
+          : `${body.slice(0, chapter)}\n\n${homeProjects(pages)}${body.slice(chapter).trimStart()}`
+      const post = page.portfolioNewsletter
+      if (post && isRecentNewsletter(post))
+        body += `\n\n## From my notebook\n\n[${escapeLabel(post.title)}](${post.link}) · ${dateText(post.pubDate)}\n\n${escapeLabel(post.description)}\n`
+    }
+    let value = `${header}Web page: ${pagePath(slug)}\n\n${facts(page)}${body}\n\n${listing(page, pages)}`
     if (Array.isArray(fm.photos)) {
       value += `## Photos\n\n${fm.photos
         .map(

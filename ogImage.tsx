@@ -1,4 +1,5 @@
 import type { SocialImageOptions } from "@quartz-community/og-image"
+import type { Theme } from "./quartz/util/theme"
 import { displayPeriod, type PortfolioFrontmatter } from "./site-plugins/portfolio/src/dates"
 
 function fontName(spec: string | { name: string } | undefined): string {
@@ -19,7 +20,7 @@ export const portfolioOgImage: SocialImageOptions["imageStructure"] = ({
   iconBase64,
 }) => {
   const { colorScheme } = userOpts
-  const theme = cfg.theme
+  const theme = cfg.theme as Theme
   const colors = theme.colors[colorScheme]
   const fontBreakPoint = 32
   const useSmallerFont = title.length > fontBreakPoint
@@ -108,13 +109,7 @@ export const portfolioOgImage: SocialImageOptions["imageStructure"] = ({
           }}
         >
           {iconBase64 && (
-            <img
-              src={iconBase64}
-              alt=""
-              width={56}
-              height={56}
-              style={{ borderRadius: "50%" }}
-            />
+            <img src={iconBase64} alt="" width={56} height={56} style={{ borderRadius: "50%" }} />
           )}
           <div
             style={{
