@@ -4204,18 +4204,13 @@ body:has(main.portfolio-home) {
 /* Focus the small home previews without changing the original image or gallery.
    The complete screenshot stays available through image expansion. */
 .home-chapter--a-few-things-i-couldnt-leave-alone {
-  .home-chapter-media:has(img[src$="/scoped.webp"]),
-  .home-chapter-media:has(img[src$="/spelling-garden.webp"]) {
+  .home-chapter-media:has(img[src$="/scoped.webp"]) {
     aspect-ratio: 8 / 5;
     img {
       height: 100%;
       transform: scale(1.65);
       transform-origin: top left;
     }
-  }
-  .home-chapter-media:has(img[src$="/spelling-garden.webp"]) img {
-    transform: scale(2);
-    transform-origin: right 75%;
   }
 }
 @media (min-width: 721px) {

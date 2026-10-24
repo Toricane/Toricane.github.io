@@ -4,6 +4,7 @@ import type {
   QuartzComponentProps,
 } from "@quartz-community/types"
 import { toJsxRuntime } from "hast-util-to-jsx-runtime"
+import type { Root } from "hast"
 import { Fragment, jsx, jsxs } from "preact/jsx-runtime"
 import styles from "../styles/portfolio.scss"
 // @ts-expect-error - compiled to a browser script string by tsup
@@ -24,6 +25,7 @@ import {
   type HomeProjectStory,
 } from "../homeContent"
 import { selectHomeProjects } from "../homeProjects"
+import { promoteProjectLinks } from "../entryContent"
 import { applyLinkIconsToHast, linkIconMapFromFilenames, type LinkIconMap } from "../linkIcons"
 import { displayPeriod, formatMonthYear, projectDateBounds } from "../dates"
 import {
@@ -1827,11 +1829,14 @@ function Home(props: QuartzComponentProps) {
   )
 }
 
-function EntryHeading({ fileData }: QuartzComponentProps) {
+function EntryHeading({ fileData, tree }: QuartzComponentProps) {
   const data = (fileData.frontmatter ?? {}) as Frontmatter
   const slug = String(fileData.slug ?? "")
   const section = sections.find((candidate) => slug.startsWith(`${candidate}/`))
   const hero = entryImages(fileData as PortfolioFile, 1)[0]
+
+  // renderPage provides a per-page clone; modals fetch this same rendered HTML.
+  if (section === "projects") promoteProjectLinks(tree as Root)
 
   return (
     <div class="portfolio-entry-heading" data-portfolio-entry-heading>

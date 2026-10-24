@@ -66,9 +66,9 @@ there is no separate caption or controls strip beneath the carousel.
 Linked photos show a View story cue and open the corresponding project or award.
 Chapter image-only paragraphs become accessible expansion controls with a small
 corner-expand icon and a descriptive accessible label. The original
-image loads only on expansion; the small preview stays in the page. Scoped and
-Spelling Garden use CSS-only crops to emphasize the interface at phone width,
-while the full screenshot remains available in the lightbox.
+image loads only on expansion; the small preview stays in the page. Scoped uses
+a CSS-only crop to emphasize the interface at phone width. Spelling Garden shows
+its full screenshot. Both originals remain available in the lightbox.
 
 Hackathon experiments and smaller tools are curated in the source Markdown. The
 milestones chapter resolves its authored award links to collection records, using
@@ -109,6 +109,17 @@ The introduction's section-link row uses automatic equal-width grid columns.
 Projects and Awards currently split the row evenly. A future section should
 receive the same share automatically; do not reserve an empty third column or
 add an Experience collection until it is actually implemented.
+
+## Project entry order
+
+Project pages and entry modals display `## Links` before the first body section
+(normally `## Overview`), after the entry heading and description. This lets
+visitors reach the demo, repository, or related resources before reading the
+longer story. The render-only helper in `src/entryContent.ts` moves the whole
+section, including any subsections, in the HTML tree; keyboard and visual order
+agree. Awards keep their authored order. Source Markdown, templates, and generated
+Markdown exports retain their original section order. Keep editing Links in its
+existing position in each project note; no duplicate link list is needed.
 
 ## Appearance
 

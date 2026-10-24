@@ -194,9 +194,10 @@ editing the reel. Do not add large original images to the initially loaded reel.
 Its first image is eager; the rest are lazy. Keep icon pause/play controls and
 reduced-motion behaviour intact when changing its content.
 Reel items with a `link` show a View story cue and open that entry. Chapter image
-blocks support keyboard and pointer expansion to the original photo. Scoped and
-Spelling Garden previews use CSS crops for legibility; the source images and
-gallery metadata remain full-size. Check their focal areas when replacing images.
+blocks support keyboard and pointer expansion to the original photo. Scoped's
+preview uses a CSS crop for legibility; Spelling Garden shows the full image.
+Source images and gallery metadata remain full-size. Check focal areas when
+replacing images.
 
 ## Verification and handoff
 
