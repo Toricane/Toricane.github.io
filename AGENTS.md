@@ -92,8 +92,10 @@ The next section shows up to six `significance: spotlight` projects, selected
 automatically by recency. Do not hardcode this selection's project slugs.
 Cards use their first Gallery image and remain text-only when it is missing.
 The graph reuses all dated project timeline data, not just the selected cards.
-The compact overview is followed by contribution/result summaries derived from
-the entries, then curated narrative chapters from `content/index.md`.
+The compact overview leads into curated narrative chapters from `content/index.md`.
+The source's `## More selected work` heading places compact contribution/result
+summaries for selected projects without a full chapter. Standalone project links
+in chapters identify that coverage automatically; do not hardcode excluded slugs.
 Mobile keeps a narrow rail beside the overview heading, cards, and archive links;
 the detailed stories below use the full width. Wide desktops move the rail into
 the left margin. Keep the introduction's section links equally sized for any

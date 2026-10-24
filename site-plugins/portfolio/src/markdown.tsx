@@ -15,7 +15,12 @@ import type {
 import { slugifyFilePath, slugTag } from "@quartz-community/utils/path"
 import { hideContentDebt } from "./contentDebt"
 import { selectHomeProjects } from "./homeProjects"
-import type { HomeProjectStory } from "./homeContent"
+import {
+  HOME_MORE_WORK_HEADING,
+  homeStoryProjectSlugs,
+  type HomeNode,
+  type HomeProjectStory,
+} from "./homeContent"
 import { isRecentNewsletter, type NewsletterPost } from "./newsletter"
 
 type Page = {
@@ -213,7 +218,22 @@ function listedEntry(entry: Page): string {
   return `- [${escapeLabel(title(entry))}](${markdownPath(String(entry.slug))})${description ? `: ${escapeLabel(String(description))}` : ""}${listingMetadata(entry)}`
 }
 
-function homeProjects(pages: Page[]): string {
+function homeStoryDetail(page: Page): string {
+  const story = page.homeProjectStory
+  return [
+    story?.contribution ? `My contribution: ${escapeLabel(story.contribution)}` : "",
+    story?.result &&
+    story.result !== page.frontmatter?.description &&
+    story.result !== story.contribution
+      ? `The result: ${escapeLabel(story.result)}`
+      : "",
+  ]
+    .filter(Boolean)
+    .map((text) => `\n  ${text}`)
+    .join("")
+}
+
+function homeProjects(pages: Page[], includeDetails = true): string {
   const entries = (section: string) =>
     pages.filter(
       (page) =>
@@ -229,21 +249,9 @@ function homeProjects(pages: Page[]): string {
     page.frontmatter?.tags?.some(
       (tag) => slugTag(tag) === "hackathon" || slugTag(tag).startsWith("hackathon/"),
     )
-  const stories = selected.map((page) => {
-    const story = page.homeProjectStory
-    const detail = [
-      story?.contribution ? `My contribution: ${escapeLabel(story.contribution)}` : "",
-      story?.result &&
-      story.result !== page.frontmatter?.description &&
-      story.result !== story.contribution
-        ? `The result: ${escapeLabel(story.result)}`
-        : "",
-    ]
-      .filter(Boolean)
-      .map((text) => `\n  ${text}`)
-      .join("")
-    return listedEntry(page) + detail
-  })
+  const stories = selected.map(
+    (page) => listedEntry(page) + (includeDetails ? homeStoryDetail(page) : ""),
+  )
   return `## Selected projects\n\nProjects: ${projects.length} · Hackathon builds: ${projects.filter(isHackathon).length} · Hackathon awards: ${awards.filter(isHackathon).length}\n\n${stories.join("\n")}\n\n[View all projects](/projects.md) · [Full timeline](/projects/?view=timeline) · [${awards.length} awards & distinctions](/awards.md)\n\n`
 }
 
@@ -317,11 +325,39 @@ export async function markdownOutputs(
     const header = `# ${escapeLabel(title(page))}\n\n${fm.description ? `${escapeLabel(String(fm.description))}\n\n` : ""}`
     let body = cleanMarkdown(source, slug, base, routes)
     if (slug === "index") {
+      const moreWorkHeading = `## ${HOME_MORE_WORK_HEADING}\n`
+      const hasMoreWork = body.includes(moreWorkHeading)
+      if (hasMoreWork) {
+        const tree = unified().use(remarkParse).use(remarkGfm).parse(body)
+        const covered = homeStoryProjectSlugs(tree.children as HomeNode[])
+        const additional = selectHomeProjects(
+          pages.filter(
+            (page) => page.unlisted !== true && String(page.slug).startsWith("projects/"),
+          ),
+        ).filter((page) => !covered.has(String(page.slug)))
+        const stories = additional.map(
+          (page) =>
+            (page.homeProjectStory?.contribution
+              ? `- [${escapeLabel(title(page))}](${markdownPath(String(page.slug))})${listingMetadata(page)}`
+              : listedEntry(page)) + homeStoryDetail(page),
+        )
+        if (stories.length) {
+          const start = body.indexOf(moreWorkHeading) + moreWorkHeading.length
+          const nextChapter = body.indexOf("\n## ", start)
+          const end = nextChapter < 0 ? body.length : nextChapter
+          body = `${body.slice(0, end).trimEnd()}\n\n${stories.join("\n")}\n\n${body.slice(end).trimStart()}`
+        } else {
+          body = body.replace(
+            new RegExp(`## ${HOME_MORE_WORK_HEADING}\\n[\\s\\S]*?(?=\\n## |$)`),
+            "",
+          )
+        }
+      }
       const chapter = body.search(/\n## /)
       body =
         chapter < 0
-          ? `${body}\n\n${homeProjects(pages)}`
-          : `${body.slice(0, chapter)}\n\n${homeProjects(pages)}${body.slice(chapter).trimStart()}`
+          ? `${body}\n\n${homeProjects(pages, !hasMoreWork)}`
+          : `${body.slice(0, chapter)}\n\n${homeProjects(pages, !hasMoreWork)}${body.slice(chapter).trimStart()}`
       const post = page.portfolioNewsletter
       if (post && isRecentNewsletter(post))
         body += `\n\n## From my notebook\n\n[${escapeLabel(post.title)}](${post.link}) · ${dateText(post.pubDate)}\n\n${escapeLabel(post.description)}\n`
@@ -383,8 +419,8 @@ For search, fetch /search-index.json and search its pages locally by title, desc
 
 ## Start here
 
-- [About Prajwal](/index.md): Background, interests, and contact links.
-- [Projects](/projects.md): Projects and hackathon builds, with dates, highlights, and tags.
+- [About Prajwal](/index.md): Background, selected projects, curated build stories, community work, and contact links. Follow project links for full details.
+- [Projects](/projects.md): All projects and hackathon builds, with dates, highlights, tags, and links to individual entries.
 - [Awards](/awards.md): Awards and accomplishments, with dates, highlights, and tags.
 - [Resume](${RESUME_HREF}): Resume Markdown served by the separate resume project.
 - [Search index](/search-index.json): Searchable text and metadata; schema version 1.

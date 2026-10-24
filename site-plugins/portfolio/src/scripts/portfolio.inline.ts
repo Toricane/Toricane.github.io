@@ -1320,6 +1320,8 @@ function enlargeModal() {
   }
 }
 
+let lightboxReturnFocus: HTMLElement | null = null
+
 function lightboxRoot() {
   return document.querySelector<HTMLElement>("[data-portfolio-lightbox-root]")
 }
@@ -1344,9 +1346,11 @@ function closeLightbox() {
     caption.textContent = ""
     caption.hidden = true
   }
+  if (lightboxReturnFocus?.isConnected) lightboxReturnFocus.focus({ preventScroll: true })
+  lightboxReturnFocus = null
 }
 
-function openLightbox(src: string, caption = "") {
+function openLightbox(src: string, caption = "", trigger?: HTMLElement) {
   const root = lightboxRoot()
   if (!root || !src) return
   const image = root.querySelector<HTMLImageElement>("[data-portfolio-lightbox-image]")
@@ -1354,6 +1358,7 @@ function openLightbox(src: string, caption = "") {
   const panel = root.querySelector<HTMLElement>("[data-portfolio-lightbox-panel]")
   if (!image) return
 
+  lightboxReturnFocus = trigger ?? null
   image.src = imageVariant(src, "full")
   image.alt = caption
   if (captionNode) {
@@ -1393,7 +1398,7 @@ function wireLightbox() {
 
     event.preventDefault()
     event.stopPropagation()
-    openLightbox(src, trigger.dataset.lightboxCaption ?? "")
+    openLightbox(src, trigger.dataset.lightboxCaption ?? "", trigger)
   }
 
   const onKeyDown = (event: KeyboardEvent) => {
@@ -1412,7 +1417,7 @@ function wireLightbox() {
     const src = trigger.dataset.lightboxSrc || trigger.querySelector("img")?.getAttribute("src")
     if (!src) return
     event.preventDefault()
-    openLightbox(src, trigger.dataset.lightboxCaption ?? "")
+    openLightbox(src, trigger.dataset.lightboxCaption ?? "", trigger)
   }
 
   document.addEventListener("click", onDocumentClick, true)

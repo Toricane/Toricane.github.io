@@ -15,7 +15,14 @@ import path from "node:path"
 import type { GalleryImage } from "../galleryExtractor"
 import { imageVariant } from "../imageVariant"
 import { isRecentNewsletter, type NewsletterPost } from "../newsletter"
-import { homeChapters, homeText, type HomeNode, type HomeProjectStory } from "../homeContent"
+import {
+  homeChapters,
+  homeText,
+  homeStoryProjectSlugs,
+  HOME_MORE_WORK_HEADING,
+  type HomeNode,
+  type HomeProjectStory,
+} from "../homeContent"
 import { selectHomeProjects } from "../homeProjects"
 import { applyLinkIconsToHast, linkIconMapFromFilenames, type LinkIconMap } from "../linkIcons"
 import { displayPeriod, formatMonthYear, projectDateBounds } from "../dates"
@@ -1298,6 +1305,28 @@ function prepareHomeContent(node: HomeNode) {
         : {}),
     })
   }
+  if (node.tagName === "p") {
+    const images = node.children?.filter((child) => child.tagName === "img") ?? []
+    if (
+      images.length === 1 &&
+      node.children?.every(
+        (child) => child.tagName === "img" || (child.type === "text" && !child.value?.trim()),
+      )
+    ) {
+      const image = images[0].properties ?? {}
+      const caption = String(image.alt ?? "")
+      node.properties = {
+        ...node.properties,
+        className: ["home-chapter-media"],
+        role: "button",
+        tabIndex: 0,
+        "aria-label": `Expand ${caption || "photo"}`,
+        "data-portfolio-lightbox": "",
+        "data-lightbox-src": imageVariant(normalizeImageSrc(String(image.src)), "full"),
+        "data-lightbox-caption": caption,
+      }
+    }
+  }
   node.children?.forEach(prepareHomeContent)
 }
 
@@ -1358,7 +1387,10 @@ function PhotoCoverflow({ allFiles }: { allFiles: PortfolioFile[] }) {
                   decoding="async"
                   {...(index === 0 ? { fetchpriority: "high" as const } : {})}
                 />
-                <figcaption>{caption}</figcaption>
+                <figcaption>
+                  <span>{caption}</span>
+                  {photo.link && <span class="home-photo-reel__story">View story ↗</span>}
+                </figcaption>
               </>
             )
             return photo.link ? (
@@ -1424,31 +1456,11 @@ function PhotoCoverflow({ allFiles }: { allFiles: PortfolioFile[] }) {
 
 function HomeProject({ file }: { file: PortfolioFile }) {
   const data = frontmatter(file)
-  const image = entryImages(file, 1)[0]
   const story = (file as { homeProjectStory?: HomeProjectStory }).homeProjectStory ?? {}
   const distinctResult =
     story.result && story.result !== data.description && story.result !== story.contribution
   return (
-    <li class={`home-project${image ? "" : " home-project--text"}`}>
-      {image && (
-        <a
-          class="home-project__image"
-          href={linkFor(file)}
-          data-portfolio-open={cleanSlug(file)}
-          aria-label={`Explore ${data.title}`}
-        >
-          <img
-            src={imageVariant(image.src, "small")}
-            alt={image.alt}
-            width="800"
-            height="500"
-            srcSet={`${imageVariant(image.src, "preview")} 256w, ${imageVariant(image.src, "small")} 800w`}
-            sizes="(max-width: 720px) calc(100vw - 80px), (max-width: 1100px) 40vw, 560px"
-            loading="lazy"
-            decoding="async"
-          />
-        </a>
-      )}
+    <li class="home-project">
       <div class="home-project__copy">
         <p class="home-project__meta">
           {displayDate(data)}
@@ -1456,7 +1468,7 @@ function HomeProject({ file }: { file: PortfolioFile }) {
         </p>
         <h3>
           <a href={linkFor(file)} data-portfolio-open={cleanSlug(file)}>
-            {data.title}
+            {data.title} <span aria-hidden="true">↗</span>
           </a>
         </h3>
         {!story.contribution && data.description && <p>{data.description}</p>}
@@ -1472,9 +1484,6 @@ function HomeProject({ file }: { file: PortfolioFile }) {
             {story.result}
           </p>
         )}
-        <a class="home-project__more" href={linkFor(file)} data-portfolio-open={cleanSlug(file)}>
-          Explore the build <span aria-hidden="true">↗</span>
-        </a>
       </div>
     </li>
   )
@@ -1520,13 +1529,37 @@ function HomeChapter({
   nodes,
   index,
   allFiles,
+  additionalProjects,
 }: {
   heading: HomeNode
   nodes: HomeNode[]
   index: number
   allFiles: PortfolioFile[]
+  additionalProjects: PortfolioFile[]
 }) {
   const id = String(heading.properties?.id ?? `home-chapter-${index}`)
+  if (homeText(heading) === HOME_MORE_WORK_HEADING) {
+    if (!additionalProjects.length) return null
+    return (
+      <section
+        class="portfolio-home-section home-chapter home-additional-work"
+        id={id}
+        aria-labelledby={`${id}-title`}
+      >
+        <header class="home-chapter__heading">
+          <h2 id={`${id}-title`}>{homeText(heading)}</h2>
+        </header>
+        {nodes.some((node) => homeText(node).trim()) && (
+          <div class="home-chapter__intro">{homeJsx(nodes)}</div>
+        )}
+        <ul class="home-additional-work__stories">
+          {additionalProjects.map((file) => (
+            <HomeProject file={file} />
+          ))}
+        </ul>
+      </section>
+    )
+  }
   const lead: HomeNode[] = []
   const groups: HomeNode[][] = []
   for (const node of nodes) {
@@ -1698,8 +1731,8 @@ function HomeProjects({ allFiles }: { allFiles: PortfolioFile[] }) {
         ))}
       </ul>
       <nav class="portfolio-home-projects__links" aria-label="Explore portfolio">
-        <a class="portfolio-home-projects__all" href={sectionHref("projects")}>
-          View all projects <span aria-hidden="true">→</span>
+        <a href={sectionHref("projects")}>
+          All {projects.length} projects <span aria-hidden="true">↗</span>
         </a>
         <a href={`${sectionHref("projects")}?view=timeline`}>
           Full timeline <span aria-hidden="true">↗</span>
@@ -1709,17 +1742,6 @@ function HomeProjects({ allFiles }: { allFiles: PortfolioFile[] }) {
           <span aria-hidden="true">↗</span>
         </a>
       </nav>
-      <div class="portfolio-home-projects__deeper" id="project-stories">
-        <h3>What I worked on. What came out of it.</h3>
-        <ul class="portfolio-home-projects__stories">
-          {selected.map((file) => (
-            <HomeProject file={file} />
-          ))}
-        </ul>
-        <a class="home-section-action" href={sectionHref("projects")}>
-          Browse all {projects.length} projects <span aria-hidden="true">→</span>
-        </a>
-      </div>
     </section>
   )
 }
@@ -1730,6 +1752,10 @@ function Home(props: QuartzComponentProps) {
   applyLinkIconsToHast(tree, icons)
   prepareHomeContent(tree as HomeNode)
   const { intro, chapters } = homeChapters(tree as HomeNode)
+  const chapterProjects = homeStoryProjectSlugs(chapters.flatMap((chapter) => chapter.nodes))
+  const additionalProjects = selectHomeProjects(itemsForSection(props.allFiles, "projects")).filter(
+    (file) => !chapterProjects.has(cleanSlug(file)),
+  )
   // Quartz renders a second, CSS-hidden article after this component. Keep
   // just the intro there for search previews instead of duplicating every
   // chapter and image. renderPage gives us a per-page clone of the tree.
@@ -1785,7 +1811,12 @@ function Home(props: QuartzComponentProps) {
       </div>
       <HomeProjects allFiles={props.allFiles} />
       {chapters.map((chapter, index) => (
-        <HomeChapter {...chapter} index={index} allFiles={props.allFiles} />
+        <HomeChapter
+          {...chapter}
+          index={index}
+          allFiles={props.allFiles}
+          additionalProjects={additionalProjects}
+        />
       ))}
       <Newsletter post={newsletter} />
       <script

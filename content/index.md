@@ -7,40 +7,16 @@ cssclasses:
 
 Hello there! I'm a second-year :ubc: [Engineering Physics student at UBC](https://www.engphys.ubc.ca/). I build AI tools and physical prototypes.
 
-- Co-founded [Buildplate](/projects/buildplate), which supported **83 profiles and 66 published portfolios** during my role.
-- Built [JARVIS](/projects/jarvis-for-the-visually-impaired), a wearable AI assistant, and demonstrated it at **four Vancouver AI meetups**.
-- Led [Handy Andy](/projects/handy-andy), connecting speech recognition to an **Arduino-controlled robotic hand**.
-- Worked on systems for a **1,000+ member AI community** and taught chess to **30+ elementary students**.
+- Co-founded [Buildplate](/projects/buildplate): **83 profiles and 66 published portfolios** during my role.
+- Built [JARVIS](/projects/jarvis-for-the-visually-impaired), a wearable AI assistant demoed at **four Vancouver AI meetups**.
+- Led [Handy Andy](/projects/handy-andy), a robotic hand connecting **speech to ASL movements**.
+- Built systems for a **1,000+ member AI community** and taught chess to **30+ elementary students**.
 
 [Email](mailto:prajwal028@outlook.com) · [GitHub](https://github.com/Toricane) · [LinkedIn](https://linkedin.com/in/prajwal-prashanth)
 
-## From prototype to public demo
-
-Building something is only the beginning. With [JARVIS](/projects/jarvis-for-the-visually-impaired), I took a wearable AI assistant out of my workspace and into four Vancouver AI meetups. Each demonstration gave me another reason to change it.
-
-### Start with something tangible
-
-![The camera board and battery used in a compact JARVIS prototype.](/assets/tab-panels/2nd_prototype.webp)
-
-The first prototype brought a Raspberry Pi, camera, microphone, earphones, button, and battery together on a hat. It described the scene in front of the wearer and answered spoken questions.
-
-### Put it in front of people
-
-![Presenting JARVIS at a Vancouver AI community meetup.](/assets/tab-panels/vanaimay.webp)
-
-Live demos exposed microphone transcription problems, search errors, and fragile mounting. I fixed the search behavior, adapted how I used the microphone, and gathered feedback from local AI professionals.
-
-### Work toward a smaller form
-
-![A closer look at the JARVIS microcontroller prototype.](/assets/tab-panels/2nd_prototype_continued.webp)
-
-I worked on moving wake-word detection and speech-to-text onto a Seeed Studio XIAO ESP32S3 Sense using C++ and Edge Impulse. A $1,000 Ingenious+ grant helped fund continued development.
-
-[Explore the JARVIS build](/projects/jarvis-for-the-visually-impaired)
-
 ## From cellular data to a response scenario
 
-With [cell-safe](/projects/cell-safe), our team, Five Bars 3G, explored how cellular activity could inform emergency planning around Waterfront Station. The challenge, hosted by Rogers, UBC, and Databricks, brought together data engineering, transport, and public safety.
+Could people get home if a crossing or transit route closed? With [cell-safe](/projects/cell-safe), our team, Five Bars 3G, explored that question around Waterfront Station using synthetic cellular activity. Rogers, UBC, and Databricks hosted the challenge.
 
 ### Make the data usable
 
@@ -48,11 +24,11 @@ With [cell-safe](/projects/cell-safe), our team, Five Bars 3G, explored how cell
 
 I designed the database schema and Databricks medallion pipeline, turning **8.06 million synthetic cellular records into 437,760 minute-level activity summaries**. We grouped 36 home origins into four regions and checked that regional counts reconciled to the totals.
 
-### Ask a concrete question
+### Connect the data to decisions
 
 ![Five Bars 3G presenting the emergency-response scenario.](/assets/tab-panels/cell-safe-presentation.webp)
 
-Could people get home if a crossing or transit route closed? I helped develop the team's disaster-response scenario. We connected the activity summaries with community hubs, road closures, and transit information to explore transport, shelter, and supply needs.
+I helped develop the team's disaster-response scenario. We connected the activity summaries with community hubs, road closures, and transit information to explore transport, shelter, and supply needs under different conditions.
 
 ### Present the result and its limits
 
@@ -60,7 +36,35 @@ Could people get home if a crossing or transit route closed? I helped develop th
 
 We won **first place and a $3,000 team prize**. The prototype made the scenario easier to inspect, while relying on explicit assumptions: synthetic session counts and home origins alone cannot establish where someone wants to go or what help they need.
 
-[Explore the cell-safe build](/projects/cell-safe)
+[Explore the pipeline and response scenario](/projects/cell-safe)
+
+## From prototype to public demo
+
+Live demonstrations of [JARVIS](/projects/jarvis-for-the-visually-impaired) exposed microphone transcription problems, search errors, and fragile hardware mounting. Taking the wearable AI assistant to four Vancouver AI meetups gave me specific problems to work on, and people to learn from.
+
+### Make the hardware portable
+
+![The camera board and battery used in a compact JARVIS prototype.](/assets/tab-panels/2nd_prototype.webp)
+
+The first version mounted a Raspberry Pi, camera, microphone, earphones, button, and battery on a hat to describe scenes and answer spoken questions. The camera board and battery shown here are from a later, smaller prototype.
+
+### Put it in front of people
+
+![Presenting JARVIS at a Vancouver AI community meetup.](/assets/tab-panels/vanaimay.webp)
+
+I fixed the search behavior, adapted how I used the microphone, and gathered feedback from local AI professionals. Demonstrating the assistant meant working through practical problems as well as the AI pipeline.
+
+### Work toward a smaller form
+
+![A closer look at the JARVIS microcontroller prototype.](/assets/tab-panels/2nd_prototype_continued.webp)
+
+I worked on moving wake-word detection and speech-to-text onto a Seeed Studio XIAO ESP32S3 Sense using C++ and Edge Impulse. A $1,000 Ingenious+ grant helped fund continued development.
+
+[See prototype iterations and demo videos](/projects/jarvis-for-the-visually-impaired)
+
+## More selected work
+
+A few more projects and their results.
 
 ## Building with people
 
@@ -82,7 +86,13 @@ I'm interested in taking this mix of software and physical engineering further i
 
 ## A few things I couldn't leave alone
 
-Smaller projects are a place to follow a question, try an interface, or make an everyday task a little easier.
+Spelling Garden began with my younger brother's spelling bee. Other small builds explore job listings and Vancouver transit.
+
+### Helping words stick
+
+![Spelling Garden's home screen with daily practice and word progress.](/assets/tab-panels/spelling-garden.webp)
+
+[Spelling Garden](/projects/spelling-garden) started as a way to help my younger brother prepare for his spelling bee. It pairs spoken words with spaced repetition for daily practice.
 
 ### A moving view of Vancouver
 
@@ -95,12 +105,6 @@ Smaller projects are a place to follow a question, try an interface, or make an 
 ![Scoped local job search and saved positions.](/assets/tab-panels/scoped.webp)
 
 [Scoped](/projects/scoped) brings UBC SCOPE listings into a searchable, filterable workspace with saved positions and a globe. Semantic search runs locally in the browser.
-
-### Helping words stick
-
-![Spelling Garden's spelling practice interface.](/assets/tab-panels/spelling-garden.webp)
-
-[Spelling Garden](/projects/spelling-garden) started as a way to help my younger brother prepare for his spelling bee. It pairs spoken words with spaced repetition for daily practice.
 
 ## A weekend to try something new
 

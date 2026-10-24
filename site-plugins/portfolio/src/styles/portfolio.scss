@@ -3976,15 +3976,17 @@ body:has(main.portfolio-home) {
 }
 
 .portfolio-home-projects {
+  --home-journey-inset-start: 40px;
+  --home-journey-inset-end: 64px;
   position: relative;
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
   gap: var(--portfolio-space-5) var(--portfolio-space-4);
-  padding-block: 40px 64px;
+  padding-block: var(--home-journey-inset-start) var(--home-journey-inset-end);
   background: color-mix(in srgb, var(--portfolio-panel) 38%, var(--portfolio-ink));
 }
 .portfolio-home-projects__heading {
-  grid-column: 1 / -1;
+  grid-column: 2;
   min-width: 0;
 }
 .portfolio-home-projects__stats {
@@ -4013,7 +4015,7 @@ body:has(main.portfolio-home) {
 }
 .portfolio-home-journey {
   grid-column: 1;
-  grid-row: 2;
+  grid-row: 1 / 4;
   display: flex;
   min-height: 0;
 }
@@ -4049,43 +4051,19 @@ body:has(main.portfolio-home) {
     stroke-width: 1.25;
   }
 }
-.portfolio-home-projects__stories {
-  grid-column: 2;
+.home-additional-work__stories {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--portfolio-space-7) clamp(32px, 5vw, 72px);
   list-style: none;
   padding: 0;
   margin: 0;
   min-width: 0;
 }
 .home-project {
-  display: grid;
-  grid-template-columns: minmax(0, 0.65fr) minmax(0, 1.35fr);
-  align-items: start;
-  gap: clamp(24px, 3vw, 44px);
-  padding-block: var(--portfolio-space-6);
-  border-bottom: 1px solid var(--portfolio-rule);
-  &:first-child {
-    padding-top: 0;
-  }
-  &:last-child {
-    padding-bottom: 0;
-    border: 0;
-  }
-  &--text {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-.home-project__image {
-  display: block;
-  border-radius: var(--portfolio-radius);
-  overflow: hidden;
-}
-.portfolio-home .home-project__image img {
-  display: block;
-  margin: 0;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 8 / 5;
-  object-fit: cover;
+  min-width: 0;
+  padding-block: var(--portfolio-space-6) 0;
+  border-block-start: 1px solid var(--portfolio-rule);
 }
 .home-project__copy {
   min-width: 0;
@@ -4106,13 +4084,20 @@ body:has(main.portfolio-home) {
   display: inline;
   margin-inline-end: 0.6em;
 }
-.home-project__copy h3 {
+.home-additional-work .home-project h3 {
   margin: 0 0 var(--portfolio-space-3);
-  font-size: clamp(1.25rem, 2vw, 1.75rem);
-  line-height: 1.2;
+  font-size: 1.25rem;
+  line-height: 1.35;
 }
 .home-project__copy h3 a {
   color: var(--portfolio-frost);
+  text-decoration: underline;
+  text-decoration-color: var(--portfolio-rule);
+  text-underline-offset: 0.2em;
+  span {
+    color: var(--portfolio-copper-soft);
+    white-space: nowrap;
+  }
 }
 .home-project__detail > span {
   display: block;
@@ -4185,6 +4170,53 @@ body:has(main.portfolio-home) {
 }
 .home-chapter__group > p:has(> img) {
   margin-bottom: var(--portfolio-space-5);
+}
+.home-chapter-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--portfolio-radius);
+  cursor: zoom-in;
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline-end: 12px;
+    inset-block-end: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    background: var(--portfolio-ink);
+    pointer-events: none;
+  }
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline-end: 19px;
+    inset-block-end: 19px;
+    width: 18px;
+    height: 18px;
+    z-index: 1;
+    background: var(--portfolio-frost);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 3H3v5m13-5h5v5M3 16v5h5m8 0h5v-5'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    pointer-events: none;
+  }
+}
+/* Focus the small home previews without changing the original image or gallery.
+   The complete screenshot stays available through image expansion. */
+.home-chapter--a-few-things-i-couldnt-leave-alone {
+  .home-chapter-media:has(img[src$="/scoped.webp"]),
+  .home-chapter-media:has(img[src$="/spelling-garden.webp"]) {
+    aspect-ratio: 8 / 5;
+    img {
+      height: 100%;
+      transform: scale(1.65);
+      transform-origin: top left;
+    }
+  }
+  .home-chapter-media:has(img[src$="/spelling-garden.webp"]) img {
+    transform: scale(2);
+    transform-origin: right 75%;
+  }
 }
 @media (min-width: 721px) {
   .home-chapter__groups:has(> .home-chapter__group > p > img) {
@@ -4269,9 +4301,7 @@ body:has(main.portfolio-home) {
     grid-template-columns: minmax(0, 1fr);
   }
   .portfolio-home-projects__heading,
-  .portfolio-home-projects__stories,
   .portfolio-home-projects__grid,
-  .portfolio-home-projects__deeper,
   .portfolio-home-projects__links {
     grid-column: 1;
   }
@@ -4281,17 +4311,12 @@ body:has(main.portfolio-home) {
     grid-row: auto;
     inset-inline-start: 16px;
     width: 48px;
-    top: 200px;
-    bottom: 100px;
+    inset-block: var(--home-journey-inset-start) var(--home-journey-inset-end);
   }
 }
 @media (max-width: 900px) {
   .home-chapter__groups {
     gap: var(--portfolio-space-5);
-  }
-  .home-project {
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    gap: var(--portfolio-space-6);
   }
 }
 @media (max-width: 720px) {
@@ -4321,6 +4346,8 @@ body:has(main.portfolio-home) {
     padding-block: 44px;
   }
   .portfolio-home-projects {
+    --home-journey-inset-start: 44px;
+    --home-journey-inset-end: 44px;
     grid-template-columns: 28px minmax(0, 1fr);
     column-gap: 12px;
   }
@@ -4334,10 +4361,8 @@ body:has(main.portfolio-home) {
     r: 2px;
     stroke-width: 1;
   }
-  .home-project {
+  .home-additional-work__stories {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--portfolio-space-5);
-    padding-block: var(--portfolio-space-7);
   }
   .home-project__copy p {
     font-size: 0.9375rem;
@@ -4439,6 +4464,17 @@ body:has(main.portfolio-home) {
     outline: 1px solid oklch(1 0 0 / 0.1);
     outline-offset: -1px;
   }
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 16px;
+  }
+  .home-photo-reel__story {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    font-weight: 600;
+  }
 }
 :root[saved-theme="light"] .home-photo-reel img {
   outline-color: oklch(0 0 0 / 0.1);
@@ -4468,8 +4504,7 @@ body:has(main.portfolio-home) {
     display: none;
   }
 }
-.portfolio-home-projects__grid,
-.portfolio-home-projects__deeper {
+.portfolio-home-projects__grid {
   grid-column: 2;
   min-width: 0;
 }
@@ -4513,13 +4548,6 @@ body:has(main.portfolio-home) {
     display: none;
   }
 }
-.portfolio-home-projects__deeper {
-  margin-top: 48px;
-  > h3 {
-    margin: 0 0 32px;
-    font-size: 1.5rem;
-  }
-}
 @media (min-width: 721px) {
   .portfolio-home-projects__grid {
     .portfolio-card {
@@ -4544,11 +4572,14 @@ body:has(main.portfolio-home) {
 }
 .portfolio-home .portfolio-home-projects__links {
   grid-column: 2;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  a {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
 }
-.portfolio-home .portfolio-home-projects__links a,
 .home-section-action,
 .home-chapter__actions a,
 .home-chapter--a-few-milestones-along-the-way .home-chapter__intro a {
@@ -4567,7 +4598,6 @@ body:has(main.portfolio-home) {
   font-weight: 600;
   text-decoration: none;
 }
-.portfolio-home .portfolio-home-projects__links a:first-child,
 .home-section-action {
   color: var(--portfolio-on-accent);
   background: var(--portfolio-copper);
@@ -4773,7 +4803,6 @@ body:has(main.portfolio-home) {
 }
 @media (hover: hover) {
   .portfolio-home .portfolio-section-links a:hover,
-  .portfolio-home .portfolio-home-projects__links a:hover,
   .home-section-action:hover,
   .home-chapter__actions a:hover {
     background: var(--portfolio-copper);
@@ -4782,7 +4811,6 @@ body:has(main.portfolio-home) {
 }
 @media (min-width: 1440px) {
   .portfolio-home-projects__grid,
-  .portfolio-home-projects__deeper,
   .portfolio-home .portfolio-home-projects__links {
     grid-column: 1;
   }
@@ -4802,18 +4830,19 @@ body:has(main.portfolio-home) {
     height: 88px;
   }
   .portfolio-home-projects {
-    padding-top: 28px;
+    --home-journey-inset-start: 28px;
     row-gap: 16px;
   }
 }
 @media (max-width: 720px) {
   .portfolio-home-markdown > ul {
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
     margin-block: 14px;
   }
   .portfolio-home-markdown > ul li {
     padding-inline-start: 8px;
-    font-size: 0.75rem;
+    font-size: 0.9375rem;
   }
   .portfolio-home .portfolio-section-links a {
     min-height: 62px;
@@ -4861,17 +4890,6 @@ body:has(main.portfolio-home) {
   }
   .portfolio-home-projects__grid .portfolio-card__meta {
     font-size: 0.5625rem;
-  }
-  .portfolio-home .portfolio-home-projects__links {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    a:first-child {
-      grid-column: 1 / -1;
-    }
-  }
-  .portfolio-home-projects__deeper {
-    grid-column: 1 / -1;
-    margin-top: 32px;
   }
   .home-milestones__photos,
   .home-milestones__photos[data-count] {

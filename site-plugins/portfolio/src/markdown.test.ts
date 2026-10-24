@@ -58,6 +58,68 @@ test("home Markdown keeps stories before narrative chapters and includes their d
   }
 })
 
+test("home keeps full chapters before additional work and summarizes each contribution once", async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "portfolio-home-sequence-"))
+  try {
+    const source = path.join(directory, "index.md")
+    await fs.writeFile(
+      source,
+      [
+        "Hello.",
+        "",
+        "## A full story",
+        "",
+        "Here is the illustrated story.",
+        "",
+        "[See the iterations](/projects/detailed)",
+        "",
+        "## More selected work",
+        "",
+        "A few more projects and their results.",
+        "",
+        "## Building with people",
+        "",
+        "Teaching chess.",
+        "",
+      ].join("\n"),
+    )
+    const outputs = await markdownOutputs(context(directory), [
+      page("index", {}, { filePath: source }),
+      page(
+        "projects/detailed",
+        { title: "Detailed", significance: "spotlight", when: "2026/09" },
+        {
+          homeProjectStory: {
+            contribution: "Already covered in the chapter.",
+            result: "A documented result.",
+          },
+        },
+      ),
+      page(
+        "projects/other",
+        { title: "Other", significance: "spotlight", when: "2026/08" },
+        {
+          homeProjectStory: {
+            contribution: "Built the other project.",
+            result: "Shipped a prototype.",
+          },
+        },
+      ),
+    ])
+    const home = outputs.get("index.md")!
+    assert.ok(home.indexOf("## Selected projects") < home.indexOf("## A full story"))
+    assert.ok(home.indexOf("## A full story") < home.indexOf("## More selected work"))
+    assert.ok(home.indexOf("## More selected work") < home.indexOf("## Building with people"))
+    assert.equal(home.match(/My contribution: Built the other project\./g)?.length, 1)
+    assert.doesNotMatch(home, /Already covered in the chapter/)
+    assert.ok(home.indexOf("My contribution:") > home.indexOf("## More selected work"))
+    assert.match(home, /\[See the iterations\]\(\/projects\/detailed.md\)/)
+  } finally {
+    assert.equal(path.dirname(path.resolve(directory)), path.resolve(os.tmpdir()))
+    await fs.rm(directory, { recursive: true, force: true })
+  }
+})
+
 test("root, folders, tags and explicit HTML/index URL forms", () => {
   assert.equal(markdownPath("index"), "/index.md")
   assert.equal(markdownPath("/"), "/index.md")

@@ -26,19 +26,20 @@ There is no separate content sync step or manually maintained collection data fi
 ## Home page
 
 The homepage is a finite scrolling narrative: an introduction and curated photo
-reel, a compact selected-project overview, contribution/result stories, and
-authored chapters about projects, community work, smaller tools, hackathons,
-milestones, and contact. The introduction fills the first desktop viewport;
-mobile follows its content height.
+reel, a compact selected-project overview, then authored project chapters
+(currently cell-safe before JARVIS). `## More selected work` places contribution
+and result summaries for selected projects without a full chapter. Community work,
+smaller tools, hackathons, milestones, and contact follow. The introduction fills
+the first desktop viewport; mobile follows its content height.
 
 Up to six projects marked `significance: spotlight` appear automatically, newest
 first. Their first `## Gallery` image supplies the card image; entries without
 images stay text-only. Contribution and result summaries come from the project
 entries. The remaining narrative and hero facts are curated in `content/index.md`.
 
-The timeline spans the compact overview on mobile, with full-width detailed
-stories below, and moves into the left margin on wide desktops. The Projects and
-Awards links share their row equally, without reserving a future section.
+The timeline spans the overview heading, cards, and archive links, with full-width
+detailed stories below, and moves into the left margin on wide desktops. The
+Projects and Awards links share their row equally, without reserving a future section.
 
 Project totals, hackathon builds, and hackathon awards are calculated from content.
 Tag relevant award entries `Hackathon` so placements, side challenges, and
@@ -56,6 +57,7 @@ update automatically. Technical details live in the [plugin documentation](site-
 
 ## Update content
 
+- Home copy, section descriptions, chapter order, image alt text, and CTA labels live in [content/index.md](content/index.md). Move a whole `##` section to reorder it; edit the standalone final link to change its CTA. Image-only paragraphs automatically get an expansion icon and keyboard support. See the [editing example](site-plugins/portfolio/HOME-MAINTENANCE.md#quick-editing-reference).
 - Edit Markdown under `content/`.
 - Add a project in `content/projects/`, a hackathon project in `content/projects/` with the `hackathon` tag, or an award in `content/awards/`.
 - Put the full image in `content/assets/tab-panels/` and reference it in `## Gallery`. Collection pages are `/awards/` (trailing slash); entries are `/awards/some-slug` (no slash).
@@ -129,7 +131,8 @@ npm run build --prefix site-plugins/portfolio
 npx quartz plugin install --from-config
 ```
 
-Then rebuild or refresh the running serve process.
+Then restart the running serve process so it loads the rebuilt plugin. Content-only
+Markdown edits are picked up by the existing preview's watcher.
 
 Checks and production build:
 

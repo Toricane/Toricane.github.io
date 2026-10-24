@@ -36,6 +36,14 @@ independent list of homepage projects or facts in a config file.
   the project template. Frontmatter `role`/`outcome` is not the source here.
   The result's opening sentence must be truthful on its own, including essential
   context such as a team prize, prototype status, or measured conditions.
+- **Story coverage and order:** the compact project overview leads directly into
+  the authored chapters. A chapter's standalone project link marks that project
+  as covered; ordinary inline mentions do not. The `## More selected work` heading
+  in `content/index.md` places text-only contribution/result summaries for the
+  remaining selected projects. Keep this heading after the main illustrated
+  stories, with a short intro paragraph so authoring cleanup retains the heading.
+  Both HTML and Markdown use the same coverage rule; no separate slug
+  exclusion list is maintained. The section is omitted when nothing remains.
 - **Counts and archive links:** project totals, hackathon-build totals, total
   awards, and hackathon-award totals are derived. Hackathon builds are projects
   tagged `hackathon`; hackathon awards are award entries tagged `Hackathon`,
@@ -103,6 +111,51 @@ entry as the detailed source of truth and the home version as a concise summary.
 Do not repeat mutable facts in more sections than necessary. Leave intentional
 `[Replace with: …]` prompts alone without verified content; the build hides them.
 
+## Quick editing reference
+
+Normal content edits require Markdown only:
+
+- **Introduction, profile facts, chapter descriptions and body copy:** edit
+  `content/index.md`. The paragraph between a `##` heading and its first `###`
+  supplies that chapter's short description.
+- **Chapter order:** move the entire `##` section, including its subsections and
+  final action link. The current main-story order is cell-safe, then JARVIS.
+  This authored order is independent of the automatically sorted selected cards.
+- **Project CTA:** edit the label and destination of the standalone link after
+  the last group's body paragraph. Keep a blank line before it; an inline link
+  inside prose does not become a section-wide action or mark a full story.
+- **Chapter image:** edit its image-only paragraph. The alt text describes the
+  image and supplies its expansion label/caption. The corner icon and keyboard
+  support are automatic; do not add an “Expand image” text link.
+- **Photo reel:** edit `photos` in `content/coverflow.md` (`src`, `caption`, `link`).
+- **Cards and generated summaries:** edit the project's frontmatter, Gallery,
+  `## Role and constraints`, or `## Result` in `content/projects/`.
+
+A chapter follows this pattern; repeat the illustrated group for each column.
+Keep the action after the final group:
+
+```markdown
+## Chapter title
+
+A short, specific introduction to this story.
+
+### What I worked on
+
+![Describe what the image shows.](/assets/tab-panels/existing-image.webp)
+
+A concise paragraph about the work and what I learned.
+
+[Describe what the reader will find](/projects/existing-project)
+```
+
+Use real asset paths and canonical entry URLs. Most headings are editable, but
+the special headings listed below control their layout. In particular, keep
+`## More selected work` unchanged and edit its intro paragraph freely. Timeline
+height, typography, image crops, and icon styling belong to the plugin stylesheet;
+they do not need changes when editing copy. Save Markdown while the local preview
+is running to rebuild it automatically. Plugin-source changes require a plugin
+build and a restart of the preview process to load the new bundle.
+
 ## Preserve the source structure
 
 Before the first `##`, keep the intro paragraph, a list of concise concrete
@@ -125,6 +178,7 @@ headings requires checking `HomeChapter` in `components/Portfolio.tsx` and
 - `a-few-milestones-along-the-way`: award links resolve into milestone cards.
 - `lets-build-something-useful`: first paragraph is the invitation, second
   paragraph supplies action links, later paragraphs contain other profiles.
+- `more-selected-work`: inserts the remaining selected projects, as described above.
 
 Other chapter IDs may have a scoped background tint. Check those selectors when
 renaming a heading. Keep the home body colour equal to the introduction
@@ -139,6 +193,10 @@ coverflow data may already name a small variant; preserve that convention when
 editing the reel. Do not add large original images to the initially loaded reel.
 Its first image is eager; the rest are lazy. Keep icon pause/play controls and
 reduced-motion behaviour intact when changing its content.
+Reel items with a `link` show a View story cue and open that entry. Chapter image
+blocks support keyboard and pointer expansion to the original photo. Scoped and
+Spelling Garden previews use CSS crops for legibility; the source images and
+gallery metadata remain full-size. Check their focal areas when replacing images.
 
 ## Verification and handoff
 

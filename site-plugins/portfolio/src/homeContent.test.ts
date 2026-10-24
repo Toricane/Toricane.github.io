@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { homeChapters, homeProjectStory, type HomeNode } from "./homeContent"
+import { homeChapters, homeProjectStory, homeStoryProjectSlugs, type HomeNode } from "./homeContent"
 
 const node = (tagName: string, value: string): HomeNode => ({
   tagName,
@@ -54,5 +54,34 @@ test("home outcomes keep the headline sentence and preserve decimal measurements
       ],
     }),
     { result: "Measured 1.4× gain." },
+  )
+})
+
+test("full home stories are identified by project actions, not incidental mentions or archives", () => {
+  const link = (href: string): HomeNode => ({ tagName: "a", properties: { href } })
+  assert.deepEqual(
+    [
+      ...homeStoryProjectSlugs([
+        { tagName: "p", children: [link("/projects/story")] },
+        { tagName: "p", children: [link("/projects/story#process")] },
+        {
+          tagName: "p",
+          children: [{ type: "text", value: "I also built " }, link("/projects/mention")],
+        },
+        { tagName: "p", children: [link("/projects/")] },
+        { tagName: "p", children: [link("/awards/example")] },
+        { tagName: "p", children: [link("https://other.example/projects/external")] },
+      ]),
+    ],
+    ["projects/story"],
+  )
+  assert.deepEqual(
+    [
+      ...homeStoryProjectSlugs([
+        { type: "paragraph", children: [{ type: "link", url: "/projects/story.md#process" }] },
+        { type: "paragraph", children: [{ type: "link", url: "/projects/another.html/" }] },
+      ]),
+    ],
+    ["projects/story", "projects/another"],
   )
 })

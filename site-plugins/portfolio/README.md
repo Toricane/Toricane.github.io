@@ -10,7 +10,8 @@ keeping existing claims in sync. This section documents the implementation.
 
 `Home`, `HomeProjects`, and `HomeChapter` in `src/components/Portfolio.tsx`
 render a finite, vertically scrolling story. The first desktop viewport contains a
-concise introduction, a two-column list of profile facts authored in `content/index.md`,
+concise introduction, profile facts authored in `content/index.md` (two columns on
+desktop, a single readable column on mobile),
 prominent Projects/Awards links, and the curated photos from `content/coverflow.md`.
 Mobile follows its content height. Only the hero carries a quiet engineering grid; the following chapters
 use slightly different, theme-aware static surface tints. No scroll listeners,
@@ -19,11 +20,15 @@ parallax, entrance animation, or additional client library is required.
 Selected projects come from published entries with `significance: spotlight`,
 sorted by recency and capped at six. `homeContent.ts` projects each entry's first
 published **Role and constraints** and **Result** paragraphs into file metadata at
-build time. A compact six-card overview comes before shorter image/text stories.
-Stories show the contribution and result, falling back to the description when a
-contribution is missing, plus the date, affiliation, and first Gallery image.
-Missing images and absent results are omitted. Modals and full-page entry URLs
-remain available.
+build time. A compact six-card overview leads directly into the authored chapters.
+Standalone project actions in those chapters identify which projects already
+have a full story; inline mentions and archive links do not. The authored
+`## More selected work` heading places a two-column text-only list of the remaining
+selected projects after the main illustrated chapters, stacking on mobile.
+These summaries show contribution, result, date and affiliation, falling back to
+the description when a contribution is missing. Absent results and an empty
+additional-work section are omitted. No exclusion list of project slugs is needed.
+Modals and full-page entry URLs remain available.
 
 The result projection keeps the first sentence of the first published Result
 paragraph. Write that sentence so it is accurate on its own, including any
@@ -33,8 +38,8 @@ the optional `role` and `outcome` frontmatter fields do not populate them.
 
 The rest of the narrative lives in `content/index.md`. Each `##` heading becomes
 a chapter; `###` subsections become responsive groups. The Markdown export inserts
-selected projects after the introduction and preserves the same chapter order,
-contributions, and results. Private LinkedIn exports and the resume source are
+selected projects after the introduction and inserts the additional summaries at
+the same authored heading, using the same coverage rule. Private LinkedIn exports and the resume source are
 not read by the build. Home images use `small/` and `preview/` sources; the first
 coverflow photo is eager/high-priority and other images are lazy with reserved
 geometry. Text remains immediately available throughout the document; there is
@@ -44,12 +49,12 @@ The homepage graph uses all dated project inputs, colors, branches, hiatuses,
 and nodes from the full timeline, including projects outside the selected six.
 The graph represents the whole history; its nodes are not selected-story row
 connectors. It stays in a 28px rail on mobile, a 52px rail at intermediate widths,
-and a 48px left margin at 1440px and wider. Stories use image/text columns on
-desktop and stack in reading order on mobile.
+and a 48px left margin at 1440px and wider.
 
-On mobile, the rail spans the overview heading, cards, and archive links, which
-share the content column beside it. The detailed stories span the full section width below the rail,
-aligning with subsequent home chapters rather than carrying an empty graph gutter.
+The rail spans the overview heading, cards, and archive links at every width.
+At wide desktop sizes, its insets follow the overview's content padding rather
+than fixed offsets into the cards. Archive routes use quiet text links. Detailed
+chapters and additional summaries use the full section width below the rail.
 
 The home coverflow advances every six seconds only while visible. Hover, keyboard
 focus, hidden tabs, and overlays suspend it; manual interaction pauses it until
@@ -58,6 +63,12 @@ smooth arrow scrolling. The controls remain available without autoplay. Navigati
 cleanup disconnects its observer and removes timers and listeners.
 Previous, pause/play, and next controls overlay the top-right corner of the photos;
 there is no separate caption or controls strip beneath the carousel.
+Linked photos show a View story cue and open the corresponding project or award.
+Chapter image-only paragraphs become accessible expansion controls with a small
+corner-expand icon and a descriptive accessible label. The original
+image loads only on expansion; the small preview stays in the page. Scoped and
+Spelling Garden use CSS-only crops to emphasize the interface at phone width,
+while the full screenshot remains available in the lightbox.
 
 Hackathon experiments and smaller tools are curated in the source Markdown. The
 milestones chapter resolves its authored award links to collection records, using
@@ -192,6 +203,10 @@ regenerated from published entries on every build and included in home search te
 `/llms.txt` stays concise: a brief description of Prajwal and the portfolio,
 Markdown URL and local search instructions, and five links (About, Projects,
 Awards, Resume, Search index). It does not duplicate individual entry or tag listings.
+The About link describes the home's curated build stories; the Projects link
+leads to the complete collection and individual entries. Edit this directory's
+`src/markdown.tsx` to change the generated guidance, then rebuild the plugin and
+Quartz; `public/llms.txt` is output, not an editable content source.
 Normal HTML pages have
 `alternate` Markdown and `describedby` llms.txt discovery links in their heads.
 Assets, feeds, and client-side filter states are not separate Markdown pages.
