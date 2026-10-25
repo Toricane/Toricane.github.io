@@ -124,6 +124,17 @@ Substack link remains. New posts are picked up on the next site build. See the
 [plugin README](site-plugins/portfolio/README.md) for responsive dimensions, cache
 behavior, and newsletter tests.
 
+The footer's public visit count is fetched at build time by
+`createPublicVisitsPlugin()`, using the `GOATCOUNTER_API_TOKEN` Actions secret
+(or the ignored local `.env.pulse`). It exposes only the last completed month's
+aggregate page visits and month, excludes event paths, and is omitted if missing
+or unavailable. Project and award entries show their own monthly counts in the
+heading metadata (also in modals), sharing the same fetch and combining known
+aliases and URL variants. Collection headings show visits to their listing page,
+rather than summing visits to entries. Detailed reports are local
+under ignored `private/portfolio-pulse/`; never publish those reports or the API
+key. See [Portfolio pulse](scripts/PORTFOLIO-PULSE.md) for setup and count semantics.
+
 ## Image variants
 
 For `assets/tab-panels/` images, keep three sizes with the **same basename**:

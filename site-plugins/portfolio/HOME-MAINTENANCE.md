@@ -64,6 +64,14 @@ independent list of homepage projects or facts in a config file.
   time. Do not manually hide or restore the section for each new post. A rebuild
   is needed to discover a post or age a preview out; this static site does not
   change at midnight without a build. Keep the Substack contact link available.
+- **Public visit count:** the footer uses the last completed month's aggregate
+  page visits, fetched at build time with `GOATCOUNTER_API_TOKEN`. It excludes
+  click events and shows its month; no key or failed refresh omits the count.
+  Project and award entry metadata uses that same fetch for per-entry counts,
+  combining known aliases and URL variants. Modals reuse the entry HTML.
+  Projects and Awards archive headings show visits to the archive page itself.
+  The Pages workflow refreshes monthly. Detailed pulse reports stay local under
+  `private/portfolio-pulse/`; do not copy them into home content or public assets.
 - **Agent exports:** `/index.md`, collection Markdown, `/search-index.json`, and
   `/llms.txt` are generated. Never edit these output files under `public/`.
 

@@ -16,6 +16,7 @@ quartz/cli/tui/dist/
 .env.*
 site-plugins/*/dist/
 .codex-remote-attachments/
+.codex-attachments/
 
 linkedin_export/
 resume.md

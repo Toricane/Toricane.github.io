@@ -15,6 +15,7 @@ import fs from "node:fs"
 import path from "node:path"
 import type { GalleryImage } from "../galleryExtractor"
 import { imageVariant } from "../imageVariant"
+import { publicVisitsLabel, type PublicVisits } from "../publicVisits"
 import { isRecentNewsletter, type NewsletterPost } from "../newsletter"
 import {
   homeChapters,
@@ -1169,6 +1170,11 @@ function TagIndex({ allFiles }: { allFiles: PortfolioFile[] }) {
 }
 
 function Collection({ section, allFiles }: { section: Section; allFiles: PortfolioFile[] }) {
+  const visits = publicVisitsLabel(
+    allFiles.find((file) => file.slug === `${section}/index`)?.portfolioCollectionVisits as
+      PublicVisits | undefined,
+    "entry",
+  )
   const items = itemsForSection(allFiles, section)
   const galleryItems = [...items].sort((a, b) => compareGallery(a, b, section))
   const title = section[0].toUpperCase() + section.slice(1)
@@ -1185,6 +1191,11 @@ function Collection({ section, allFiles }: { section: Section; allFiles: Portfol
             {items.length} entries
           </p>
           <h1>{title}</h1>
+          {visits && (
+            <p class="portfolio-collection__visits" data-portfolio-collection-visits>
+              {visits}
+            </p>
+          )}
         </div>
         <div class="portfolio-heading__actions">
           <div class="portfolio-heading__toggles">
@@ -1834,6 +1845,9 @@ function EntryHeading({ fileData, tree }: QuartzComponentProps) {
   const slug = String(fileData.slug ?? "")
   const section = sections.find((candidate) => slug.startsWith(`${candidate}/`))
   const hero = entryImages(fileData as PortfolioFile, 1)[0]
+  const visits = section
+    ? publicVisitsLabel(fileData.portfolioEntryVisits as PublicVisits | undefined, "entry")
+    : undefined
 
   // renderPage provides a per-page clone; modals fetch this same rendered HTML.
   if (section === "projects") promoteProjectLinks(tree as Root)
@@ -1851,11 +1865,17 @@ function EntryHeading({ fileData, tree }: QuartzComponentProps) {
         </figure>
       )}
       <h1>{data.title}</h1>
-      {(data.from || displayDate(data)) && (
+      {(data.from || displayDate(data) || visits) && (
         <p class="portfolio-entry-heading__meta">
           {data.from && <span>{data.from}</span>}
           {data.from && displayDate(data) && <span aria-hidden="true">·</span>}
           {displayDate(data) && <span>{displayDate(data)}</span>}
+          {visits && (
+            <>
+              {(data.from || displayDate(data)) && <span aria-hidden="true">·</span>}
+              <span data-portfolio-entry-visits>{visits}</span>
+            </>
+          )}
         </p>
       )}
       <TagList tags={data.tags} compact linked />
@@ -2013,10 +2033,14 @@ function LightboxHost() {
   )
 }
 
-function SiteFooter() {
+function SiteFooter({ stats }: { stats?: PublicVisits }) {
+  const visits = publicVisitsLabel(stats)
   return (
     <footer class="portfolio-footer">
-      <span>© {new Date().getFullYear()} Prajwal Prashanth</span>
+      <div class="portfolio-footer__meta">
+        <span>© {new Date().getFullYear()} Prajwal Prashanth</span>
+        {visits && <span class="portfolio-footer__visits">{visits}</span>}
+      </div>
       <nav aria-label="Footer navigation">
         <a href="/index.xml">RSS</a>
         <ResumeLink>Resume</ResumeLink>
@@ -2062,7 +2086,12 @@ export default (() => {
         ) : dataOnly ? null : (
           <EntryHeading {...props} />
         )}
-        <SiteFooter />
+        <SiteFooter
+          stats={
+            props.allFiles.find((file) => file.slug === "index")?.portfolioPublicVisits as
+              PublicVisits | undefined
+          }
+        />
         <ModalHost />
         <LightboxHost />
         <LinkIconsData />

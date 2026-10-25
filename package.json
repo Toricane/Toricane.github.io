@@ -19,6 +19,9 @@
     "images": "node scripts/generate-image-variants.mjs",
     "hooks": "node scripts/install-git-hooks.mjs",
     "test": "tsx --test",
+    "pulse": "node scripts/portfolio-pulse.mjs",
+    "pulse:demo": "node scripts/portfolio-pulse.mjs --demo",
+    "pulse:test": "node --test scripts/portfolio-pulse.test.mjs",
     "profile": "0x -D prof ./quartz/bootstrap-cli.mjs build --concurrency=1",
     "install-plugins": "npx tsx ./quartz/plugins/loader/install-plugins.ts",
     "prebuild": "npm run install-plugins"

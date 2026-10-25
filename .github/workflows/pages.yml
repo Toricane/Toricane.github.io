@@ -4,6 +4,8 @@ on:
   push:
     branches: [v5]
   workflow_dispatch:
+  schedule:
+    - cron: "17 9 2 * *"
 
 permissions:
   contents: read
@@ -34,6 +36,8 @@ jobs:
         run: npx quartz plugin install --from-config
 
       - name: Build Quartz
+        env:
+          GOATCOUNTER_API_TOKEN: ${{ secrets.GOATCOUNTER_API_TOKEN }}
         run: npx quartz build
 
       - name: Verify Markdown endpoints

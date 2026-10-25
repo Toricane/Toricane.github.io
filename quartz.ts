@@ -1,7 +1,10 @@
 import { componentRegistry } from "./quartz/components/registry"
 import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
 import { portfolioOgImage } from "./ogImage"
-import { createNewsletterPlugins } from "./site-plugins/portfolio/dist/index.js"
+import {
+  createNewsletterPlugins,
+  createPublicVisitsPlugin,
+} from "./site-plugins/portfolio/dist/index.js"
 
 // Must run before loadQuartzConfig so CustomOgImages picks up the override.
 componentRegistry.setOptionOverrides("@quartz-community/og-image", {
@@ -13,6 +16,7 @@ const config = await loadQuartzConfig()
 // this additional site emitter explicitly alongside the Markdown emitter.
 const newsletter = createNewsletterPlugins()
 config.plugins.transformers.push(newsletter.transformer)
+config.plugins.transformers.push(createPublicVisitsPlugin())
 config.plugins.emitters.push(newsletter.emitter)
 export default config
 export const layout = await loadQuartzLayout()

@@ -334,6 +334,18 @@ cache preservation, malformed responses, and offline builds.
 
 ## GoatCounter analytics
 
+For the local monthly analytics report, API key setup, and optional Windows
+schedule, see [Portfolio pulse](../../scripts/PORTFOLIO-PULSE.md). Reports stay
+outside the published site. `createPublicVisitsPlugin()` fetches only the last
+complete month's page-visit counts once at build time. Home metadata supplies
+the footer total; individual project/award metadata supplies each entry's count,
+also used by modals. Aliases, `.html`, and trailing-slash variants are combined.
+Projects and Awards listing headings also show their own page visits, rather
+than the sum of their entries' visits, merging slash and named-index forms.
+It excludes event paths, omits missing/failed data, and publishes only each count
+and month rather than the full fetched map. The existing Pages workflow refreshes it
+monthly using the `GOATCOUNTER_API_TOKEN` Actions secret.
+
 The portfolio client owns analytics; `configuration.analytics` stays `null` to
 avoid Quartz installing a second tracker. The endpoint is configured in
 `src/analytics.ts`. Tracking runs only on `https://prajwal.is-a.dev`; localhost,

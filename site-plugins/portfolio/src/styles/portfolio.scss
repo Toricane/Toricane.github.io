@@ -182,6 +182,7 @@ body {
   box-sizing: border-box;
   min-height: var(--portfolio-nav-height);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--portfolio-space-4);
@@ -189,6 +190,16 @@ body {
   padding: var(--portfolio-space-2) 0;
   background: var(--portfolio-ink);
   border-bottom: 1px solid var(--portfolio-rule);
+}
+
+.portfolio-footer__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portfolio-space-1) var(--portfolio-space-4);
+}
+
+.portfolio-footer__visits {
+  font-size: 0.75rem;
 }
 
 .portfolio-nav__brand {
@@ -1342,6 +1353,13 @@ body[data-slug="coverflow"] .portfolio-footer {
 
 .portfolio-heading h1 {
   font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+.portfolio-collection__visits {
+  margin: var(--portfolio-space-2) 0 0;
+  color: var(--portfolio-steel);
+  font-family: var(--codeFont);
+  font-size: 0.75rem;
 }
 
 .portfolio-heading__actions {
