@@ -3,7 +3,27 @@ import { readFileSync } from "node:fs"
 import { test } from "node:test"
 import vm from "node:vm"
 import { transformSync } from "esbuild"
-import { analyticsPath, clickKind, isTapLocation } from "./analytics"
+import { analyticsPath, clickKind, isTapLocation, campaignCleanUrl } from "./analytics"
+
+test("campaign cleanup removes only UTM tags while preserving tap controls, functional queries, and anchors", () => {
+  assert.equal(
+    campaignCleanUrl({ pathname: "/", search: "?utm_campaign=portfolio&utm_source=linkedin" }),
+    "/",
+  )
+  assert.equal(
+    campaignCleanUrl({
+      pathname: "/",
+      search: "?t=1&utm_source=nfc&place=Vancouver&q=AI&utm_source=other",
+      hash: "#projects",
+    }),
+    "/?t=1&place=Vancouver&q=AI#projects",
+  )
+  assert.equal(
+    campaignCleanUrl({ pathname: "/", search: "?tap=true&UTM_SOURCE=nfc", hash: "#hello" }),
+    "/?tap=true#hello",
+  )
+  assert.equal(campaignCleanUrl({ pathname: "/projects/", search: "?q=AI&ref=demo" }), null)
+})
 
 test("tap query aliases share one analytics path without including campaign or place parameters", () => {
   for (const search of ["?tap=true", "?t=1", "?t=1&utm_source=nfc&place=Vancouver"]) {
@@ -36,11 +56,47 @@ test("click categories distinguish contact, resume, social, and external project
   for (const [href, kind] of cases) assert.equal(clickKind(new URL(href, origin), origin), kind)
 })
 
+test("source-only links capture acquisition before cleanup without replacing internal referrers", () => {
+  const code = transformSync(readFileSync(new URL("./analytics.ts", import.meta.url), "utf8"), {
+    loader: "ts",
+    format: "cjs",
+  }).code
+  for (const source of ["linkedin", "github", "resume"]) {
+    const hits: any[] = []
+    const location = { origin: "https://prajwal.is-a.dev", search: `?utm_source=${source}` }
+    const window = { goatcounter: { count: (hit: unknown) => hits.push(hit) } }
+    const module: any = { exports: {} }
+    vm.runInNewContext(code, { module, window, location, URL, URLSearchParams })
+    module.exports.trackModalView("/", "Portfolio")
+    assert.equal(hits[0].referrer, source)
+    location.search = ""
+    module.exports.trackModalView("/projects/cell-safe", "cell-safe")
+    assert.equal(hits[1].referrer, "https://prajwal.is-a.dev/")
+  }
+})
+
 test("tracking queues startup, avoids duplicate navigation, and handles dynamic modal clicks", () => {
   const listeners = new Map<string, Function>()
   const scripts: any[] = []
   const hits: any[] = []
-  const location = { origin: "https://prajwal.is-a.dev", pathname: "/", search: "?t=1" }
+  const location = {
+    origin: "https://prajwal.is-a.dev",
+    pathname: "/",
+    search: "?t=1&utm_campaign=networking&utm_source=nfc",
+    hash: "#hello",
+  }
+  const originalState = { portfolioModal: false }
+  const replacements: string[] = []
+  const history = {
+    state: originalState,
+    replaceState: (state: unknown, _title: string, href: string) => {
+      assert.equal(state, originalState)
+      replacements.push(href)
+      const url = new URL(href, location.origin)
+      location.search = url.search
+      location.hash = url.hash
+    },
+  }
   const window: any = {
     addEventListener: (name: string, callback: Function) => listeners.set(name, callback),
   }
@@ -61,6 +117,7 @@ test("tracking queues startup, avoids duplicate navigation, and handles dynamic 
     window,
     document,
     location,
+    history,
     URL,
     URLSearchParams,
     queueMicrotask,
@@ -70,11 +127,20 @@ test("tracking queues startup, avoids duplicate navigation, and handles dynamic 
   assert.equal(scripts.length, 1)
   assert.equal(window.goatcounter.no_onload, true)
   listeners.get("nav")!()
-  window.goatcounter.count = (hit: unknown) => hits.push(hit)
+  const capturedQueries: string[] = []
+  window.goatcounter.count = (hit: unknown) => {
+    hits.push(hit)
+    capturedQueries.push(location.search)
+  }
+  assert.match(location.search, /utm_campaign/)
   scripts[0].onload()
   assert.equal(hits.length, 1)
   assert.equal(hits[0].path, "/?tap=true")
   assert.equal(hits[0].referrer, "nfc")
+  assert.match(capturedQueries[0], /utm_campaign=networking/)
+  assert.equal(location.search, "?t=1")
+  assert.equal(location.hash, "#hello")
+  assert.equal(replacements.length, 1)
   module.exports.trackModalView("/projects/cell-safe", "cell-safe")
   module.exports.trackModalView("/projects/cell-safe", "cell-safe")
   assert.equal(hits.length, 2)

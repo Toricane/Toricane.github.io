@@ -348,6 +348,14 @@ Both are reported as `/?tap=true`, separately from ordinary `/` visits. Other qu
 parameters stay out of page/event names; GoatCounter still receives its normal
 campaign query data. Existing tap place/device greetings remain unchanged.
 
+Incoming `utm_*` parameters are removed from the address bar with
+`history.replaceState` after GoatCounter has built the queued tracking requests.
+This preserves history state, anchors, tap controls, and all non-UTM query
+parameters, without reloading or adding a Back-button step. Excluded browsers and
+local copies clean the URL without tracking; a failed tracker download also
+cleans the URL. Cleanup does not wait for server acknowledgement or retry blocked
+analytics requests.
+
 Delegated click tracking works for dynamically inserted modal and tap links and
 middle clicks. Events use `click-{kind}:{placement}:{page}` (for example,
 `click-github:modal:/projects/cell-safe`). Kinds are `resume`, `email`, `github`,
@@ -356,8 +364,11 @@ middle clicks. Events use `click-{kind}:{placement}:{page}` (for example,
 resume clicks do not prove that someone read the resume. Destination query strings,
 email addresses, and link text are not included in event names.
 
-For shared links, use `utm_campaign` for a stable initiative and `utm_source` for
-the surface, e.g. `/?utm_campaign=portfolio&utm_source=linkedin`. Tap links can use
+For shared links, `utm_source` alone identifies the surface, e.g.
+`/?utm_source=linkedin`, `/?utm_source=github`, or `/?utm_source=resume`. The initial
+pageview captures this as a GoatCounter referrer before URL cleanup, so it works
+without a campaign name. Native campaign grouping remains optional: add
+`utm_campaign` for a specific initiative. Tap links can use
 `/?t=1` alone: initial tap arrivals and clicks on the tap page report `nfc` as
 their referrer, without spending NFC storage on campaign tags. Longer campaign
 tags remain optional. GoatCounter creates campaigns when

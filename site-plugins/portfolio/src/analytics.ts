@@ -9,6 +9,29 @@ export function analyticsPath(location: { pathname: string; search: string }): s
   return home && isTapLocation(location) ? "/?tap=true" : location.pathname
 }
 
+export function campaignCleanUrl(location: {
+  pathname: string
+  search: string
+  hash?: string
+}): string | null {
+  const params = new URLSearchParams(location.search)
+  const keys = [...params.keys()].filter((key) => /^utm_/i.test(key))
+  if (!keys.length) return null
+  for (const key of keys) params.delete(key)
+  const query = params.toString()
+  return `${location.pathname}${query ? `?${query}` : ""}${location.hash ?? ""}`
+}
+
+function cleanCampaignUrl() {
+  const clean = campaignCleanUrl(location)
+  if (clean === null) return
+  try {
+    history.replaceState(history.state, "", clean)
+  } catch {
+    // A restricted History API must not interrupt navigation or tracking.
+  }
+}
+
 type Hit = { path: string; title: string; event?: boolean; referrer?: string }
 const ANALYTICS_ORIGIN = "https://prajwal.is-a.dev"
 type AnalyticsWindow = Window & {
@@ -76,7 +99,7 @@ export function trackModalView(path: string, title: string) {
     ? new URL(lastPage, location.origin).href
     : path === "/?tap=true"
       ? "nfc"
-      : undefined
+      : new URLSearchParams(location.search).get("utm_source")?.trim() || undefined
   lastPage = path
   send({ path, title, referrer })
 }
@@ -93,7 +116,10 @@ export function clickKind(url: URL, ownOrigin: string): string | null {
 
 export function initializeAnalytics() {
   // Do not even load the remote tracker on local/LAN/preview copies.
-  if (location.origin !== ANALYTICS_ORIGIN) return
+  if (location.origin !== ANALYTICS_ORIGIN) {
+    cleanCampaignUrl()
+    return
+  }
   if (!preferencesWired) {
     preferencesWired = true
     window.addEventListener("hashchange", () => {
@@ -101,13 +127,19 @@ export function initializeAnalytics() {
     })
   }
   applyAnalyticsPreference()
-  if (analyticsExcluded()) return
+  if (analyticsExcluded()) {
+    cleanCampaignUrl()
+    return
+  }
   const win = window as AnalyticsWindow
   if (win.portfolioAnalytics) return
   win.portfolioAnalytics = true
   win.goatcounter = { no_onload: true }
 
-  const page = () => trackModalView(analyticsPath(location), document.title)
+  const page = () => {
+    trackModalView(analyticsPath(location), document.title)
+    if (win.goatcounter?.count) cleanCampaignUrl()
+  }
   document.addEventListener("nav", page)
   window.addEventListener("popstate", () => queueMicrotask(page))
   const onClick = (event: MouseEvent) => {
@@ -147,9 +179,13 @@ export function initializeAnalytics() {
   script.dataset.goatcounter = "https://prajwal.goatcounter.com/count"
   script.onload = () => {
     for (const hit of pending.splice(0)) send(hit)
+    // count.js reads location.search synchronously while creating its requests.
+    // Keep campaign tags until every queued request has captured them.
+    cleanCampaignUrl()
   }
   script.onerror = () => {
     pending.length = 0
+    cleanCampaignUrl()
   }
   document.head.appendChild(script)
 }
