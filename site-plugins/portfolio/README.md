@@ -365,11 +365,15 @@ traffic arrives; no token or site change is needed for each new link. Keep tags 
 incoming links rather than internal navigation links. These identify acquisition
 sources, not individual visitors or a guaranteed visitor-level conversion funnel.
 
-To exclude your own traffic, open `https://prajwal.is-a.dev/#toggle-goatcounter`,
-reload if needed, and confirm GoatCounter's disabled notification. This uses the
-tracker's built-in browser exclusion, which also applies to custom events. Repeat
-in each browser/device you use. Opening it again toggles tracking back on. No
-exclusion is enabled for other visitors by default.
+To exclude your own traffic, open `https://prajwal.is-a.dev/#disable-goatcounter`.
+The site shows an on-page DISABLED confirmation even if a blocker prevents the
+remote tracker from loading. Reopening this link leaves tracking disabled.
+`#enable-goatcounter` explicitly enables it again; the legacy `#toggle-goatcounter`
+also works, including within an already loaded page. Commands are removed from
+the address bar after handling so reloads cannot accidentally reverse the choice.
+This uses GoatCounter's `skipgc` browser preference and also stops custom events
+and loading the tracker. Repeat in each browser/device you use. If storage is
+blocked, the confirmation explains that the exclusion applies only to this visit.
 
 Run `node --import tsx --test site-plugins/portfolio/src/analytics.test.ts` from the
 repo root for query aliases, click categories, startup buffering, deduplication,

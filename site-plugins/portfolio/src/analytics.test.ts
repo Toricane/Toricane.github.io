@@ -128,3 +128,95 @@ test("local, LAN, file, and preview copies never load the tracker or send modal 
     module.exports.trackModalView("/projects/cell-safe", "cell-safe")
   }
 })
+
+test("exclusion confirms on-page without a remote tracker and works during same-page navigation", () => {
+  const code = transformSync(readFileSync(new URL("./analytics.ts", import.meta.url), "utf8"), {
+    loader: "ts",
+    format: "cjs",
+  }).code
+  for (const blockedStorage of [false, true]) {
+    const values = new Map<string, string>()
+    const listeners = new Map<string, Function>()
+    const notices: any[] = []
+    const scripts: any[] = []
+    const hits: any[] = []
+    const location = {
+      origin: "https://prajwal.is-a.dev",
+      pathname: "/",
+      search: "",
+      hash: "#disable-goatcounter",
+    }
+    const history = {
+      state: null,
+      replaceState: () => {
+        location.hash = ""
+      },
+    }
+    const localStorage = {
+      getItem: (key: string) => values.get(key),
+      setItem: (key: string, value: string) => {
+        if (blockedStorage) throw new Error("blocked")
+        values.set(key, value)
+      },
+      removeItem: (key: string) => {
+        if (blockedStorage) throw new Error("blocked")
+        values.delete(key)
+      },
+    }
+    const window: any = {
+      addEventListener: (name: string, fn: Function) => listeners.set(name, fn),
+    }
+    const document = {
+      title: "Portfolio",
+      querySelector: () => notices[0] ?? null,
+      createElement: () => ({ dataset: {}, setAttribute: () => {}, isConnected: false }),
+      body: {
+        prepend: (notice: any) => {
+          notice.isConnected = true
+          notices.push(notice)
+        },
+      },
+      head: { appendChild: (script: unknown) => scripts.push(script) },
+      addEventListener: (name: string, fn: Function) => listeners.set(name, fn),
+    }
+    const module: any = { exports: {} }
+    vm.runInNewContext(code, {
+      module,
+      window,
+      document,
+      location,
+      history,
+      localStorage,
+      URL,
+      URLSearchParams,
+      queueMicrotask,
+    })
+    module.exports.initializeAnalytics()
+    assert.equal(scripts.length, 0)
+    assert.equal(location.hash, "")
+    assert.match(notices[0].textContent, /DISABLED/)
+    if (blockedStorage) assert.match(notices[0].textContent, /for this visit/)
+    else assert.equal(values.get("skipgc"), "t")
+    window.goatcounter = { count: (hit: unknown) => hits.push(hit) }
+    module.exports.trackModalView("/projects/cell-safe", "cell-safe")
+    assert.equal(hits.length, 0)
+    // Explicit disable remains disabled even when opened repeatedly.
+    location.hash = "#disable-goatcounter"
+    listeners.get("hashchange")!()
+    assert.match(notices[0].textContent, /DISABLED/)
+    assert.equal(scripts.length, 0)
+    location.hash = "#enable-goatcounter"
+    listeners.get("hashchange")!()
+    assert.match(notices[0].textContent, /ENABLED/)
+    assert.equal(scripts.length, 1)
+    assert.equal(notices.length, 1)
+    window.goatcounter.count = (hit: unknown) => hits.push(hit)
+    scripts[0].onload()
+    assert.equal(hits.length, 1)
+    location.hash = "#toggle-goatcounter"
+    listeners.get("hashchange")!()
+    assert.match(notices[0].textContent, /DISABLED/)
+    module.exports.trackModalView("/projects/jarvis", "jarvis")
+    assert.equal(hits.length, 1)
+  }
+})

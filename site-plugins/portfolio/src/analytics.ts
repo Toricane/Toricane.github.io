@@ -18,9 +18,49 @@ type AnalyticsWindow = Window & {
 
 let lastPage = ""
 const pending: Hit[] = []
+let sessionExcluded = false
+let preferencesWired = false
+
+function analyticsExcluded(): boolean {
+  try {
+    return sessionExcluded || localStorage.getItem("skipgc") === "t"
+  } catch {
+    return sessionExcluded
+  }
+}
+
+function applyAnalyticsPreference(): boolean {
+  const action = location.hash
+  if (!["#disable-goatcounter", "#enable-goatcounter", "#toggle-goatcounter"].includes(action))
+    return false
+  const disabled =
+    action === "#toggle-goatcounter" ? !analyticsExcluded() : action === "#disable-goatcounter"
+  sessionExcluded = disabled
+  if (disabled) pending.length = 0
+  let saved = true
+  try {
+    if (disabled) localStorage.setItem("skipgc", "t")
+    else localStorage.removeItem("skipgc")
+  } catch {
+    saved = false
+  }
+  // Consume the command before the remote script can toggle it a second time.
+  history.replaceState(history.state, "", `${location.pathname}${location.search}`)
+  const notice =
+    document.querySelector<HTMLElement>("[data-portfolio-analytics-status]") ??
+    document.createElement("p")
+  notice.dataset.portfolioAnalyticsStatus = ""
+  notice.className = "portfolio-analytics-status"
+  notice.setAttribute("role", "status")
+  notice.textContent = saved
+    ? `Analytics ${disabled ? "DISABLED" : "ENABLED"} in this browser.`
+    : `Analytics ${disabled ? "DISABLED" : "ENABLED"} for this visit. Your browser blocked saving this preference.`
+  if (!notice.isConnected) document.body.prepend(notice)
+  return true
+}
 
 function send(hit: Hit) {
-  if (location.origin !== ANALYTICS_ORIGIN) return
+  if (location.origin !== ANALYTICS_ORIGIN || analyticsExcluded()) return
   const counter = (window as AnalyticsWindow).goatcounter
   try {
     if (counter?.count) counter.count(hit)
@@ -54,6 +94,14 @@ export function clickKind(url: URL, ownOrigin: string): string | null {
 export function initializeAnalytics() {
   // Do not even load the remote tracker on local/LAN/preview copies.
   if (location.origin !== ANALYTICS_ORIGIN) return
+  if (!preferencesWired) {
+    preferencesWired = true
+    window.addEventListener("hashchange", () => {
+      if (applyAnalyticsPreference()) initializeAnalytics()
+    })
+  }
+  applyAnalyticsPreference()
+  if (analyticsExcluded()) return
   const win = window as AnalyticsWindow
   if (win.portfolioAnalytics) return
   win.portfolioAnalytics = true

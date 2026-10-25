@@ -1,3 +1,14 @@
+.portfolio-analytics-status {
+  margin: 16px;
+  padding: 16px;
+  border: 1px solid var(--portfolio-rule);
+  border-radius: 8px;
+  background: var(--portfolio-panel);
+  color: var(--portfolio-frost);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
 :root {
   color-scheme: dark;
   --portfolio-ink: #0f161e;
