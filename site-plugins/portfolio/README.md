@@ -331,3 +331,46 @@ localStorage cache is needed.
 Run `node --import tsx --test site-plugins/portfolio/src/newsletter.test.ts`
 from the root to check freshness boundaries, feed parsing, shared requests,
 cache preservation, malformed responses, and offline builds.
+
+## GoatCounter analytics
+
+The portfolio client owns analytics; `configuration.analytics` stays `null` to
+avoid Quartz installing a second tracker. The endpoint is configured in
+`src/analytics.ts`. Tracking runs only on `https://prajwal.is-a.dev`; localhost,
+loopback, LAN, file, and preview copies never load the tracker or send hits.
+It loads GoatCounter once and counts initial and SPA pageviews,
+plus successfully rendered entry modals under their canonical entry paths. Modal
+back/forward views are counted too; duplicate notifications for the current path
+are suppressed. Closing a modal returns tracking to the underlying page.
+
+`/?tap=true` and `/?t=1` both enable the existing tap greeting without redirecting.
+Both are reported as `/?tap=true`, separately from ordinary `/` visits. Other query
+parameters stay out of page/event names; GoatCounter still receives its normal
+campaign query data. Existing tap place/device greetings remain unchanged.
+
+Delegated click tracking works for dynamically inserted modal and tap links and
+middle clicks. Events use `click-{kind}:{placement}:{page}` (for example,
+`click-github:modal:/projects/cell-safe`). Kinds are `resume`, `email`, `github`,
+`linkedin`, and `outbound`; placements are `home`, `menu`, `footer`, `entry`,
+`modal`, `tap-banner`, and `tap-bar`. Email clicks indicate intent, not sent mail;
+resume clicks do not prove that someone read the resume. Destination query strings,
+email addresses, and link text are not included in event names.
+
+For shared links, use `utm_campaign` for a stable initiative and `utm_source` for
+the surface, e.g. `/?utm_campaign=portfolio&utm_source=linkedin`. Tap links can use
+`/?t=1` alone: initial tap arrivals and clicks on the tap page report `nfc` as
+their referrer, without spending NFC storage on campaign tags. Longer campaign
+tags remain optional. GoatCounter creates campaigns when
+traffic arrives; no token or site change is needed for each new link. Keep tags on
+incoming links rather than internal navigation links. These identify acquisition
+sources, not individual visitors or a guaranteed visitor-level conversion funnel.
+
+To exclude your own traffic, open `https://prajwal.is-a.dev/#toggle-goatcounter`,
+reload if needed, and confirm GoatCounter's disabled notification. This uses the
+tracker's built-in browser exclusion, which also applies to custom events. Repeat
+in each browser/device you use. Opening it again toggles tracking back on. No
+exclusion is enabled for other visitors by default.
+
+Run `node --import tsx --test site-plugins/portfolio/src/analytics.test.ts` from the
+repo root for query aliases, click categories, startup buffering, deduplication,
+SPA views, and dynamically rendered link events.

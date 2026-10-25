@@ -4,9 +4,8 @@ configuration:
   pageTitleSuffix: " · Prajwal's Portfolio"
   enableSPA: true
   enablePopovers: true
-  analytics:
-    provider: goatcounter
-    websiteId: prajwal
+  # Portfolio owns GoatCounter pageviews, tap arrivals, and click events.
+  analytics: null
   locale: en-US
   baseUrl: prajwal.is-a.dev
   ignorePatterns:

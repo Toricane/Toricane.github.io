@@ -3,6 +3,9 @@ import { initializeTheme, type Theme } from "../theme"
 import { transitionTheme } from "../themeTransition"
 import { buildProjectTimeline, type ProjectTimelineInput } from "../projectTimeline"
 import { linkIconShortcodeRegex, type LinkIconMap } from "../linkIcons"
+import { initializeAnalytics, trackModalView, isTapLocation, analyticsPath } from "../analytics"
+
+initializeAnalytics()
 
 type CleanupWindow = Window & {
   addCleanup?: (cleanup: () => void) => void
@@ -1220,6 +1223,7 @@ function renderModal() {
   document.documentElement.classList.add("portfolio-modal-open")
   panel?.focus({ preventScroll: true })
   body.scrollTop = 0
+  trackModalView(current.href, current.title)
 }
 
 function syncModalUrl(href: string) {
@@ -1290,6 +1294,7 @@ function closeModal() {
   renderModal()
   suppressingSpa = true
   history.pushState({}, "", returnUrl)
+  trackModalView(analyticsPath(location), document.title)
   queueMicrotask(() => {
     suppressingSpa = false
   })
@@ -2268,7 +2273,7 @@ function touchSession(key: string, now = Date.now(), accumulate = false): Sessio
 }
 
 function tapQueryActive() {
-  return new URLSearchParams(location.search).get("tap") === "true"
+  return isTapLocation(location)
 }
 
 function stampSessionHidden(key: string, now: number) {
