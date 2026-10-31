@@ -1798,7 +1798,12 @@ function Home(props: QuartzComponentProps) {
     <main class="portfolio-home">
       <div class="portfolio-home-section portfolio-home-shell">
         <section class="portfolio-home-copy">
-          <h1>Prajwal Prashanth</h1>
+          <h1>
+            Prajwal Prashanth
+            <span class="portfolio-name-dot" aria-hidden="true">
+              .
+            </span>
+          </h1>
           <div class="portfolio-home-markdown">{homeJsx(intro)}</div>
           <div class="home-hero-actions">
             <a class="home-primary-link" href="#selected-projects">
@@ -1905,6 +1910,9 @@ function SiteNav({ slug }: { slug: string }) {
     <header class="portfolio-nav">
       <a class="portfolio-nav__brand" href="/">
         Prajwal Prashanth
+        <span class="portfolio-name-dot" aria-hidden="true">
+          .
+        </span>
       </a>
       <div class="portfolio-nav__actions">
         <div class="portfolio-nav__search-host" data-portfolio-search-host />
