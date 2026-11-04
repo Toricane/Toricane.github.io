@@ -3,7 +3,7 @@ title: Spelling Garden
 description: Spelling bee practice with text-to-speech and spaced repetition to help words stick.
 date: 2026-10-18
 from: Independent
-significance: standard
+significance: featured
 tags:
   - JavaScript
   - Education

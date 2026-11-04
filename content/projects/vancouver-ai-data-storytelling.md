@@ -17,11 +17,13 @@ Across the competition, I experimented with ways to let people explore long-form
 
 ## Role and constraints
 
-> [Replace with: what you personally owned, who you worked with, and the practical constraints.]
+I built individual submissions exploring survey responses through semantic maps, generated roundtable dialogues, and source-grounded conversations across the four-round competition.
 
 ## Process
 
-> [Replace with: the research, prototypes, failed approaches, and decisions that led to the result.]
+Building on my earlier [student-survey exploration](/projects/student-survey-analysis), I used text embeddings, t-SNE, and K-Means to organize open-ended responses into interactive 3D maps for [Round 2](/projects/vancouver-ai-semantic-maps). Users could inspect individual answers alongside the broader clusters.
+
+In [Round 3](/projects/bc-ai-roundtable-dialogues), I extended the maps with generated dialogues between cluster personas, distinct synthesized voices, and synchronized transcripts. These dialogues represent survey themes rather than recordings of respondents. For [Round 4's PlatoAI](/projects/platoai), I built a Flask application combining semantic retrieval and conversational context, with clickable citations exposing the survey responses behind the dialogue.
 
 ## Result
 

@@ -3,7 +3,7 @@ title: "Hack For Youth – 1st Place"
 description: "Won first place with TimeCraft, a conversational Google Calendar scheduling prototype."
 when: "2024/11"
 from: "Hack For Youth"
-significance: "spotlight"
+significance: featured
 tags:
   - AI
   - Hackathon

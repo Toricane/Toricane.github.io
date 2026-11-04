@@ -30,6 +30,7 @@ Won first place at Hack For Youth. The prototype displays calendar events and su
 
 ## Links
 
+- [Earlier calendar prototype: CalendAI](/projects/calendai)
 - [Devpost](https://devpost.com/software/timecraft-wgcb0u)
 - [GitHub](https://github.com/Toricane/timecraft)
 - [Hackathon Website](https://hack-for-youth.devpost.com/)

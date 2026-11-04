@@ -27,6 +27,8 @@ Published an interactive survey exploration with semantic maps and narrated roun
 
 ## Links
 
+- [Previous round: What’s Next for Canada?](/projects/vancouver-ai-semantic-maps)
+- [Next round: PlatoAI](/projects/platoai)
 - [GitHub](https://github.com/Toricane/vanai3)
 - [Website](https://prajwal.is-a.dev/vanai3/bc_ai_hackathon_round_3/)
 - [Competition](/projects/vancouver-ai-data-storytelling)

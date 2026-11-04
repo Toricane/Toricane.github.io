@@ -4,7 +4,7 @@ description: "Chrome extension integrating Gemini with Google Calendar to plan w
 date: 2024-06-01
 modified: 2024-07-10
 from: buildspace
-significance: featured
+significance: standard
 tags:
   - Chrome-Ext
   - AI
@@ -43,6 +43,7 @@ Built and demonstrated a scheduling prototype. Installation is through an unpack
 
 ## Links
 
+- [Related calendar prototype: TimeCraft](/projects/hack-for-youth-timecraft-1st-place)
 - [Demo Tweet](https://x.com/PrajwalP028/status/1808191827066917032)
 - [GitHub](https://github.com/Toricane/calendai)
 - [Prototype update](https://www.linkedin.com/feed/update/urn%3Ali%3AugcPost%3A7213952201885433857)

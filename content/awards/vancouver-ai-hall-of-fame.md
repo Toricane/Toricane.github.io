@@ -3,7 +3,7 @@ title: "Vancouver AI Hall of Fame Award (CAD $1,000)"
 description: "Hall of Fame prize and second place overall in the four-round Vancouver AI Data Storytelling competition."
 when: "2025/10"
 from: "BC + AI Ecosystem Association"
-significance: "featured"
+significance: spotlight
 tags:
   - AI
   - Data-Storytelling

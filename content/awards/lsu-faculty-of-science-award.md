@@ -3,7 +3,7 @@ title: "LSU Faculty of Science Award (CAD $1,000)"
 description: "Recognized for the highest GPA in my program during Fall 2025."
 when: "2026/03"
 from: "Langara Students’ Union"
-significance: "featured"
+significance: spotlight
 tags:
   - Academic
   - Science

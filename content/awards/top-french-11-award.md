@@ -3,7 +3,7 @@ title: Top French 11 Award
 description: Highest French 11 marks.
 when: "2024/06"
 from: MacNeill Secondary
-significance: featured
+significance: standard
 tags:
   - Language
   - Academic

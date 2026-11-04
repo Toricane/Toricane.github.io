@@ -27,6 +27,7 @@ Completed the project in approximately 3.5 hours. Saved HTML dialogues are avail
 
 ## Links
 
+- [Previous round: BC AI Roundtables](/projects/bc-ai-roundtable-dialogues)
 - [GitHub](https://github.com/Toricane/vanai-hackathon-4-platoai)
 - [Demo video](https://youtu.be/LE6Z26gxAxw)
 - [Saved dialogue examples](https://github.com/Toricane/vanai-hackathon-4-platoai/tree/master/example)

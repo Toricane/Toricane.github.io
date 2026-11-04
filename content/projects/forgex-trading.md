@@ -4,7 +4,7 @@ description: Forex and futures backtesting platform with historical-market repla
 date: 2026-05-26
 modified: 2026-08-06
 from: ForgeX Trading
-significance: featured
+significance: spotlight
 tags:
   - Python
   - FastAPI
@@ -29,7 +29,7 @@ For historical market data, I implemented QuestDB time-series storage, batched c
 
 ## Result
 
-The platform I helped establish now serves more than 150 users, as reported in my October 2026 resume. That adoption reflects the product's continued development after my initial work and handoff.
+The platform I helped establish served more than 150 users as reported in October 2026, following continued development after my initial work and handoff.
 
 ## Reflection
 

@@ -3,7 +3,7 @@ title: Top Social Studies 9 Award
 description: Highest Social Studies 9 marks.
 when: "2022/06"
 from: MacNeill Secondary
-significance: featured
+significance: standard
 tags:
   - Academic
   - Social-Studies

@@ -27,6 +27,8 @@ This extended my earlier student-survey maps. Iterating on clustering, sizing, a
 
 ## Links
 
+- [Earlier student-survey exploration](/projects/student-survey-analysis)
+- [Next round: BC AI Roundtables](/projects/bc-ai-roundtable-dialogues)
 - [GitHub](https://github.com/Toricane/van_ai_data_storytelling_hackathon_round_2)
 - [Website](https://prajwal.is-a.dev/van_ai_data_storytelling_hackathon_round_2/)
 - [Demo video](https://www.youtube.com/watch?v=a6kd128q9Bg)

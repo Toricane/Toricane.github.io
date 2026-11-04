@@ -2,6 +2,23 @@
 
 Site-specific Quartz components, transformers, RSS, and agent-readable Markdown.
 
+## Editorial significance
+
+Projects and awards use three editorial tiers: **spotlight** is central to
+understanding Prajwal's work or achievements; **featured** merits a deliberate
+second look; **standard** belongs in the complete record without a visible tier
+label. These express editorial emphasis, rather than a numerical prestige score.
+Consider personal ownership, technical decisions and iteration, supported results,
+distinctiveness, and personal or historical meaning. Prizes, adoption, dollar
+amounts, and recency provide context; none alone determines a tier. Related project
+and award entries can have different tiers because they emphasize different facts.
+
+The opening project selection currently uses the six most recent spotlight
+projects. A spotlight designation does not guarantee an opening card. Authored
+home chapters and milestone links are curated independently; their inclusion does
+not require matching collection tiers. Changing how the opening six are selected
+requires a deliberate update to the selection rule and maintenance documentation.
+
 ## Home page
 
 For content edits, start with [HOME-MAINTENANCE.md](HOME-MAINTENANCE.md). It is the

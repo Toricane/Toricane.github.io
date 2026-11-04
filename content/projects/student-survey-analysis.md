@@ -37,6 +37,7 @@ Published the survey exploration, which later informed my Round 2 Vancouver AI s
 
 ## Links
 
+- [Later survey exploration: What’s Next for Canada?](/projects/vancouver-ai-semantic-maps)
 - [GitHub](https://github.com/Toricane/student_survey)
 - [Website](https://prajwal.is-a.dev/student_survey/)
 
