@@ -311,6 +311,18 @@ changes apply immediately. Hover/focus updates affect only the old and new activ
 projects, with the element index refreshed after graph rebuilding. Navigation
 cleanup removes listeners and pending search timers.
 
+Collection URLs preserve `q`, repeated `tag`, `highlights=1`, `sort=date`, and
+`view=timeline`; default values are omitted. Discrete changes create browser
+history entries, while continued typing updates the current search entry.
+Reload and browser Back/Forward restore the controls and matching cards.
+
+Entry modals browse the visible source group's order with Previous/Next buttons
+or Left/Right arrows, stopping at either end. Sibling navigation replaces the
+current modal URL; related-entry links retain their own Back control. Arrow
+shortcuts ignore text fields, selections, photo reels, and expanded images.
+The toolbar sits inside the dialog, Tab stays within it, and closing restores
+focus to the original card.
+
 ## Verification
 
 From this directory, run `npm run typecheck` and `npm run build`. From the repository root:

@@ -1,4 +1,5 @@
 import { imageVariant } from "../imageVariant"
+import { adjacentEntry, collectionUrl, readCollectionState } from "../collectionState"
 import { initializeTheme, type Theme } from "../theme"
 import { transitionTheme } from "../themeTransition"
 import { buildProjectTimeline, type ProjectTimelineInput } from "../projectTimeline"
@@ -24,14 +25,36 @@ const VISIT_SESSION_KEY = "portfolio:sessions:visit"
 const TAP_SESSION_KEY = "portfolio:sessions:tap"
 const DEFAULT_HELLO = "Hello there!"
 
+// Short, interruptible feedback. Native WAAPI keeps motion off the JS frame loop.
+const feedbackAnimations = new WeakMap<Element, Animation>()
+function feedback(element: Element | null, frames: Keyframe[], duration = 220) {
+  if (!element) return null
+  feedbackAnimations.get(element)?.cancel()
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return null
+  const animation = element.animate(frames, {
+    duration,
+    easing: "cubic-bezier(0.2, 0, 0, 1)",
+  })
+  feedbackAnimations.set(element, animation)
+  const release = () => {
+    if (feedbackAnimations.get(element) === animation) feedbackAnimations.delete(element)
+  }
+  animation.onfinish = release
+  animation.oncancel = release
+  return animation
+}
+
 type ModalFrame = {
   slug: string
   href: string
   html: string
   title: string
+  entries: { href: string; trigger: HTMLAnchorElement }[]
 }
 
 const modalStack: ModalFrame[] = []
+let modalVersion = 0
+let modalReturnFocus: HTMLElement | null = null
 const contentCache = new Map<string, { html: string; title: string }>()
 let returnUrl = "/"
 let suppressingSpa = false
@@ -596,7 +619,10 @@ function wireViewToggle() {
   const onClick = (event: Event) => {
     const target = event.currentTarget as HTMLButtonElement
     const mode = target.dataset.viewMode
-    if (mode === "gallery" || mode === "timeline") setMode(mode)
+    if (mode === "gallery" || mode === "timeline") {
+      setMode(mode)
+      collection.dispatchEvent(new Event("portfolio:collectionchange"))
+    }
   }
 
   for (const button of buttons) button.addEventListener("click", onClick)
@@ -685,7 +711,7 @@ function refreshProjectTimeline(
   const model = buildProjectTimeline(
     inputs.filter((input) => matchedSlugs.has(input.slug)),
     {
-      laneWidth: compact && original ? original.geometry.laneWidth * 0.7 : undefined,
+      laneWidth: compact && original ? original.geometry.laneWidth * 0.5 : undefined,
     },
   )
   const months = board.querySelector<HTMLElement>(".portfolio-project-timeline__months")!
@@ -869,21 +895,74 @@ function wireCollectionFilters() {
   let matchedSlugs = new Set<string>()
   let timelineDirty = true
 
+  const galleryCards = gallery
+    ? [...gallery.querySelectorAll<HTMLElement>("[data-portfolio-item]")]
+    : []
+  const visibleRects = () => {
+    const rects = new Map<HTMLElement, DOMRect>()
+    if (!gallery || gallery.hidden || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+      return rects
+    // Read all positions before writing; do not wake offscreen card descendants.
+    for (const card of galleryCards) {
+      if (card.hidden) continue
+      const rect = card.getBoundingClientRect()
+      if (rect.bottom > 0 && rect.top < window.innerHeight) rects.set(card, rect)
+    }
+    return rects
+  }
+  const settleGallery = (before: Map<HTMLElement, DOMRect>) => {
+    if (!gallery || gallery.hidden || !before.size) return
+    for (const card of galleryCards) feedbackAnimations.get(card)?.cancel()
+    const after = visibleRects()
+    for (const [card, rect] of after) {
+      const old = before.get(card)
+      if (old) {
+        const x = old.left - rect.left
+        const y = old.top - rect.top
+        if (Math.abs(x) + Math.abs(y) > 1)
+          feedback(card, [{ transform: `translate(${x}px, ${y}px)` }, { transform: "none" }])
+      } else {
+        feedback(
+          card,
+          [
+            { opacity: 0, transform: "translateY(6px)" },
+            { opacity: 1, transform: "none" },
+          ],
+          180,
+        )
+      }
+    }
+  }
+
   const updateVisibleTimeline = () => {
     if (!projectBoard || !timelineDirty || collection.dataset.view !== "timeline") return
     refreshProjectTimeline(projectBoard, projectCards, matchedSlugs, compactTimeline.matches)
     timelineDirty = false
   }
 
-  let significance = "all"
-  const selectedTags = new Set<string>()
+  const initialState = readCollectionState(new URLSearchParams(location.search))
+  let significance = initialState.highlights ? "highlights" : "all"
+  const knownTags = new Set(tagOptionItems.map((option) => option.dataset.tagOption))
+  const selectedTags = new Set(initialState.tags.filter((tag) => knownTags.has(tag)))
+  if (search) search.value = initialState.query
   let tagMenuOpen = false
   let panelOpen = false
-  let sortMode: "significance" | "date" =
-    sortButtons.find((button) => button.getAttribute("aria-pressed") === "true")?.dataset
-      .sortMode === "date"
-      ? "date"
-      : "significance"
+  let sortMode = initialState.sort
+  let initialized = false
+  let searchHistoryActive = false
+  const saveState = (replace = false) => {
+    if (!initialized || modalStack.length) return
+    const href = collectionUrl(location.href, {
+      view: collection.dataset.view === "timeline" ? "timeline" : "gallery",
+      sort: sortMode,
+      query: search?.value ?? "",
+      highlights: significance === "highlights",
+      tags: [...selectedTags],
+    })
+    if (href === `${location.pathname}${location.search}${location.hash}`) return
+    if (replace) history.replaceState(history.state, "", href)
+    else history.pushState({}, "", href)
+  }
 
   const syncSortToggle = () => {
     for (const button of sortButtons) {
@@ -973,6 +1052,7 @@ function wireCollectionFilters() {
   let searchTimer = 0
   const apply = () => {
     window.clearTimeout(searchTimer)
+    const before = visibleRects()
     const query = search?.value || ""
     const tags = [...selectedTags]
     matchedSlugs = new Set<string>()
@@ -1010,6 +1090,7 @@ function wireCollectionFilters() {
     if (countVisible) countVisible.textContent = String(visible)
     if (empty) empty.hidden = visible > 0 || galleryItems.length === 0
     syncFilterBadge(query, tags)
+    settleGallery(before)
   }
 
   const toggleTag = (value: string) => {
@@ -1019,11 +1100,17 @@ function wireCollectionFilters() {
     renderSelectedTags()
     syncTagOptions()
     apply()
+    searchHistoryActive = false
+    saveState()
   }
 
   const onSearch = () => {
     window.clearTimeout(searchTimer)
-    searchTimer = window.setTimeout(apply, 100)
+    searchTimer = window.setTimeout(() => {
+      apply()
+      saveState(searchHistoryActive)
+      searchHistoryActive = true
+    }, 100)
   }
   search?.addEventListener("input", onSearch)
 
@@ -1038,6 +1125,8 @@ function wireCollectionFilters() {
       )
     }
     apply()
+    searchHistoryActive = false
+    saveState()
   }
   for (const button of significanceButtons) button.addEventListener("click", onSignificance)
 
@@ -1049,7 +1138,11 @@ function wireCollectionFilters() {
     const mode = button.dataset.sortMode
     if (mode !== "significance" && mode !== "date") return
     sortMode = mode
+    const before = visibleRects()
     applyGallerySort()
+    settleGallery(before)
+    searchHistoryActive = false
+    saveState()
   }
   for (const button of sortButtons) button.addEventListener("click", onSortMode)
 
@@ -1096,6 +1189,8 @@ function wireCollectionFilters() {
     renderSelectedTags()
     syncTagOptions()
     apply()
+    searchHistoryActive = false
+    saveState()
   }
   const onDocumentPointer = (event: Event) => {
     if (!tagMenuOpen || !combobox) return
@@ -1120,15 +1215,30 @@ function wireCollectionFilters() {
 
   compactTimeline.addEventListener("change", apply)
   collection.addEventListener("portfolio:viewchange", updateVisibleTimeline)
+  const onCollectionChange = () => {
+    searchHistoryActive = false
+    saveState()
+  }
+  const onSearchBlur = () => {
+    searchHistoryActive = false
+  }
+  collection.addEventListener("portfolio:collectionchange", onCollectionChange)
+  search?.addEventListener("blur", onSearchBlur)
 
   setPanelOpen(false)
   renderSelectedTags()
   syncTagOptions()
   syncSortToggle()
+  applyGallerySort()
+  for (const button of significanceButtons)
+    button.setAttribute("aria-pressed", String(button.dataset.filterSignificance === significance))
   apply()
+  initialized = true
+  if (initialState.query || initialState.tags.length || initialState.highlights) setPanelOpen(true)
 
   ;(window as CleanupWindow).addCleanup?.(() => {
     window.clearTimeout(searchTimer)
+    for (const card of galleryCards) feedbackAnimations.get(card)?.cancel()
     search?.removeEventListener("input", onSearch)
     search?.removeEventListener("keydown", onPanelKeydown)
     toggle?.removeEventListener("click", onFilterToggle)
@@ -1142,6 +1252,8 @@ function wireCollectionFilters() {
     document.removeEventListener("pointerdown", onDocumentPointer)
     compactTimeline.removeEventListener("change", apply)
     collection.removeEventListener("portfolio:viewchange", updateVisibleTimeline)
+    collection.removeEventListener("portfolio:collectionchange", onCollectionChange)
+    search?.removeEventListener("blur", onSearchBlur)
     root.dataset.wired = "false"
   })
 }
@@ -1197,20 +1309,86 @@ async function fetchEntryContent(href: string) {
   return result
 }
 
-function renderModal() {
+function renderModalMinimap(root: HTMLElement, current?: ModalFrame) {
+  const map = root.querySelector<HTMLElement>("[data-modal-minimap]")
+  const svg = map?.querySelector("svg")
+  if (!map || !svg) return
+
+  const activeIndex = current?.entries.findIndex((entry) => entry.href === current.href) ?? -1
+  const active = current?.entries[activeIndex]?.trigger
+  const gallery = active?.closest<HTMLElement>(
+    '[data-portfolio-collection="projects"] [data-view-panel="gallery"]:not([hidden])',
+  )
+  map.hidden = !gallery
+  if (!current || !gallery || !map.getClientRects().length) return
+
+  const bounds = gallery.getBoundingClientRect()
+  if (!bounds.width || !bounds.height) return
+  // Measure card slots instead of their contents so the map follows the real grid layout.
+  const tiles = current.entries.flatMap((entry, index) => {
+    const card = entry.trigger.closest<HTMLElement>(".portfolio-card:not([hidden])")
+    if (!card || !gallery.contains(card)) return []
+    const rect = card.getBoundingClientRect()
+    const link = document.createElementNS("http://www.w3.org/2000/svg", "a")
+    const title = document.createElementNS("http://www.w3.org/2000/svg", "title")
+    title.textContent = card.querySelector("h2")?.textContent?.trim() || entry.href
+    link.setAttribute("href", entry.href)
+    link.setAttribute("aria-label", title.textContent)
+    link.setAttribute("data-modal-step", String(index - activeIndex))
+    const tile = document.createElementNS("http://www.w3.org/2000/svg", "rect")
+    tile.setAttribute("x", String(rect.left - bounds.left))
+    tile.setAttribute("y", String(rect.top - bounds.top))
+    tile.setAttribute("width", String(rect.width))
+    tile.setAttribute("height", String(rect.height))
+    tile.setAttribute("rx", "12")
+    const significance = card.dataset.significance
+    if (significance) tile.setAttribute("data-significance", significance)
+    if (index === activeIndex) {
+      tile.classList.add("is-current")
+      link.setAttribute("aria-current", "true")
+    }
+    link.append(title, tile)
+    return [link]
+  })
+  svg.setAttribute("viewBox", `0 0 ${bounds.width} ${bounds.height}`)
+  svg.replaceChildren(...tiles)
+}
+
+function renderModal(direction?: -1 | 1) {
+  modalVersion += 1
   const root = modalRoot()
   if (!root) return
 
-  const body = root.querySelector<HTMLElement>("[data-portfolio-modal-body]")
+  root.querySelector(".portfolio-modal__scroll--outgoing")?.remove()
+  let body = root.querySelector<HTMLElement>("[data-portfolio-modal-body]")
+  if (body) feedbackAnimations.get(body)?.cancel()
   const back = root.querySelector<HTMLButtonElement>("[data-portfolio-modal-back]")
   const panel = root.querySelector<HTMLElement>("[data-portfolio-modal-panel]")
   const current = modalStack[modalStack.length - 1]
 
   if (!current || !body) {
     root.hidden = true
+    renderModalMinimap(root)
     root.dataset.state = ""
     document.documentElement.classList.remove("portfolio-modal-open")
+    if (modalReturnFocus?.isConnected) modalReturnFocus.focus({ preventScroll: true })
+    modalReturnFocus = null
     return
+  }
+
+  let outgoing: HTMLElement | undefined
+  if (direction && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    outgoing = body
+    body = outgoing.cloneNode(false) as HTMLElement
+    const scrollTop = outgoing.scrollTop
+    outgoing.style.top = `${outgoing.offsetTop}px`
+    outgoing.style.height = `${outgoing.offsetHeight}px`
+    outgoing.classList.add("portfolio-modal__scroll--outgoing")
+    outgoing.removeAttribute("data-portfolio-modal-body")
+    outgoing.inert = true
+    outgoing.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"))
+    outgoing.after(body)
+    outgoing.scrollTop = scrollTop
   }
 
   body.innerHTML = current.html
@@ -1219,28 +1397,66 @@ function renderModal() {
   enhanceEntryContent(body)
 
   if (back) back.hidden = modalStack.length < 2
+  const navigation = root.querySelector<HTMLElement>("[data-modal-navigation]")
+  if (navigation) navigation.hidden = current.entries.length < 2
+  for (const step of [-1, 1]) {
+    const button = root.querySelector<HTMLButtonElement>(`[data-modal-step="${step}"]`)
+    if (button) button.disabled = !adjacentEntry(current.entries, current.href, step)
+  }
+  const position = root.querySelector<HTMLElement>("[data-modal-position]")
+  if (position)
+    position.textContent = `${current.entries.findIndex((entry) => entry.href === current.href) + 1} of ${current.entries.length}`
   root.hidden = false
   document.documentElement.classList.add("portfolio-modal-open")
+  renderModalMinimap(root, current)
   panel?.focus({ preventScroll: true })
   body.scrollTop = 0
+  if (outgoing && direction) {
+    const slideOut = feedback(outgoing, [
+      { transform: "none" },
+      { transform: `translateX(${-direction * 100}%)` },
+    ])
+    feedback(body, [{ transform: `translateX(${direction * 100}%)` }, { transform: "none" }])
+    const removeOutgoing = () => outgoing.remove()
+    if (slideOut) void slideOut.finished.then(removeOutgoing, removeOutgoing)
+    else removeOutgoing()
+  } else if (!direction) {
+    feedback(panel, [
+      { opacity: 0, transform: "translateY(10px) scale(0.985)" },
+      { opacity: 1, transform: "none" },
+    ])
+  }
   trackModalView(current.href, current.title)
 }
 
-function syncModalUrl(href: string) {
+function syncModalUrl(href: string, replace = false) {
   suppressingSpa = true
-  history.pushState({ portfolioModal: true, href, depth: modalStack.length }, "", href)
+  const state = { portfolioModal: true, href, depth: modalStack.length }
+  if (replace) history.replaceState(state, "", href)
+  else history.pushState(state, "", href)
   // Release on next tick so Quartz's popstate from unrelated actions still works.
   queueMicrotask(() => {
     suppressingSpa = false
   })
 }
 
-async function openEntry(href: string, options: { nested?: boolean } = {}) {
+async function openEntry(
+  href: string,
+  options: {
+    nested?: boolean
+    replace?: boolean
+    trigger?: HTMLAnchorElement
+    direction?: -1 | 1
+  } = {},
+) {
   const entry = normalizeEntryPath(href)
   if (!entry) return false
 
   const root = modalRoot()
   if (!root) return false
+  const requestVersion = ++modalVersion
+  const panel = root.querySelector("[data-portfolio-modal-panel]")
+  if (panel) feedbackAnimations.get(panel)?.cancel()
 
   // Full page already showing this entry: don't reopen as modal.
   if (
@@ -1253,22 +1469,49 @@ async function openEntry(href: string, options: { nested?: boolean } = {}) {
 
   if (!modalStack.length) {
     returnUrl = `${location.pathname}${location.search}${location.hash}`
+    modalReturnFocus =
+      options.trigger ??
+      (document.activeElement instanceof HTMLElement ? document.activeElement : null)
   }
 
+  const previous = modalStack.at(-1)
+  const group = options.trigger?.closest("ul, [data-view-panel], .portfolio-coverflow__viewport")
+  const entries = options.replace
+    ? (previous?.entries ?? [])
+    : options.nested
+      ? []
+      : [...(group?.querySelectorAll<HTMLAnchorElement>("a[data-portfolio-open], a[href]") ?? [])]
+          .filter(
+            (link) =>
+              !link.closest("[hidden]") && normalizeEntryPath(link.getAttribute("href") ?? ""),
+          )
+          .map((trigger) => ({
+            href: normalizeEntryPath(trigger.getAttribute("href")!)!.href,
+            trigger,
+          }))
+          .filter(
+            (entry, index, all) =>
+              all.findIndex((candidate) => candidate.href === entry.href) === index,
+          )
+
   try {
-    root.dataset.state = "loading"
+    root.dataset.state = options.direction ? "switching" : "loading"
     root.hidden = false
     document.documentElement.classList.add("portfolio-modal-open")
     const content = await fetchEntryContent(entry.href)
+    if (requestVersion !== modalVersion) return true
     const frame: ModalFrame = {
       slug: entry.slug,
       href: entry.href,
       html: content.html,
       title: content.title,
+      entries,
     }
 
     const top = modalStack[modalStack.length - 1]
-    if (top?.href === frame.href) {
+    if (options.replace && top) {
+      modalStack[modalStack.length - 1] = frame
+    } else if (top?.href === frame.href) {
       top.html = frame.html
       top.title = frame.title
     } else if (options.nested || modalStack.length) {
@@ -1278,20 +1521,53 @@ async function openEntry(href: string, options: { nested?: boolean } = {}) {
       modalStack.push(frame)
     }
 
-    renderModal()
+    renderModal(options.direction)
     root.dataset.state = "ready"
-    syncModalUrl(entry.href)
+    syncModalUrl(entry.href, options.replace)
     return true
   } catch {
+    if (requestVersion !== modalVersion) return true
+    if (options.direction) {
+      root.dataset.state = "ready"
+      return false
+    }
     root.hidden = true
     document.documentElement.classList.remove("portfolio-modal-open")
     return false
   }
 }
 
+function stepModal(step: number) {
+  const current = modalStack.at(-1)
+  const root = modalRoot()
+  if (
+    !step ||
+    !current ||
+    root?.dataset.state !== "ready" ||
+    root.querySelector(".portfolio-modal__scroll--outgoing")
+  )
+    return
+  const next = adjacentEntry(current.entries, current.href, step)
+  if (next) void openEntry(next.href, { replace: true, direction: step < 0 ? -1 : 1 })
+}
+
 function closeModal() {
+  const version = ++modalVersion
+  const panel = modalRoot()?.querySelector<HTMLElement>("[data-portfolio-modal-panel]")
+  const animation = feedback(
+    panel ?? null,
+    [
+      { opacity: 1, transform: "none" },
+      { opacity: 0, transform: "translateY(6px) scale(0.99)" },
+    ],
+    150,
+  )
   modalStack.length = 0
-  renderModal()
+  const finish = () => {
+    if (version === modalVersion) renderModal()
+  }
+  if (animation) void animation.finished.then(finish, () => {})
+  else finish()
   suppressingSpa = true
   history.pushState({}, "", returnUrl)
   trackModalView(analyticsPath(location), document.title)
@@ -1326,6 +1602,18 @@ function enlargeModal() {
 }
 
 let lightboxReturnFocus: HTMLElement | null = null
+let lightboxVersion = 0
+
+function imageFlight(image: HTMLImageElement, source: DOMRect, reverse = false) {
+  const destination = image.getBoundingClientRect()
+  if (!source.width || !source.height || !destination.width || !destination.height) return null
+  const transform = `translate(${source.left + source.width / 2 - destination.left - destination.width / 2}px, ${source.top + source.height / 2 - destination.top - destination.height / 2}px) scale(${source.width / destination.width}, ${source.height / destination.height})`
+  const frames = [
+    { transform, opacity: 0.5 },
+    { transform: "none", opacity: 1 },
+  ]
+  return feedback(image, reverse ? frames.reverse() : frames, reverse ? 170 : 260)
+}
 
 function lightboxRoot() {
   return document.querySelector<HTMLElement>("[data-portfolio-lightbox-root]")
@@ -1338,21 +1626,37 @@ function isLightboxOpen() {
 
 function closeLightbox() {
   const root = lightboxRoot()
-  if (!root) return
-  root.hidden = true
-  document.documentElement.classList.remove("portfolio-lightbox-open")
+  if (!root || root.hidden) return
+  const version = ++lightboxVersion
   const image = root.querySelector<HTMLImageElement>("[data-portfolio-lightbox-image]")
-  const caption = root.querySelector<HTMLElement>("[data-portfolio-lightbox-caption]")
-  if (image) {
-    image.removeAttribute("src")
-    image.alt = ""
+  const source = lightboxReturnFocus?.querySelector("img") ?? lightboxReturnFocus
+  const rect = source?.getBoundingClientRect()
+  const animation =
+    image &&
+    rect &&
+    rect.bottom > 0 &&
+    rect.top < innerHeight &&
+    !lightboxReturnFocus?.closest("main.portfolio-home")
+      ? imageFlight(image, rect, true)
+      : null
+  const finish = () => {
+    if (version !== lightboxVersion) return
+    root.hidden = true
+    document.documentElement.classList.remove("portfolio-lightbox-open")
+    const caption = root.querySelector<HTMLElement>("[data-portfolio-lightbox-caption]")
+    if (image) {
+      image.removeAttribute("src")
+      image.alt = ""
+    }
+    if (caption) {
+      caption.textContent = ""
+      caption.hidden = true
+    }
+    if (lightboxReturnFocus?.isConnected) lightboxReturnFocus.focus({ preventScroll: true })
+    lightboxReturnFocus = null
   }
-  if (caption) {
-    caption.textContent = ""
-    caption.hidden = true
-  }
-  if (lightboxReturnFocus?.isConnected) lightboxReturnFocus.focus({ preventScroll: true })
-  lightboxReturnFocus = null
+  if (animation) void animation.finished.then(finish, () => {})
+  else finish()
 }
 
 function openLightbox(src: string, caption = "", trigger?: HTMLElement) {
@@ -1362,6 +1666,11 @@ function openLightbox(src: string, caption = "", trigger?: HTMLElement) {
   const captionNode = root.querySelector<HTMLElement>("[data-portfolio-lightbox-caption]")
   const panel = root.querySelector<HTMLElement>("[data-portfolio-lightbox-panel]")
   if (!image) return
+
+  const version = ++lightboxVersion
+  feedbackAnimations.get(image)?.cancel()
+  const source = trigger?.querySelector("img") ?? trigger
+  const rect = source?.getBoundingClientRect()
 
   lightboxReturnFocus = trigger ?? null
   image.src = imageVariant(src, "full")
@@ -1373,6 +1682,13 @@ function openLightbox(src: string, caption = "", trigger?: HTMLElement) {
   root.hidden = false
   document.documentElement.classList.add("portfolio-lightbox-open")
   panel?.focus({ preventScroll: true })
+  if (rect && !trigger?.closest("main.portfolio-home"))
+    void image.decode().then(
+      () => {
+        if (version === lightboxVersion && !root.hidden) imageFlight(image, rect)
+      },
+      () => {},
+    )
 }
 
 function wireLightbox() {
@@ -1445,6 +1761,14 @@ function wireModal() {
     const target = event.target as HTMLElement | null
     if (!target) return
 
+    const step = target.closest("[data-modal-step]")
+    if (step) {
+      event.preventDefault()
+      event.stopPropagation()
+      stepModal(Number(step.getAttribute("data-modal-step")))
+      return
+    }
+
     if (target.closest("[data-portfolio-modal-close]")) {
       event.preventDefault()
       event.stopPropagation()
@@ -1478,6 +1802,13 @@ function wireModal() {
 
     const href = openLink.getAttribute("href")
     if (!href) return
+    // This document capture handler runs before the search widget's handlers.
+    if (openLink.matches(".result-card") && window.matchMedia("(max-width: 800px)").matches) {
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      openSearchPreviewPage(href)
+      return
+    }
     const entry = normalizeEntryPath(href)
     if (!entry) return
 
@@ -1488,15 +1819,51 @@ function wireModal() {
 
     event.preventDefault()
     event.stopPropagation()
-    void openEntry(entry.href, { nested: modalStack.length > 0 })
+    void openEntry(entry.href, { nested: modalStack.length > 0, trigger: openLink })
   }
 
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key !== "Escape") return
-    if (isLightboxOpen()) return
-    if (modalStack.length) {
+    if (isLightboxOpen() || !modalStack.length) return
+    const target = event.target as HTMLElement | null
+    if (event.key === "Escape") {
       event.preventDefault()
       closeModal()
+      return
+    }
+    if (event.key === "Tab") {
+      const focusable = [
+        ...root.querySelectorAll<HTMLElement>(
+          "button:not(:disabled), a[href], input, [tabindex='0']",
+        ),
+      ].filter((node) => !node.closest("[hidden], [inert]") && node.getClientRects().length)
+      const first = focusable[0],
+        last = focusable.at(-1)
+      if (
+        event.shiftKey &&
+        (document.activeElement === first ||
+          document.activeElement === root.querySelector("[data-portfolio-modal-panel]"))
+      ) {
+        event.preventDefault()
+        last?.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first?.focus()
+      }
+      return
+    }
+    if (
+      event.repeat ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      target?.closest("input, textarea, select, [contenteditable], .portfolio-coverflow") ||
+      window.getSelection()?.toString()
+    )
+      return
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault()
+      stepModal(event.key === "ArrowLeft" ? -1 : 1)
     }
   }
 
@@ -1508,7 +1875,7 @@ function wireModal() {
       // Browser moved between modal frames.
       while (modalStack.length > (state.depth ?? 1)) modalStack.pop()
       if (!modalStack.length || modalStack[modalStack.length - 1]?.href !== state.href) {
-        void openEntry(state.href, { nested: false }).then(() => {
+        void openEntry(state.href, { nested: false, replace: true }).then(() => {
           // openEntry pushes history; avoid doubling after popstate.
         })
       } else {
@@ -1526,11 +1893,16 @@ function wireModal() {
   document.addEventListener("click", onDocumentClick, true)
   document.addEventListener("keydown", onKeyDown)
   window.addEventListener("popstate", onPopState)
+  const onResize = () => renderModalMinimap(root, modalStack.at(-1))
+  window.addEventListener("resize", onResize)
 
   ;(window as CleanupWindow).addCleanup?.(() => {
     document.removeEventListener("click", onDocumentClick, true)
     document.removeEventListener("keydown", onKeyDown)
     window.removeEventListener("popstate", onPopState)
+    window.removeEventListener("resize", onResize)
+    modalVersion += 1
+    modalReturnFocus = null
     root.dataset.wired = "false"
   })
 }
@@ -1917,6 +2289,8 @@ function wireSearchPortfolioPreview() {
   }
 
   const render = async (rawHref: string) => {
+    // Phones use one results list and navigate on selection, avoiding two scroll panes.
+    if (window.matchMedia("(max-width: 800px)").matches) return
     const entry = normalizeEntryPath(rawHref)
     const pane = ensurePane()
     if (!pane) return

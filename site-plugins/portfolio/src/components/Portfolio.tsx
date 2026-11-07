@@ -527,7 +527,7 @@ function CollectionFilters({ tags }: { tags: string[] }) {
           role="group"
           aria-label="Highlights"
         >
-          <span class="portfolio-filters__label">Highlights</span>
+          <span class="portfolio-filters__label">Show</span>
           <div class="portfolio-filters__chips">
             <button type="button" data-filter-significance="all" aria-pressed="true">
               All
@@ -728,7 +728,11 @@ function TimelineRow({
       </div>
       <a href={linkFor(file)} data-portfolio-open={cleanSlug(file)}>
         <div class="portfolio-timeline__body">
-          <div class="portfolio-timeline__media">{thumb && <TimelineThumb image={thumb} />}</div>
+          {thumb && (
+            <div class="portfolio-timeline__media">
+              <TimelineThumb image={thumb} />
+            </div>
+          )}
           <div>
             <h2>{data.title}</h2>
             {data.from && <p class="portfolio-card__from">{data.from}</p>}
@@ -1206,10 +1210,10 @@ function Collection({ section, allFiles }: { section: Section; allFiles: Portfol
               data-sort-toggle
             >
               <button type="button" data-sort-mode="significance" aria-pressed="true">
-                Highlights
+                Highlights first
               </button>
               <button type="button" data-sort-mode="date" aria-pressed="false">
-                Date
+                Newest first
               </button>
             </div>
             <div class="portfolio-view-toggle" role="group" aria-label="View mode">
@@ -1987,29 +1991,78 @@ function SiteNav({ slug }: { slug: string }) {
 
 function ModalHost() {
   return (
-    <div class="portfolio-modal" data-portfolio-modal hidden>
-      <div class="portfolio-modal__backdrop" data-portfolio-modal-close tabindex={-1} />
-      <div class="portfolio-modal__controls">
-        <button type="button" data-portfolio-modal-close aria-label="Close">
-          ×
-        </button>
-        <button type="button" data-portfolio-modal-enlarge aria-label="Open full page">
-          ↗
-        </button>
-        <button type="button" data-portfolio-modal-back aria-label="Back" hidden>
-          ←
-        </button>
-      </div>
-      <div
-        class="portfolio-modal__panel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="portfolio-modal-title"
-        data-portfolio-modal-panel
-        tabindex={-1}
-      >
+    <div
+      class="portfolio-modal"
+      data-portfolio-modal
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="portfolio-modal-title"
+      hidden
+    >
+      <div class="portfolio-modal__backdrop" data-portfolio-modal-close aria-hidden="true" />
+      <div class="portfolio-modal__panel" data-portfolio-modal-panel tabindex={-1}>
+        <div class="portfolio-modal__controls">
+          <button
+            type="button"
+            data-portfolio-modal-back
+            aria-label="Back to related entry"
+            title="Back to related entry"
+            hidden
+          >
+            ↶
+          </button>
+          <nav
+            class="portfolio-modal__navigation"
+            aria-label="Browse entries"
+            data-modal-navigation
+            hidden
+          >
+            <button
+              type="button"
+              data-modal-step="-1"
+              aria-label="Previous entry"
+              aria-keyshortcuts="ArrowLeft"
+              title="Previous entry (Left arrow)"
+            >
+              ←
+            </button>
+            <span data-modal-position aria-live="polite" aria-atomic="true" />
+            <button
+              type="button"
+              data-modal-step="1"
+              aria-label="Next entry"
+              aria-keyshortcuts="ArrowRight"
+              title="Next entry (Right arrow)"
+            >
+              →
+            </button>
+          </nav>
+          <div class="portfolio-modal__utilities">
+            <button
+              type="button"
+              data-portfolio-modal-enlarge
+              aria-label="Open full page"
+              title="Open full page"
+            >
+              ↗
+            </button>
+            <button
+              type="button"
+              data-portfolio-modal-close
+              aria-label="Close"
+              aria-keyshortcuts="Escape"
+              title="Close (Escape)"
+            >
+              ×
+            </button>
+          </div>
+        </div>
         <div class="portfolio-modal__scroll" data-portfolio-modal-body />
       </div>
+      <nav class="portfolio-modal__minimap" data-modal-minimap aria-label="Gallery map" hidden>
+        <div class="portfolio-modal__minimap-title">Gallery map</div>
+        <svg preserveAspectRatio="none" />
+      </nav>
     </div>
   )
 }
