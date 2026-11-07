@@ -12,7 +12,7 @@ tags:
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![First-place certificate for the Data Intelligence for Smarter Communities Hackathon.](/assets/tab-panels/data-intelligence-hackathon-first-place-certificate.webp)
 
 ## Links
 

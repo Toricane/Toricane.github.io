@@ -12,7 +12,7 @@ tags:
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![LSU Faculty of Science Award certificate from Langara College.](/assets/tab-panels/lsu-faculty-of-science-award-certificate.webp)
 
 ## Links
 

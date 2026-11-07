@@ -11,7 +11,7 @@ tags:
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![President’s International Entrance Scholarship certificate from Langara College.](/assets/tab-panels/langara-entrance-scholarship-certificate.webp)
 
 ## Links
 

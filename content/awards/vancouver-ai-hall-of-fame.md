@@ -12,7 +12,7 @@ tags:
 
 ## Gallery
 
-<!-- [Replace with: verified project or award images.] -->
+![Prajwal and Kris holding the $1,000 prize cheque at the Vancouver AI Data Storytelling Hackathon.](/assets/tab-panels/vancouver-ai-data-storytelling-award.webp)
 
 ## Links
 
